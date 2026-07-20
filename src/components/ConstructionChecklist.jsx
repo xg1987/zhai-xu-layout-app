@@ -8,7 +8,7 @@ export function ConstructionChecklist({ groups }) {
     <section className="checklist" aria-label="施工清单">
       <div className="checklist-heading">
         <h2>按施工节点整理</h2>
-        <p>共 5 项，确认做法后即可交底</p>
+        <p>共 {groups.reduce((sum, group) => sum + group.items.length, 0)} 项，确认做法后即可交底</p>
       </div>
       <div className="checklist-groups">
         {groups.map((group, groupIndex) => (
@@ -16,7 +16,7 @@ export function ConstructionChecklist({ groups }) {
             <div className="checklist-group-title">
               <span>{String(groupIndex + 1).padStart(2, '0')}</span>
               <h3>{group.title}</h3>
-              <small>{group.count}项</small>
+              <small>{group.items.length}项</small>
             </div>
             <ul>
               {group.items.map((item) => (

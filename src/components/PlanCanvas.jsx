@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icons.jsx'
+import { useDismiss } from '../useDismiss.js'
 
 function DirectionGrid({ angle = 0 }) {
   return (
@@ -31,6 +32,12 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
   const [floor, setFloor] = useState('1F')
   const [floorOpen, setFloorOpen] = useState(false)
   const drag = useRef(null)
+  const pointers = useRef(new Map())
+  const pinch = useRef(null)
+  const stageRef = useRef(null)
+  const floorPickerRef = useRef(null)
+
+  useDismiss([floorPickerRef], floorOpen, () => setFloorOpen(false))
 
   useEffect(() => {
     const point = recommendations.find((item) => item.id === selectedId)
@@ -42,23 +49,55 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
   }, [selectedId, recommendations, scale])
 
   const clampScale = (value) => Math.min(1.8, Math.max(0.9, value))
+
+  // React 17+ 在根节点以 passive 方式注册 onWheel，preventDefault 会被忽略，
+  // 因此滚轮缩放必须用非 passive 的原生监听。
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    const onWheel = (event) => {
+      event.preventDefault()
+      setScale((current) => clampScale(current + (event.deltaY > 0 ? -0.08 : 0.08)))
+    }
+    stage.addEventListener('wheel', onWheel, { passive: false })
+    return () => stage.removeEventListener('wheel', onWheel)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const resetView = () => {
     setScale(1)
     setOffset({ x: 0, y: 0 })
   }
 
   const startDrag = (event) => {
-    if (scale <= 1) return
-    drag.current = {
-      x: event.clientX,
-      y: event.clientY,
-      originX: offset.x,
-      originY: offset.y,
-    }
     event.currentTarget.setPointerCapture(event.pointerId)
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()]
+      pinch.current = { distance: Math.hypot(a.x - b.x, a.y - b.y), scale }
+      drag.current = null
+    } else if (scale > 1) {
+      drag.current = {
+        x: event.clientX,
+        y: event.clientY,
+        originX: offset.x,
+        originY: offset.y,
+      }
+    }
   }
 
   const moveDrag = (event) => {
+    const point = pointers.current.get(event.pointerId)
+    if (point) {
+      point.x = event.clientX
+      point.y = event.clientY
+    }
+    if (pinch.current && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()]
+      const distance = Math.hypot(a.x - b.x, a.y - b.y)
+      if (distance > 0) setScale(clampScale(pinch.current.scale * (distance / pinch.current.distance)))
+      return
+    }
     if (!drag.current) return
     setOffset({
       x: drag.current.originX + event.clientX - drag.current.x,
@@ -66,7 +105,9 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
     })
   }
 
-  const endDrag = () => {
+  const endDrag = (event) => {
+    pointers.current.delete(event.pointerId)
+    if (pointers.current.size < 2) pinch.current = null
     drag.current = null
   }
 
@@ -75,7 +116,7 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
       <Compass />
 
       {showFloorControl && (
-        <div className="floor-picker">
+        <div className="floor-picker" ref={floorPickerRef}>
           <button
             aria-expanded={floorOpen}
             className="floor-control"
@@ -109,14 +150,11 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
 
       <div
         className="plan-stage"
+        ref={stageRef}
         onPointerDown={startDrag}
         onPointerMove={moveDrag}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        onWheel={(event) => {
-          event.preventDefault()
-          setScale((current) => clampScale(current + (event.deltaY > 0 ? -0.08 : 0.08)))
-        }}
       >
         <div
           className="plan-transform"
@@ -140,9 +178,7 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
               }}
               style={{ left: `${point.x}%`, top: `${point.y}%` }}
               type="button"
-            >
-              {point.id}
-            </button>
+            />
           ))}
         </div>
       </div>

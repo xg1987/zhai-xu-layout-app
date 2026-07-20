@@ -1,9 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ConstructionChecklist } from './ConstructionChecklist.jsx'
 import { DesktopInspector } from './DesktopInspector.jsx'
 import { DesktopSidebar } from './DesktopSidebar.jsx'
 import { Icon } from './Icons.jsx'
 import { PlanCanvas } from './PlanCanvas.jsx'
+
+function WebSectionPage({ activeNav, ruleSelection, onRuleSelect, onOpenReview }) {
+  if (activeNav === 'projects') {
+    return (
+      <section className="web-section-page">
+        <header><div><h1>项目</h1><p>管理客户住宅方案与当前进度</p></div></header>
+        <div className="web-page-body">
+          <h2>进行中的项目</h2>
+          <button className="web-project-row" type="button" onClick={onOpenReview}>
+            <img src="/assets/demo-floor-plan.png" alt="罗莉住宅户型缩略图" />
+            <span><strong>罗莉的住宅方案</strong><small>空间已确认 · 5个建议点位</small></span>
+            <em>继续审核</em>
+            <Icon name="chevronRight" size={20} />
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="web-section-page">
+      <header><div><h1>规则库</h1><p>维护老师确认过的布局规则与施工模板</p></div></header>
+      <div className="web-page-body">
+        <h2>规则分类</h2>
+        <div className="rule-library-list">
+          <button type="button" onClick={() => onRuleSelect('水局规则')}><span>水局规则</span><small>2条待补充</small><Icon name="chevronRight" size={19} /></button>
+          <button type="button" onClick={() => onRuleSelect('土局规则')}><span>土局规则</span><small>1条待补充</small><Icon name="chevronRight" size={19} /></button>
+          <button type="button" onClick={() => onRuleSelect('入户门处理')}><span>入户门处理</span><small>3条已审核</small><Icon name="chevronRight" size={19} /></button>
+        </div>
+        {ruleSelection && (
+          <div className="rule-selection-detail" role="status">
+            <strong>{ruleSelection}</strong>
+            <span>已打开该分类，后续可在这里维护触发条件和施工模板。</span>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
 
 export function DesktopWorkspace({
   activeTab,
@@ -22,6 +61,9 @@ export function DesktopWorkspace({
   const [calibrating, setCalibrating] = useState(false)
   const [exported, setExported] = useState(false)
   const [ruleSelection, setRuleSelection] = useState('')
+  const exportTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(exportTimer.current), [])
 
   const exportReport = () => {
     const report = [
@@ -38,52 +80,30 @@ export function DesktopWorkspace({
     link.click()
     URL.revokeObjectURL(url)
     setExported(true)
+    clearTimeout(exportTimer.current)
+    exportTimer.current = setTimeout(() => setExported(false), 3000)
   }
 
-  const SectionPage = () => {
-    if (activeNav === 'projects') {
-      return (
-        <section className="web-section-page">
-          <header><div><h1>项目</h1><p>管理客户住宅方案与当前进度</p></div></header>
-          <div className="web-page-body">
-            <h2>进行中的项目</h2>
-            <button className="web-project-row" type="button" onClick={() => setActiveNav('review')}>
-              <img src="/assets/demo-floor-plan.png" alt="罗莉住宅户型缩略图" />
-              <span><strong>罗莉的住宅方案</strong><small>空间已确认 · 5个建议点位</small></span>
-              <em>继续审核</em>
-              <Icon name="chevronRight" size={20} />
-            </button>
-          </div>
-        </section>
-      )
-    }
-
-    return (
-      <section className="web-section-page">
-        <header><div><h1>规则库</h1><p>维护老师确认过的布局规则与施工模板</p></div></header>
-        <div className="web-page-body">
-          <h2>规则分类</h2>
-          <div className="rule-library-list">
-            <button type="button" onClick={() => setRuleSelection('水局规则')}><span>水局规则</span><small>2条待补充</small><Icon name="chevronRight" size={19} /></button>
-            <button type="button" onClick={() => setRuleSelection('土局规则')}><span>土局规则</span><small>1条待补充</small><Icon name="chevronRight" size={19} /></button>
-            <button type="button" onClick={() => setRuleSelection('入户门处理')}><span>入户门处理</span><small>3条已审核</small><Icon name="chevronRight" size={19} /></button>
-          </div>
-          {ruleSelection && (
-            <div className="rule-selection-detail" role="status">
-              <strong>{ruleSelection}</strong>
-              <span>已打开该分类，后续可在这里维护触发条件和施工模板。</span>
-            </div>
-          )}
-        </div>
-      </section>
-    )
+  const onTabListKeyDown = (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    const next = activeTab === 'plan' ? 'checklist' : 'plan'
+    onTabChange(next)
+    const tabs = event.currentTarget.querySelectorAll('[role="tab"]')
+    tabs[next === 'plan' ? 0 : 1]?.focus()
   }
 
   return (
     <main className="web-shell">
       <DesktopSidebar active={activeNav} onChange={setActiveNav} />
 
-      {activeNav !== 'review' ? <SectionPage /> : <>
+      {activeNav !== 'review' ? (
+        <WebSectionPage
+          activeNav={activeNav}
+          ruleSelection={ruleSelection}
+          onRuleSelect={setRuleSelection}
+          onOpenReview={() => setActiveNav('review')}
+        />
+      ) : <>
 
       <header className="web-header">
         <div>
@@ -107,12 +127,13 @@ export function DesktopWorkspace({
       </header>
 
       <section className="web-canvas-pane">
-        <div className="web-view-tabs" role="tablist" aria-label="桌面方案视图">
+        <div className="web-view-tabs" role="tablist" aria-label="桌面方案视图" onKeyDown={onTabListKeyDown}>
           <button
             aria-selected={activeTab === 'plan'}
             className={activeTab === 'plan' ? 'is-active' : ''}
             onClick={() => onTabChange('plan')}
             role="tab"
+            tabIndex={activeTab === 'plan' ? 0 : -1}
             type="button"
           >
             平面图
@@ -122,6 +143,7 @@ export function DesktopWorkspace({
             className={activeTab === 'checklist' ? 'is-active' : ''}
             onClick={() => onTabChange('checklist')}
             role="tab"
+            tabIndex={activeTab === 'checklist' ? 0 : -1}
             type="button"
           >
             施工清单

@@ -65,17 +65,14 @@ export const recommendations = [
 export const checklistGroups = [
   {
     title: '铺地施工前',
-    count: 2,
     items: ['中宫楼梯下方 · 泰山石与水局', '西南入户门 · 99枚铜币布局'],
   },
   {
     title: '装修施工阶段',
-    count: 2,
     items: ['西北电梯区域 · 确认水局范围', '东北楼梯区域 · 确认土局做法'],
   },
   {
     title: '软装进场后',
-    count: 1,
     items: ['北偏西玄关 · 安装金山图'],
   },
 ]

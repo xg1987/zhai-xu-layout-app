@@ -3,6 +3,7 @@ import { Icon } from './Icons.jsx'
 const navItems = [
   { id: 'home', label: '首页', icon: 'home' },
   { id: 'projects', label: '项目', icon: 'project' },
+  { id: 'shop', label: '商城', icon: 'shop' },
   { id: 'consult', label: '咨询', icon: 'chat' },
   { id: 'profile', label: '我的', icon: 'user' },
 ]

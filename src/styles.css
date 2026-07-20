@@ -7,11 +7,12 @@
   --paper: #f7f4ed;
   --paper-raised: #fbf9f4;
   --ink: #252927;
-  --muted: #777970;
+  --muted: #63665d;
   --line: rgba(53, 57, 52, 0.16);
   --jade: #315e50;
   --jade-dark: #244d41;
   --brass: #b48746;
+  --brass-ink: #86602a;
   --cinnabar: #ad4035;
   --shadow: 0 -8px 30px rgba(44, 42, 35, 0.12);
 }
@@ -182,7 +183,7 @@ button:focus-visible {
 .mobile-more-menu > span {
   padding: 8px 11px 5px;
   color: var(--jade);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .mobile-calibration-control {
@@ -198,7 +199,7 @@ button:focus-visible {
   border-radius: 10px;
   background: var(--paper-raised);
   color: #73592c;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .mobile-calibration-control input { width: 100%; accent-color: var(--brass); }
@@ -271,7 +272,7 @@ button:focus-visible {
   border-radius: 8px;
   background: var(--jade);
   color: white;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .project-summary {
@@ -280,8 +281,8 @@ button:focus-visible {
 }
 
 .project-summary > span {
-  color: var(--brass);
-  font-size: 12px;
+  color: var(--brass-ink);
+  font-size: 13px;
 }
 
 .project-summary h3 {
@@ -293,7 +294,7 @@ button:focus-visible {
 .project-summary p {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -325,9 +326,9 @@ button:focus-visible {
 }
 
 .home-next span {
-  color: var(--brass);
+  color: var(--brass-ink);
   font-family: Georgia, serif;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .home-next p {
@@ -363,7 +364,7 @@ button:focus-visible {
 .teacher-row h2,
 .profile-identity h2 { font-size: 21px; }
 .teacher-row p,
-.profile-identity p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.profile-identity p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 
 .message-list {
   flex: 1;
@@ -449,6 +450,180 @@ button:focus-visible {
   background: rgba(49,94,80,.06);
   color: var(--jade);
   font-size: 13px;
+}
+
+.consult-quick {
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.consult-quick button {
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--jade);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.profile-shortcuts {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.profile-shortcuts button {
+  padding: 14px 0 12px;
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
+.profile-shortcuts strong {
+  color: var(--jade);
+  font-family: Georgia, serif;
+  font-size: 20px;
+}
+
+.profile-shortcuts span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.shop-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-categories {
+  margin-top: 22px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.shop-categories button {
+  padding: 7px 14px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.shop-categories button.is-active {
+  border-color: var(--jade);
+  background: var(--jade);
+  color: white;
+}
+
+.shop-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.shop-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.shop-card-visual {
+  height: 86px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--line);
+  background: #efebe3;
+  color: var(--brass-ink);
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 30px;
+}
+
+.shop-card-body {
+  padding: 12px 12px 13px;
+}
+
+.shop-card h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.shop-card-body > p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.shop-card-footer {
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shop-card-footer strong {
+  color: var(--brass-ink);
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.shop-card-footer button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--jade);
+  color: white;
+  cursor: pointer;
+}
+
+.shop-card-footer button.is-added {
+  background: rgba(49, 94, 80, 0.12);
+  color: var(--jade);
+}
+
+.shop-cart-bar {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(251, 249, 244, 0.985);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shop-cart-bar strong {
+  display: flex;
+  align-items: center;
+  color: var(--jade);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .plan-canvas {
@@ -566,8 +741,8 @@ button:focus-visible {
 .map-marker {
   position: absolute;
   z-index: 6;
-  width: 35px;
-  height: 41px;
+  width: 38px;
+  height: 44px;
   transform: translate(-50%, -100%);
   border: 2px solid rgba(247, 244, 237, 0.9);
   border-radius: 50% 50% 50% 10%;
@@ -604,7 +779,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   transform: rotate(45deg);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
 }
 
@@ -825,7 +1000,7 @@ button:focus-visible {
 }
 
 .detail-rule span { color: var(--muted); }
-.detail-rule strong { color: var(--brass); font-weight: 600; }
+.detail-rule strong { color: var(--brass-ink); font-weight: 600; }
 
 .secondary-action {
   width: 100%;
@@ -848,7 +1023,7 @@ button:focus-visible {
   height: 66px;
   padding-bottom: env(safe-area-inset-bottom);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   border-top: 1px solid var(--line);
   background: rgba(251, 249, 244, 0.985);
 }
@@ -912,7 +1087,7 @@ button:focus-visible {
 }
 
 .checklist-group-title > span {
-  color: var(--brass);
+  color: var(--brass-ink);
   font-family: Georgia, serif;
   font-size: 13px;
 }
@@ -925,7 +1100,7 @@ button:focus-visible {
 
 .checklist-group-title small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .checklist-group ul {
@@ -985,7 +1160,7 @@ button:focus-visible {
   border-left: 3px solid var(--jade);
   background: var(--paper-raised);
   color: var(--jade);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .web-shell {
@@ -1096,7 +1271,7 @@ button:focus-visible {
   }
 
   .account-popover strong { font-size: 13px; }
-  .account-popover span { color: var(--muted); font-size: 11px; }
+  .account-popover span { color: var(--muted); font-size: 12px; }
 
   .account-avatar {
     width: 43px;
@@ -1302,8 +1477,8 @@ button:focus-visible {
   }
 
   .plan-canvas--desktop .map-marker {
-    width: 38px;
-    height: 44px;
+    width: 41px;
+    height: 47px;
   }
 
   .calibration-note {
@@ -1432,15 +1607,15 @@ button:focus-visible {
   }
 
   .rule-evidence span {
-    color: var(--brass);
-    font-size: 12px;
+    color: var(--brass-ink);
+    font-size: 13px;
     font-weight: 600;
   }
 
   .rule-evidence p {
     margin: 6px 0 0;
     color: #62645f;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
   }
 

@@ -2,7 +2,7 @@ import { Icon } from './Icons.jsx'
 
 export function RecommendationSheet({ item, expanded, onExpandedChange, onNext }) {
   return (
-    <aside className={`recommendation-sheet ${expanded ? 'is-expanded' : ''}`} aria-live="polite">
+    <aside className={`recommendation-sheet ${expanded ? 'is-expanded' : ''}`}>
       <button
         aria-label={expanded ? '收起方案详情' : '展开方案详情'}
         className="sheet-handle"
@@ -14,7 +14,7 @@ export function RecommendationSheet({ item, expanded, onExpandedChange, onNext }
 
       <header className="sheet-title-row">
         <div className="sheet-pin"><Icon name="pin" size={21} strokeWidth={1.9} /></div>
-        <h2><strong>{item.id}</strong> {item.sector} · {item.place}</h2>
+        <h2 aria-live="polite"><strong>{item.id}</strong> {item.sector} · {item.place}</h2>
         <button
           className="sheet-toggle"
           type="button"

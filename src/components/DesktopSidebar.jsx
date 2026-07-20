@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Icon } from './Icons.jsx'
+import { useDismiss } from '../useDismiss.js'
 
 const items = [
   { id: 'projects', label: '项目', icon: 'home' },
@@ -9,6 +10,9 @@ const items = [
 
 export function DesktopSidebar({ active, onChange }) {
   const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef(null)
+
+  useDismiss([accountRef], accountOpen, () => setAccountOpen(false))
 
   return (
     <aside className="web-sidebar">
@@ -26,7 +30,7 @@ export function DesktopSidebar({ active, onChange }) {
           </button>
         ))}
       </nav>
-      <div className="web-account-wrap">
+      <div className="web-account-wrap" ref={accountRef}>
         {accountOpen && (
           <div className="account-popover" role="status">
             <strong>一宸老师</strong>

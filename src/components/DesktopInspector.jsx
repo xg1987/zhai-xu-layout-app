@@ -5,10 +5,10 @@ export function DesktopInspector({ item, onNext }) {
   const [showRule, setShowRule] = useState(false)
 
   return (
-    <aside className="web-inspector" aria-live="polite">
+    <aside className="web-inspector">
       <header className="inspector-title">
         <Icon name="pin" size={29} strokeWidth={1.7} />
-        <h2><strong>{item.id}</strong> {item.sector} · {item.place}</h2>
+        <h2 aria-live="polite"><strong>{item.id}</strong> {item.sector} · {item.place}</h2>
       </header>
 
       <section className="inspector-section advice-section">

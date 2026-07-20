@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { BottomNav } from './components/BottomNav.jsx'
 import { ConstructionChecklist } from './components/ConstructionChecklist.jsx'
 import { DesktopWorkspace } from './components/DesktopWorkspace.jsx'
 import { Icon } from './components/Icons.jsx'
-import { MobileConsult, MobileHome, MobileProfile } from './components/MobilePages.jsx'
+import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './components/MobilePages.jsx'
 import { PlanCanvas } from './components/PlanCanvas.jsx'
 import { RecommendationSheet } from './components/RecommendationSheet.jsx'
 import { checklistGroups, recommendations } from './data.js'
+import { useDismiss } from './useDismiss.js'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('plan')
@@ -18,6 +19,21 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileCalibrating, setMobileCalibrating] = useState(false)
   const [menuFeedback, setMenuFeedback] = useState('')
+  const [messages, setMessages] = useState([
+    { id: 1, from: 'teacher', text: '罗莉家的5个重点位置已经整理好了，你可以点开方案逐项确认。' },
+  ])
+  const [cartIds, setCartIds] = useState([])
+  const nextMessageId = useRef(2)
+  const menuRef = useRef(null)
+  const menuButtonRef = useRef(null)
+
+  useDismiss([menuRef, menuButtonRef], mobileMenuOpen, () => setMobileMenuOpen(false))
+
+  useEffect(() => {
+    if (!menuFeedback) return
+    const timer = setTimeout(() => setMenuFeedback(''), 2400)
+    return () => clearTimeout(timer)
+  }, [menuFeedback])
 
   const selected = useMemo(
     () => recommendations.find((item) => item.id === selectedId) || recommendations[0],
@@ -37,18 +53,45 @@ export default function App() {
     setSheetExpanded(false)
   }
 
+  const sendConsultMessage = (text) => {
+    setMessages((current) => [...current, { id: nextMessageId.current++, from: 'user', text }])
+  }
+
+  const toggleCartItem = (id) => {
+    setCartIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  }
+
+  const submitCartToConsult = () => {
+    sendConsultMessage(`我在商城选好了 ${cartIds.length} 件布置物件，麻烦老师帮我确认是否合适。`)
+    setActiveNav('consult')
+  }
+
   const shareCurrentProject = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
       setMenuFeedback('方案链接已复制')
     } catch {
-      setMenuFeedback('方案链接已准备')
+      setMenuFeedback('复制失败，请手动复制浏览器地址')
     }
+  }
+
+  const switchViewTab = (tab) => {
+    setActiveTab(tab)
+    if (tab === 'checklist') setSheetExpanded(false)
+  }
+
+  const onTabListKeyDown = (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    const next = activeTab === 'plan' ? 'checklist' : 'plan'
+    switchViewTab(next)
+    const tabs = event.currentTarget.querySelectorAll('[role="tab"]')
+    tabs[next === 'plan' ? 0 : 1]?.focus()
   }
 
   const mobileHeader = {
     home: ['宅序', '让每个建议落到准确位置'],
     projects: ['罗莉的住宅方案', confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/5点位已复核` : '空间已确认 · 5个建议点位'],
+    shop: ['商城', '方案配套好物'],
     consult: ['咨询', '一宸老师 · 方案沟通'],
     profile: ['我的', '账户与方案设置'],
   }[activeNav]
@@ -66,13 +109,13 @@ export default function App() {
             <h1>{mobileHeader[0]}</h1>
             <p>{mobileHeader[1]}</p>
           </div>
-          <button className="header-icon" type="button" aria-label="更多操作" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((value) => !value)}>
+          <button ref={menuButtonRef} className="header-icon" type="button" aria-label="更多操作" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((value) => !value)}>
             <Icon name="more" size={27} />
           </button>
         </header>
 
         {mobileMenuOpen && (
-          <div className="mobile-more-menu">
+          <div className="mobile-more-menu" ref={menuRef}>
             <button type="button" onClick={shareCurrentProject}>分享当前方案</button>
             <button
               type="button"
@@ -90,12 +133,13 @@ export default function App() {
           </div>
         )}
 
-        {activeNav === 'projects' && <div className="view-tabs" role="tablist" aria-label="方案视图">
+        {activeNav === 'projects' && <div className="view-tabs" role="tablist" aria-label="方案视图" onKeyDown={onTabListKeyDown}>
           <button
             aria-selected={activeTab === 'plan'}
             className={activeTab === 'plan' ? 'is-active' : ''}
-            onClick={() => setActiveTab('plan')}
+            onClick={() => switchViewTab('plan')}
             role="tab"
+            tabIndex={activeTab === 'plan' ? 0 : -1}
             type="button"
           >
             平面图
@@ -103,11 +147,9 @@ export default function App() {
           <button
             aria-selected={activeTab === 'checklist'}
             className={activeTab === 'checklist' ? 'is-active' : ''}
-            onClick={() => {
-              setActiveTab('checklist')
-              setSheetExpanded(false)
-            }}
+            onClick={() => switchViewTab('checklist')}
             role="tab"
+            tabIndex={activeTab === 'checklist' ? 0 : -1}
             type="button"
           >
             施工清单
@@ -116,8 +158,13 @@ export default function App() {
 
         <div className={`content-region ${activeNav === 'projects' ? '' : 'is-simple'}`}>
           {activeNav === 'home' && <MobileHome onOpenProject={() => setActiveNav('projects')} />}
-          {activeNav === 'consult' && <MobileConsult />}
-          {activeNav === 'profile' && <MobileProfile />}
+          {activeNav === 'shop' && (
+            <MobileShop cartIds={cartIds} onToggle={toggleCartItem} onCheckout={submitCartToConsult} />
+          )}
+          {activeNav === 'consult' && <MobileConsult messages={messages} onSend={sendConsultMessage} />}
+          {activeNav === 'profile' && (
+            <MobileProfile cartCount={cartIds.length} confirmedCount={confirmedIds.length} />
+          )}
           {activeNav === 'projects' && (activeTab === 'plan' ? (
             <>
               <PlanCanvas
@@ -166,10 +213,7 @@ export default function App() {
         checklistGroups={checklistGroups}
         onNext={confirmAndSelectNextPoint}
         onSelectPoint={selectPoint}
-        onTabChange={(tab) => {
-          setActiveTab(tab)
-          setSheetExpanded(false)
-        }}
+        onTabChange={switchViewTab}
         recommendations={recommendations}
         selected={selected}
         selectedId={selectedId}

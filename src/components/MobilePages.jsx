@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icons.jsx'
 
 export function MobileHome({ onOpenProject }) {
@@ -31,17 +31,20 @@ export function MobileHome({ onOpenProject }) {
   )
 }
 
-export function MobileConsult() {
+export function MobileConsult({ messages, onSend }) {
   const [draft, setDraft] = useState('')
-  const [messages, setMessages] = useState([
-    { id: 1, from: 'teacher', text: '罗莉家的5个重点位置已经整理好了，你可以点开方案逐项确认。' },
-  ])
+  const listRef = useRef(null)
+
+  useEffect(() => {
+    const list = listRef.current
+    if (list) list.scrollTop = list.scrollHeight
+  }, [messages])
 
   const sendMessage = (event) => {
     event.preventDefault()
     const value = draft.trim()
     if (!value) return
-    setMessages((current) => [...current, { id: Date.now(), from: 'user', text: value }])
+    onSend(value)
     setDraft('')
   }
 
@@ -51,11 +54,18 @@ export function MobileConsult() {
         <div className="teacher-avatar">宸</div>
         <div><h2>一宸老师</h2><p>方案咨询中</p></div>
       </div>
-      <div className="message-list">
+      <div className="message-list" ref={listRef}>
         {messages.map((message) => (
           <p className={message.from === 'user' ? 'message-user' : 'message-teacher'} key={message.id}>
             {message.text}
           </p>
+        ))}
+      </div>
+      <div className="consult-quick" aria-label="常见问题">
+        {['水局的具体做法有哪些？', '施工顺序可以调整吗？', '泰山石如何挑选？'].map((question) => (
+          <button key={question} type="button" onClick={() => onSend(question)}>
+            {question}
+          </button>
         ))}
       </div>
       <form className="message-composer" onSubmit={sendMessage}>
@@ -73,15 +83,109 @@ export function MobileConsult() {
   )
 }
 
-export function MobileProfile() {
+const shopCategories = ['全部', '摆件', '绿植', '灯具', '收纳']
+
+const shopProducts = [
+  { id: 's1', name: '黄铜罗盘摆件', category: '摆件', price: 268, note: '适配 01 玄关点位', mark: '铜' },
+  { id: 's2', name: '琉璃水养绿萝', category: '绿植', price: 89, note: '适配 02 水局布置', mark: '植' },
+  { id: 's3', name: '陶土聚宝盆', category: '摆件', price: 158, note: '适配 03 土局布置', mark: '陶' },
+  { id: 's4', name: '暖光落地灯', category: '灯具', price: 420, note: '客厅明堂补光', mark: '灯' },
+  { id: 's5', name: '樟木收纳箱', category: '收纳', price: 199, note: '杂物归位不挡气口', mark: '樟' },
+  { id: 's6', name: '五帝钱挂饰', category: '摆件', price: 68, note: '入户门楣悬挂', mark: '钱' },
+]
+
+export function MobileShop({ cartIds, onToggle, onCheckout }) {
+  const [activeCategory, setActiveCategory] = useState('全部')
+
+  const visible = activeCategory === '全部'
+    ? shopProducts
+    : shopProducts.filter((product) => product.category === activeCategory)
+  const cartTotal = cartIds.reduce(
+    (sum, id) => sum + shopProducts.find((product) => product.id === id).price,
+    0,
+  )
+
+  return (
+    <section className="mobile-page shop-page" aria-label="商城">
+      <div className="home-intro">
+        <h2>为方案挑选合适的物件</h2>
+        <p>按老师方案中的点位建议，挑选对应的布置好物。</p>
+      </div>
+
+      <div className="shop-categories" role="tablist" aria-label="商品分类">
+        {shopCategories.map((category) => (
+          <button
+            aria-selected={activeCategory === category}
+            className={activeCategory === category ? 'is-active' : ''}
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            role="tab"
+            type="button"
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      <div className="shop-grid">
+        {visible.map((product) => {
+          const inCart = cartIds.includes(product.id)
+          return (
+            <article className="shop-card" key={product.id}>
+              <div className="shop-card-visual">{product.mark}</div>
+              <div className="shop-card-body">
+                <h3>{product.name}</h3>
+                <p>{product.note}</p>
+                <div className="shop-card-footer">
+                  <strong>¥{product.price}</strong>
+                  <button
+                    aria-label={inCart ? `移出清单：${product.name}` : `加入清单：${product.name}`}
+                    aria-pressed={inCart}
+                    className={inCart ? 'is-added' : ''}
+                    onClick={() => onToggle(product.id)}
+                    type="button"
+                  >
+                    <Icon name={inCart ? 'check' : 'plus'} size={16} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+
+      {cartIds.length > 0 && (
+        <button className="shop-cart-bar" type="button" onClick={onCheckout}>
+          <span>已选 {cartIds.length} 件 · 合计 ¥{cartTotal}</span>
+          <strong>发给老师确认 <Icon name="chevronRight" size={16} /></strong>
+        </button>
+      )}
+    </section>
+  )
+}
+
+export function MobileProfile({ cartCount, confirmedCount }) {
   const [activeSetting, setActiveSetting] = useState('')
-  const settings = ['通知设置', '方案偏好', '关于宅序']
+  const settings = ['通知设置', '方案偏好', '收货地址', '关于宅序']
+  const shortcuts = [
+    { count: 1, label: '方案报告' },
+    { count: confirmedCount, label: '确认点位' },
+    { count: cartCount, label: '商城清单' },
+  ]
 
   return (
     <section className="mobile-page profile-page" aria-label="我的">
       <div className="profile-identity">
         <div className="profile-avatar"><Icon name="user" size={30} /></div>
         <div><h2>罗莉</h2><p>已保存 1 个住宅项目</p></div>
+      </div>
+      <div className="profile-shortcuts">
+        {shortcuts.map((shortcut) => (
+          <button key={shortcut.label} type="button" onClick={() => setActiveSetting(shortcut.label)}>
+            <strong>{shortcut.count}</strong>
+            <span>{shortcut.label}</span>
+          </button>
+        ))}
       </div>
       <div className="profile-settings">
         {settings.map((setting) => (
