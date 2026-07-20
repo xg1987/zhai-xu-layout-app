@@ -456,33 +456,168 @@ button:focus-visible {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 20px;
   background: #e8e5de;
 }
 
-.auth-card {
-  width: min(100%, 380px);
-  padding: 36px 30px 28px;
+.auth-layout {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  width: min(100%, 920px);
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 24px;
   background: var(--paper-raised);
-  box-shadow: 0 20px 60px rgba(47, 45, 39, 0.12);
+  box-shadow: 0 30px 80px rgba(47, 45, 39, 0.18);
 }
 
-.auth-brand {
+.auth-brand-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 46px 42px;
+  background: linear-gradient(155deg, #33604f, #22453a);
+  color: #f3efe4;
+}
+
+.auth-compass {
+  position: absolute;
+  top: -120px;
+  right: -130px;
+  width: 430px;
+  height: 430px;
+  color: rgba(216, 186, 138, 0.5);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.7;
+}
+
+.auth-compass .compass-spin {
+  animation: auth-spin 120s linear infinite;
+  transform-origin: 100px 100px;
+}
+
+.auth-compass text {
+  fill: currentColor;
+  stroke: none;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 10px;
+}
+
+.auth-compass .needle {
+  fill: rgba(216, 186, 138, 0.55);
+  stroke: none;
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-compass .compass-spin { animation: none; }
+}
+
+.auth-brand-copy {
+  position: relative;
+}
+
+.auth-logo {
+  margin: 0;
+  color: rgba(243, 239, 228, 0.82);
+  font-size: 14px;
+  letter-spacing: 0.24em;
+}
+
+.auth-brand-copy h1 {
+  margin: 16px 0 0;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: 0.08em;
+}
+
+.auth-value {
+  margin: 14px 0 0;
+  max-width: 320px;
+  color: rgba(243, 239, 228, 0.76);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.auth-features {
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 13px;
+  list-style: none;
+}
+
+.auth-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(243, 239, 228, 0.92);
+  font-size: 13.5px;
+}
+
+.auth-features svg {
+  flex-shrink: 0;
+  color: rgba(216, 186, 138, 0.9);
+}
+
+.auth-card {
+  padding: 42px 38px 30px;
+}
+
+.auth-form-title {
   margin: 0;
   font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 34px;
-  text-align: center;
-  letter-spacing: 0.12em;
+  font-size: 26px;
+  letter-spacing: 0.04em;
 }
 
-.auth-sub {
+.auth-form-sub {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 13px;
-  text-align: center;
-  letter-spacing: 0.06em;
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    padding: 0;
+    place-items: stretch;
+  }
+
+  .auth-layout {
+    grid-template-columns: 1fr;
+    width: 100%;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .auth-brand-panel {
+    min-height: 320px;
+    padding: 44px 26px 30px;
+  }
+
+  .auth-compass {
+    top: -150px;
+    right: -140px;
+    width: 390px;
+    height: 390px;
+  }
+
+  .auth-brand-copy h1 {
+    font-size: 31px;
+  }
+
+  .auth-card {
+    padding: 30px 26px 36px;
+  }
 }
 
 .auth-tabs {
