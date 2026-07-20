@@ -6,35 +6,34 @@ function CompassArt() {
   return (
     <svg className="auth-compass" viewBox="0 0 200 200" aria-hidden="true">
       <g className="compass-spin">
-        <circle cx="100" cy="100" r="96" />
-        <circle cx="100" cy="100" r="78" />
+        <circle cx="100" cy="100" r="97" />
+        <circle cx="100" cy="100" r="88" />
         {ticks.map((angle) => (
           <line
             key={angle}
             x1="100"
-            y1="5"
+            y1="4"
             x2="100"
-            y2={angle % 45 === 0 ? 15 : 10}
+            y2={angle % 45 === 0 ? 13 : 8.5}
             transform={`rotate(${angle} 100 100)`}
           />
         ))}
       </g>
-      <circle cx="100" cy="100" r="56" />
-      <circle cx="100" cy="100" r="32" />
-      <path d="M100 44v112M44 100h112" />
-      <path className="needle" d="M100 58l7 42-7 42-7-42Z" />
-      <text x="100" y="30" textAnchor="middle">北</text>
-      <text x="100" y="178" textAnchor="middle">南</text>
-      <text x="174" y="104" textAnchor="middle">东</text>
-      <text x="26" y="104" textAnchor="middle">西</text>
+      <circle cx="100" cy="100" r="72" />
+      <circle cx="100" cy="100" r="58" />
+      <path d="M100 12v16M100 172v16M12 100h16M172 100h16" />
+      <text x="100" y="38" textAnchor="middle">北</text>
+      <text x="100" y="170" textAnchor="middle">南</text>
+      <text x="165" y="104" textAnchor="middle">东</text>
+      <text x="35" y="104" textAnchor="middle">西</text>
     </svg>
   )
 }
 
 const features = [
-  { icon: 'calibrate', text: '罗盘校准 · 户型方位精准勘定' },
-  { icon: 'pin', text: '点位建议 · 五行布局逐项确认' },
-  { icon: 'review', text: '施工交底 · 清单进度全程可查' },
+  { icon: 'calibrate', text: '罗盘校准 · 方位精准勘定' },
+  { icon: 'pin', text: '点位建议 · 五行逐项确认' },
+  { icon: 'review', text: '施工交底 · 进度全程可查' },
 ]
 
 export function AuthPage({ onAuthed }) {
@@ -77,25 +76,12 @@ export function AuthPage({ onAuthed }) {
 
   return (
     <div className="auth-page">
-      <main className="auth-layout">
-        <section className="auth-brand-panel">
-          <CompassArt />
-          <div className="auth-brand-copy">
-            <p className="auth-logo">宅序 · 家居风水调整</p>
-            <h1>家居风水<br />调至有序</h1>
-            <p className="auth-value">
-              专业老师在线勘定户型点位，水局土局逐项落地，施工清单一键交底。
-            </p>
-            <ul className="auth-features">
-              {features.map((feature) => (
-                <li key={feature.icon}>
-                  <Icon name={feature.icon} size={18} strokeWidth={1.7} />
-                  {feature.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+      <CompassArt />
+
+      <header className="auth-topbar">宅序 · 家居风水调整</header>
+
+      <main className="auth-center">
+        <h1 className="auth-headline">家居风水 · 调至有序</h1>
 
         <section className="auth-card">
           <h2 className="auth-form-title">{mode === 'login' ? '欢迎回来' : '创建账号'}</h2>
@@ -180,6 +166,15 @@ export function AuthPage({ onAuthed }) {
           </p>
         </section>
       </main>
+
+      <ul className="auth-features">
+        {features.map((feature) => (
+          <li key={feature.icon}>
+            <Icon name={feature.icon} size={17} strokeWidth={1.7} />
+            {feature.text}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

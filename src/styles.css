@@ -453,48 +453,33 @@ button:focus-visible {
 }
 
 .auth-page {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: #e8e5de;
-}
-
-.auth-layout {
-  display: grid;
-  grid-template-columns: 1.08fr 1fr;
-  width: min(100%, 920px);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--paper-raised);
-  box-shadow: 0 30px 80px rgba(47, 45, 39, 0.18);
-}
-
-.auth-brand-panel {
   position: relative;
-  overflow: hidden;
+  min-height: 100dvh;
   display: flex;
-  align-items: flex-end;
-  padding: 46px 42px;
-  background: linear-gradient(155deg, #33604f, #22453a);
-  color: #f3efe4;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: 24px 20px 20px;
+  background: radial-gradient(circle at 50% 44%, #a3824c 0%, #82632f 52%, #5c451e 100%);
+  color: #f7f1e3;
 }
 
 .auth-compass {
   position: absolute;
-  top: -120px;
-  right: -130px;
-  width: 430px;
-  height: 430px;
-  color: rgba(216, 186, 138, 0.5);
+  top: 50%;
+  left: 50%;
+  width: 128vmin;
+  height: 128vmin;
+  transform: translate(-50%, -50%);
+  color: rgba(250, 240, 218, 0.48);
   fill: none;
   stroke: currentColor;
-  stroke-width: 0.7;
+  stroke-width: 0.55;
+  pointer-events: none;
 }
 
 .auth-compass .compass-spin {
-  animation: auth-spin 120s linear infinite;
+  animation: auth-spin 150s linear infinite;
   transform-origin: 100px 100px;
 }
 
@@ -502,12 +487,7 @@ button:focus-visible {
   fill: currentColor;
   stroke: none;
   font-family: "Songti SC", "STSong", serif;
-  font-size: 10px;
-}
-
-.auth-compass .needle {
-  fill: rgba(216, 186, 138, 0.55);
-  stroke: none;
+  font-size: 8px;
 }
 
 @keyframes auth-spin {
@@ -518,105 +498,99 @@ button:focus-visible {
   .auth-compass .compass-spin { animation: none; }
 }
 
-.auth-brand-copy {
+.auth-topbar {
   position: relative;
+  color: rgba(247, 241, 227, 0.82);
+  font-size: 13px;
+  letter-spacing: 0.28em;
 }
 
-.auth-logo {
+.auth-center {
+  position: relative;
+  margin: auto 0;
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+.auth-headline {
   margin: 0;
-  color: rgba(243, 239, 228, 0.82);
-  font-size: 14px;
-  letter-spacing: 0.24em;
-}
-
-.auth-brand-copy h1 {
-  margin: 16px 0 0;
   font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 36px;
+  font-size: clamp(26px, 4.2vmin, 38px);
   font-weight: 700;
-  line-height: 1.32;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.18em;
+  text-shadow: 0 2px 24px rgba(56, 40, 14, 0.55);
 }
 
-.auth-value {
-  margin: 14px 0 0;
-  max-width: 320px;
-  color: rgba(243, 239, 228, 0.76);
-  font-size: 14px;
-  line-height: 1.8;
+.auth-card {
+  width: min(88vw, 372px);
+  padding: 28px 28px 22px;
+  border: 1px solid rgba(250, 240, 218, 0.5);
+  border-radius: 20px;
+  background: rgba(251, 249, 244, 0.96);
+  color: var(--ink);
+  box-shadow: 0 34px 90px rgba(46, 33, 11, 0.5);
+}
+
+.auth-form-title {
+  margin: 0;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+}
+
+.auth-form-sub {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .auth-features {
-  margin: 28px 0 0;
+  position: relative;
+  margin: 26px 0 4px;
   padding: 0;
-  display: grid;
-  gap: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 30px;
   list-style: none;
 }
 
 .auth-features li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: rgba(243, 239, 228, 0.92);
-  font-size: 13.5px;
+  gap: 8px;
+  color: rgba(247, 241, 227, 0.85);
+  font-size: 13px;
+  letter-spacing: 0.04em;
 }
 
 .auth-features svg {
   flex-shrink: 0;
-  color: rgba(216, 186, 138, 0.9);
+  color: rgba(250, 240, 218, 0.9);
 }
 
-.auth-card {
-  padding: 42px 38px 30px;
-}
-
-.auth-form-title {
-  margin: 0;
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 26px;
-  letter-spacing: 0.04em;
-}
-
-.auth-form-sub {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-@media (max-width: 900px) {
-  .auth-page {
-    padding: 0;
-    place-items: stretch;
-  }
-
-  .auth-layout {
-    grid-template-columns: 1fr;
-    width: 100%;
-    min-height: 100dvh;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .auth-brand-panel {
-    min-height: 320px;
-    padding: 44px 26px 30px;
-  }
-
+@media (max-width: 640px) {
   .auth-compass {
-    top: -150px;
-    right: -140px;
-    width: 390px;
-    height: 390px;
+    width: 175vmin;
+    height: 175vmin;
   }
 
-  .auth-brand-copy h1 {
-    font-size: 31px;
+  .auth-headline {
+    font-size: 27px;
   }
 
   .auth-card {
-    padding: 30px 26px 36px;
+    width: min(92vw, 372px);
+    padding: 26px 22px 20px;
+  }
+
+  .auth-features {
+    gap: 9px 18px;
+  }
+
+  .auth-features li {
+    font-size: 12px;
   }
 }
 
@@ -639,7 +613,7 @@ button:focus-visible {
 }
 
 .auth-tabs button.is-active {
-  background: var(--jade);
+  background: var(--brass-ink);
   color: white;
   font-weight: 600;
 }
@@ -669,7 +643,7 @@ button:focus-visible {
 }
 
 .auth-card input:focus-visible {
-  outline: 2px solid var(--jade);
+  outline: 2px solid var(--brass-ink);
   outline-offset: 1px;
 }
 
@@ -686,7 +660,7 @@ button:focus-visible {
   height: 48px;
   border: 0;
   border-radius: 12px;
-  background: var(--jade);
+  background: var(--brass-ink);
   color: white;
   font-size: 15px;
   font-weight: 600;
@@ -710,7 +684,7 @@ button:focus-visible {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--jade);
+  color: var(--brass-ink);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
