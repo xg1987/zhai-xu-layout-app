@@ -9,8 +9,8 @@
   --ink: #252927;
   --muted: #63665d;
   --line: rgba(53, 57, 52, 0.16);
-  --jade: #315e50;
-  --jade-dark: #244d41;
+  --primary: #86602a;
+  --primary-dark: #6b4c1f;
   --brass: #b48746;
   --brass-ink: #86602a;
   --cinnabar: #ad4035;
@@ -123,7 +123,7 @@ button:focus-visible {
 }
 
 .view-tabs button.is-active {
-  color: var(--jade);
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -135,7 +135,7 @@ button:focus-visible {
   bottom: 0;
   height: 3px;
   border-radius: 3px 3px 0 0;
-  background: var(--jade);
+  background: var(--primary);
 }
 
 .content-region {
@@ -182,7 +182,7 @@ button:focus-visible {
 
 .mobile-more-menu > span {
   padding: 8px 11px 5px;
-  color: var(--jade);
+  color: var(--primary);
   font-size: 12px;
 }
 
@@ -270,7 +270,7 @@ button:focus-visible {
   bottom: 10px;
   padding: 5px 8px;
   border-radius: 8px;
-  background: var(--jade);
+  background: var(--primary);
   color: white;
   font-size: 12px;
 }
@@ -302,7 +302,7 @@ button:focus-visible {
   margin-top: 17px;
   display: flex;
   align-items: center;
-  color: var(--jade);
+  color: var(--primary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -354,9 +354,9 @@ button:focus-visible {
   height: 54px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--jade);
+  border: 1px solid var(--primary);
   border-radius: 50%;
-  color: var(--jade);
+  color: var(--primary);
   font-family: "Songti SC", serif;
   font-size: 21px;
 }
@@ -389,7 +389,7 @@ button:focus-visible {
 .message-user {
   margin-left: auto !important;
   border-bottom-right-radius: 4px !important;
-  background: var(--jade);
+  background: var(--primary);
   color: white;
 }
 
@@ -414,7 +414,7 @@ button:focus-visible {
 .message-composer button {
   border: 0;
   border-radius: 13px;
-  background: var(--jade);
+  background: var(--primary);
   color: white;
   display: grid;
   place-items: center;
@@ -446,9 +446,9 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  border-left: 3px solid var(--jade);
-  background: rgba(49,94,80,.06);
-  color: var(--jade);
+  border-left: 3px solid var(--primary);
+  background: rgba(134,96,42,.06);
+  color: var(--primary);
   font-size: 13px;
 }
 
@@ -462,6 +462,40 @@ button:focus-visible {
   padding: 24px 20px 20px;
   background: radial-gradient(circle at 50% 44%, #a3824c 0%, #82632f 52%, #5c451e 100%);
   color: #f7f1e3;
+}
+
+.auth-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 46%, transparent 42%, rgba(42, 29, 8, 0.42) 100%);
+  pointer-events: none;
+}
+
+.auth-dust {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.auth-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 66vmin;
+  height: 66vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(248, 222, 160, 0.28) 0%, transparent 62%);
+  animation: auth-breathe 6.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes auth-breathe {
+  0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 }
 
 .auth-compass {
@@ -478,9 +512,23 @@ button:focus-visible {
   pointer-events: none;
 }
 
-.auth-compass .compass-spin {
-  animation: auth-spin 150s linear infinite;
+.auth-compass .spin-slow {
+  animation: auth-spin 130s linear infinite;
   transform-origin: 100px 100px;
+}
+
+.auth-compass .spin-reverse {
+  animation: auth-spin 90s linear infinite reverse;
+  transform-origin: 100px 100px;
+}
+
+.auth-compass .spin-crawl {
+  animation: auth-spin 200s linear infinite;
+  transform-origin: 100px 100px;
+}
+
+.auth-compass .ring-dashed {
+  stroke-dasharray: 1.4 3.2;
 }
 
 .auth-compass text {
@@ -490,27 +538,42 @@ button:focus-visible {
   font-size: 8px;
 }
 
+.auth-compass .orbit-dot {
+  fill: #f6d99c;
+  stroke: none;
+  filter: drop-shadow(0 0 3px rgba(248, 220, 158, 0.9));
+}
+
+.auth-compass .orbit-dot--trail {
+  opacity: 0.45;
+}
+
 @keyframes auth-spin {
   to { transform: rotate(360deg); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .auth-compass .compass-spin { animation: none; }
-}
-
 .auth-topbar {
   position: relative;
+  z-index: 1;
   color: rgba(247, 241, 227, 0.82);
   font-size: 13px;
   letter-spacing: 0.28em;
+  animation: auth-fade-down 0.9s both;
+}
+
+@keyframes auth-fade-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
 }
 
 .auth-center {
   position: relative;
+  z-index: 1;
   margin: auto 0;
   display: grid;
   justify-items: center;
   gap: 22px;
+  perspective: 1000px;
 }
 
 .auth-headline {
@@ -519,17 +582,72 @@ button:focus-visible {
   font-size: clamp(26px, 4.2vmin, 38px);
   font-weight: 700;
   letter-spacing: 0.18em;
-  text-shadow: 0 2px 24px rgba(56, 40, 14, 0.55);
+}
+
+.auth-headline span {
+  display: inline-block;
+  background: linear-gradient(180deg, #fdf5df 20%, #e9c87e 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 14px rgba(50, 35, 10, 0.55));
+  opacity: 0;
+  transform: translateY(16px);
+  animation: auth-char-in 0.65s cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
+}
+
+.auth-headline .auth-headline-gap {
+  width: 0.3em;
+}
+
+@keyframes auth-char-in {
+  to { opacity: 1; transform: none; }
 }
 
 .auth-card {
+  position: relative;
   width: min(88vw, 372px);
   padding: 28px 28px 22px;
-  border: 1px solid rgba(250, 240, 218, 0.5);
+  border: 1px solid rgba(250, 240, 218, 0.45);
   border-radius: 20px;
-  background: rgba(251, 249, 244, 0.96);
+  background: rgba(251, 249, 244, 0.9);
   color: var(--ink);
-  box-shadow: 0 34px 90px rgba(46, 33, 11, 0.5);
+  box-shadow: 0 34px 90px rgba(46, 33, 11, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 180ms ease;
+  animation: auth-card-in 0.9s 0.35s cubic-bezier(0.2, 0.7, 0.25, 1) backwards;
+  will-change: transform;
+}
+
+@keyframes auth-card-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@property --sheen {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 1.2px;
+  background: conic-gradient(from var(--sheen, 0deg), transparent 0 72%, rgba(233, 200, 126, 0.95) 84%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: auth-sheen 7s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes auth-sheen {
+  to { --sheen: 360deg; }
 }
 
 .auth-form-title {
@@ -547,6 +665,7 @@ button:focus-visible {
 
 .auth-features {
   position: relative;
+  z-index: 1;
   margin: 26px 0 4px;
   padding: 0;
   display: flex;
@@ -554,6 +673,12 @@ button:focus-visible {
   justify-content: center;
   gap: 10px 30px;
   list-style: none;
+  animation: auth-fade-up 1s 0.7s both;
+}
+
+@keyframes auth-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
 }
 
 .auth-features li {
@@ -568,6 +693,13 @@ button:focus-visible {
 .auth-features svg {
   flex-shrink: 0;
   color: rgba(250, 240, 218, 0.9);
+}
+
+@keyframes auth-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
 }
 
 @media (max-width: 640px) {
@@ -591,6 +723,22 @@ button:focus-visible {
 
   .auth-features li {
     font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page *,
+  .auth-page *::before,
+  .auth-page *::after {
+    animation: none !important;
+  }
+
+  .auth-headline span,
+  .auth-topbar,
+  .auth-card,
+  .auth-features {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -654,17 +802,31 @@ button:focus-visible {
   background: rgba(173, 64, 53, 0.07);
   color: var(--cinnabar);
   font-size: 13px;
+  animation: auth-shake 0.5s;
 }
 
 .auth-submit {
   height: 48px;
   border: 0;
   border-radius: 12px;
-  background: var(--brass-ink);
+  background: linear-gradient(135deg, #b0863f, #86602a);
   color: white;
   font-size: 15px;
   font-weight: 600;
+  letter-spacing: 0.18em;
+  box-shadow: 0 10px 26px rgba(96, 68, 24, 0.4);
   cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 14px 32px rgba(96, 68, 24, 0.52);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .auth-submit:disabled {
@@ -715,7 +877,7 @@ button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--paper-raised);
-  color: var(--jade);
+  color: var(--primary);
   font-size: 13px;
   cursor: pointer;
 }
@@ -739,7 +901,7 @@ button:focus-visible {
 }
 
 .profile-shortcuts strong {
-  color: var(--jade);
+  color: var(--primary);
   font-family: Georgia, serif;
   font-size: 20px;
 }
@@ -774,8 +936,8 @@ button:focus-visible {
 }
 
 .shop-categories button.is-active {
-  border-color: var(--jade);
-  background: var(--jade);
+  border-color: var(--primary);
+  background: var(--primary);
   color: white;
 }
 
@@ -841,14 +1003,14 @@ button:focus-visible {
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--jade);
+  background: var(--primary);
   color: white;
   cursor: pointer;
 }
 
 .shop-card-footer button.is-added {
-  background: rgba(49, 94, 80, 0.12);
-  color: var(--jade);
+  background: rgba(134, 96, 42, 0.12);
+  color: var(--primary);
 }
 
 .shop-cart-bar {
@@ -871,7 +1033,7 @@ button:focus-visible {
 .shop-cart-bar strong {
   display: flex;
   align-items: center;
-  color: var(--jade);
+  color: var(--primary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -996,7 +1158,7 @@ button:focus-visible {
   transform: translate(-50%, -100%);
   border: 2px solid rgba(247, 244, 237, 0.9);
   border-radius: 50% 50% 50% 10%;
-  background: var(--jade);
+  background: var(--primary);
   color: #fff;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 15px;
@@ -1014,7 +1176,7 @@ button:focus-visible {
 }
 
 .map-marker.is-confirmed:not(.is-selected) {
-  box-shadow: 0 0 0 4px rgba(49,94,80,.18), 0 3px 10px rgba(36,77,65,.2);
+  box-shadow: 0 0 0 4px rgba(134,96,42,.18), 0 3px 10px rgba(36,77,65,.2);
 }
 
 .map-marker:not(.is-selected):hover {
@@ -1039,7 +1201,7 @@ button:focus-visible {
   top: 54px;
   right: 11px;
   overflow: hidden;
-  border: 1px solid rgba(49, 94, 80, 0.16);
+  border: 1px solid rgba(134, 96, 42, 0.16);
   border-radius: 12px;
   background: rgba(251, 249, 244, 0.94);
   box-shadow: 0 5px 18px rgba(53, 50, 43, 0.08);
@@ -1054,7 +1216,7 @@ button:focus-visible {
   border: 0;
   border-bottom: 1px solid var(--line);
   background: transparent;
-  color: var(--jade);
+  color: var(--primary);
   cursor: pointer;
 }
 
@@ -1107,7 +1269,7 @@ button:focus-visible {
 }
 
 .sheet-pin {
-  color: var(--jade);
+  color: var(--primary);
 }
 
 .sheet-title-row h2 {
@@ -1175,7 +1337,7 @@ button:focus-visible {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
-  color: var(--jade);
+  color: var(--primary);
 }
 
 .mountain-mark svg {
@@ -1209,7 +1371,7 @@ button:focus-visible {
   gap: 8px;
   border: 0;
   border-radius: 12px;
-  background: var(--jade);
+  background: var(--primary);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -1224,7 +1386,7 @@ button:focus-visible {
 }
 
 .primary-action:hover,
-.secondary-action:hover { background: var(--jade-dark); }
+.secondary-action:hover { background: var(--primary-dark); }
 .primary-action:active,
 .secondary-action:active { transform: translateY(1px); }
 
@@ -1256,12 +1418,12 @@ button:focus-visible {
   width: 100%;
   margin: 16px 0 0;
   background: transparent;
-  color: var(--jade);
-  border: 1px solid var(--jade);
+  color: var(--primary);
+  border: 1px solid var(--primary);
 }
 
 .secondary-action:hover {
-  background: rgba(49, 94, 80, 0.07);
+  background: rgba(134, 96, 42, 0.07);
 }
 
 .bottom-nav {
@@ -1295,7 +1457,7 @@ button:focus-visible {
 }
 
 .bottom-nav button.is-active {
-  color: var(--jade);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -1384,8 +1546,8 @@ button:focus-visible {
 }
 
 .checklist-group li.is-selected button {
-  color: var(--jade);
-  background: rgba(49,94,80,.05);
+  color: var(--primary);
+  background: rgba(134,96,42,.05);
 }
 
 .checklist-group li.is-selected .check-circle {
@@ -1395,7 +1557,7 @@ button:focus-visible {
 .check-circle {
   width: 18px;
   height: 18px;
-  border: 1.5px solid var(--jade);
+  border: 1.5px solid var(--primary);
   border-radius: 50%;
 }
 
@@ -1407,9 +1569,9 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  border-left: 3px solid var(--jade);
+  border-left: 3px solid var(--primary);
   background: var(--paper-raised);
-  color: var(--jade);
+  color: var(--primary);
   font-size: 13px;
 }
 
@@ -1449,7 +1611,7 @@ button:focus-visible {
 
   .web-brand {
     padding: 0 35px 42px;
-    color: var(--jade);
+    color: var(--primary);
     font-family: "Songti SC", "STSong", serif;
     font-size: 33px;
     font-weight: 700;
@@ -1478,8 +1640,8 @@ button:focus-visible {
   }
 
   .web-sidebar nav button.is-active {
-    background: rgba(49,94,80,.08);
-    color: var(--jade);
+    background: rgba(134,96,42,.08);
+    color: var(--primary);
     font-weight: 600;
   }
 
@@ -1628,7 +1790,7 @@ button:focus-visible {
   }
 
   .web-view-tabs button.is-active {
-    color: var(--jade);
+    color: var(--primary);
     font-weight: 700;
   }
 
@@ -1640,7 +1802,7 @@ button:focus-visible {
     bottom: 0;
     height: 3px;
     border-radius: 3px 3px 0 0;
-    background: var(--jade);
+    background: var(--primary);
   }
 
   .web-canvas-content {
@@ -1734,8 +1896,8 @@ button:focus-visible {
   }
 
   .floor-menu button.is-active {
-    background: rgba(49,94,80,.08);
-    color: var(--jade);
+    background: rgba(134,96,42,.08);
+    color: var(--primary);
   }
 
   .plan-canvas--desktop .map-marker {
@@ -1784,7 +1946,7 @@ button:focus-visible {
     grid-template-columns: 34px 1fr;
     gap: 12px;
     align-items: center;
-    color: var(--jade);
+    color: var(--primary);
   }
 
   .inspector-title h2 {
@@ -1811,7 +1973,7 @@ button:focus-visible {
 
   .inspector-section h3 {
     margin: 0 0 13px;
-    color: var(--jade);
+    color: var(--primary);
     font-family: "Songti SC", "STSong", serif;
     font-size: 17px;
   }
@@ -1836,9 +1998,9 @@ button:focus-visible {
     height: 52px;
     display: grid;
     place-items: center;
-    border: 1px solid var(--jade);
+    border: 1px solid var(--primary);
     border-radius: 50%;
-    color: var(--jade);
+    color: var(--primary);
   }
 
   .desktop-mountain-mark svg {
@@ -1900,15 +2062,15 @@ button:focus-visible {
   }
 
   .web-primary-action {
-    border: 1px solid var(--jade);
-    background: var(--jade);
+    border: 1px solid var(--primary);
+    background: var(--primary);
     color: white;
   }
 
   .web-secondary-action {
-    border: 1px solid var(--jade);
+    border: 1px solid var(--primary);
     background: transparent;
-    color: var(--jade);
+    color: var(--primary);
   }
 
   .web-canvas-content .checklist {
@@ -1976,7 +2138,7 @@ button:focus-visible {
   }
 
   .web-project-row small { color: var(--muted); font-size: 13px; }
-  .web-project-row em { color: var(--jade); font-size: 13px; font-style: normal; }
+  .web-project-row em { color: var(--primary); font-size: 13px; font-style: normal; }
 
   .rule-library-list {
     width: min(100%, 760px);
@@ -2005,11 +2167,11 @@ button:focus-visible {
     padding: 17px 18px;
     display: grid;
     gap: 6px;
-    border-left: 3px solid var(--jade);
-    background: rgba(49,94,80,.05);
+    border-left: 3px solid var(--primary);
+    background: rgba(134,96,42,.05);
   }
 
-  .rule-selection-detail strong { color: var(--jade); font-size: 15px; }
+  .rule-selection-detail strong { color: var(--primary); font-size: 15px; }
   .rule-selection-detail span { color: var(--muted); font-size: 13px; }
 }
 
