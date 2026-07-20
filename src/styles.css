@@ -776,32 +776,41 @@ button:focus-visible {
 }
 
 .auth-card form {
-  margin-top: 22px;
+  margin-top: 24px;
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .auth-card label {
   display: grid;
-  gap: 7px;
-  color: var(--muted);
+  gap: 8px;
+  color: #6f6552;
   font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .auth-card input {
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
+  width: 100%;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid rgba(107, 87, 45, 0.24);
   border-radius: 12px;
-  background: var(--paper);
+  background: #fffdf9;
   color: var(--ink);
   font: inherit;
-  font-size: 14px;
+  font-size: 15px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.auth-card input::placeholder {
+  color: #a49a85;
 }
 
 .auth-card input:focus-visible {
-  outline: 2px solid var(--brass-ink);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(180, 135, 70, 0.2);
 }
 
 .auth-error {
