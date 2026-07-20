@@ -746,28 +746,33 @@ button:focus-visible {
   }
 }
 
-.auth-tabs {
-  margin-top: 26px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+.auth-password {
+  position: relative;
+  display: block;
 }
 
-.auth-tabs button {
-  height: 42px;
+.auth-password input {
+  width: 100%;
+  padding-right: 46px;
+}
+
+.auth-password button {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 14px;
   cursor: pointer;
 }
 
-.auth-tabs button.is-active {
-  background: var(--brass-ink);
-  color: white;
-  font-weight: 600;
+.auth-password button:hover {
+  color: var(--ink);
 }
 
 .auth-card form {

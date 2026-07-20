@@ -119,6 +119,7 @@ export function AuthPage({ onAuthed }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const cardRef = useRef(null)
@@ -200,27 +201,6 @@ export function AuthPage({ onAuthed }) {
             {mode === 'login' ? '登录后继续你的住宅布局方案' : '注册即可开始首次户型勘定'}
           </p>
 
-          <div className="auth-tabs" role="tablist" aria-label="登录或注册">
-            <button
-              aria-selected={mode === 'login'}
-              className={mode === 'login' ? 'is-active' : ''}
-              onClick={() => switchMode('login')}
-              role="tab"
-              type="button"
-            >
-              登录
-            </button>
-            <button
-              aria-selected={mode === 'register'}
-              className={mode === 'register' ? 'is-active' : ''}
-              onClick={() => switchMode('register')}
-              role="tab"
-              type="button"
-            >
-              注册
-            </button>
-          </div>
-
           <form onSubmit={submit}>
             {mode === 'register' && (
               <label>
@@ -251,15 +231,24 @@ export function AuthPage({ onAuthed }) {
             </label>
             <label>
               密码
-              <input
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                minLength={8}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder={mode === 'login' ? '请输入密码' : '至少 8 位'}
-                required
-                type="password"
-                value={password}
-              />
+              <span className="auth-password">
+                <input
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  minLength={8}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder={mode === 'login' ? '请输入密码' : '至少 8 位'}
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                />
+                <button
+                  aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                  onClick={() => setShowPassword((value) => !value)}
+                  type="button"
+                >
+                  <Icon name={showPassword ? 'eyeOff' : 'eye'} size={20} strokeWidth={1.7} />
+                </button>
+              </span>
             </label>
 
             {error && <p className="auth-error" role="alert">{error}</p>}
