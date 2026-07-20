@@ -8,7 +8,7 @@ const items = [
   { id: 'rules', label: '规则库', icon: 'book' },
 ]
 
-export function DesktopSidebar({ active, onChange }) {
+export function DesktopSidebar({ active, onChange, user, onLogout }) {
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef(null)
 
@@ -32,14 +32,15 @@ export function DesktopSidebar({ active, onChange }) {
       </nav>
       <div className="web-account-wrap" ref={accountRef}>
         {accountOpen && (
-          <div className="account-popover" role="status">
-            <strong>一宸老师</strong>
+          <div className="account-popover">
+            <strong>{user.name}</strong>
             <span>方案审核账号</span>
+            <button type="button" onClick={onLogout}>退出登录</button>
           </div>
         )}
         <button className="web-account" aria-expanded={accountOpen} type="button" onClick={() => setAccountOpen((value) => !value)}>
           <span className="account-avatar"><Icon name="user" size={22} /></span>
-          <span>一宸老师</span>
+          <span>{user.name}</span>
           <Icon name="chevronDown" size={17} />
         </button>
       </div>

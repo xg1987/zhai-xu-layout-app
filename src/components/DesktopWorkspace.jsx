@@ -56,6 +56,8 @@ export function DesktopWorkspace({
   gridAngle,
   onGridAngleChange,
   confirmedIds,
+  user,
+  onLogout,
 }) {
   const [activeNav, setActiveNav] = useState('review')
   const [calibrating, setCalibrating] = useState(false)
@@ -94,7 +96,7 @@ export function DesktopWorkspace({
 
   return (
     <main className="web-shell">
-      <DesktopSidebar active={activeNav} onChange={setActiveNav} />
+      <DesktopSidebar active={activeNav} onChange={setActiveNav} user={user} onLogout={onLogout} />
 
       {activeNav !== 'review' ? (
         <WebSectionPage

@@ -9,14 +9,22 @@
 
 ```bash
 npm install
-npm run dev
+npm run dev   # 同时启动 API（127.0.0.1:3001）和前端（0.0.0.0:5173）
 ```
 
-生产构建：
+生产构建与启动：
 
 ```bash
 npm run build
+npm run start  # NODE_ENV=production，由 API 服务托管 dist 静态资源
 ```
+
+## 账号体系
+
+- 手机号 + 密码注册/登录，密码使用 bcrypt 加密存储于 SQLite（`server/data.db`，不入库控）。
+- 会话使用 httpOnly Cookie（14 天有效期），退出登录即失效。
+- 接口：`POST /api/register`、`POST /api/login`、`POST /api/logout`、`GET /api/me`。
+- 生产部署务必置于 HTTPS 之后，并为 Cookie 增加 `Secure` 标记。
 
 主要验收尺寸为 App `390 × 844`、Web `1280 × 720`；Web 同时按 `1440 × 900` 概念规格设计。
 

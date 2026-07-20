@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { AuthPage } from './components/AuthPage.jsx'
 import { BottomNav } from './components/BottomNav.jsx'
 import { ConstructionChecklist } from './components/ConstructionChecklist.jsx'
 import { DesktopWorkspace } from './components/DesktopWorkspace.jsx'
@@ -10,6 +11,8 @@ import { checklistGroups, recommendations } from './data.js'
 import { useDismiss } from './useDismiss.js'
 
 export default function App() {
+  const [user, setUser] = useState(null)
+  const [authChecked, setAuthChecked] = useState(false)
   const [activeTab, setActiveTab] = useState('plan')
   const [selectedId, setSelectedId] = useState('02')
   const [sheetExpanded, setSheetExpanded] = useState(false)
@@ -28,6 +31,22 @@ export default function App() {
   const menuButtonRef = useRef(null)
 
   useDismiss([menuRef, menuButtonRef], mobileMenuOpen, () => setMobileMenuOpen(false))
+
+  useEffect(() => {
+    fetch('/api/me')
+      .then((res) => res.json())
+      .then((data) => setUser(data.user))
+      .catch(() => {})
+      .finally(() => setAuthChecked(true))
+  }, [])
+
+  const logout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' })
+    } finally {
+      setUser(null)
+    }
+  }
 
   useEffect(() => {
     if (!menuFeedback) return
@@ -96,6 +115,9 @@ export default function App() {
     profile: ['我的', '账户与方案设置'],
   }[activeNav]
 
+  if (!authChecked) return null
+  if (!user) return <AuthPage onAuthed={setUser} />
+
   return (
     <div className="product-root">
       <main className="app-shell mobile-shell">
@@ -163,7 +185,12 @@ export default function App() {
           )}
           {activeNav === 'consult' && <MobileConsult messages={messages} onSend={sendConsultMessage} />}
           {activeNav === 'profile' && (
-            <MobileProfile cartCount={cartIds.length} confirmedCount={confirmedIds.length} />
+            <MobileProfile
+              user={user}
+              cartCount={cartIds.length}
+              confirmedCount={confirmedIds.length}
+              onLogout={logout}
+            />
           )}
           {activeNav === 'projects' && (activeTab === 'plan' ? (
             <>
@@ -220,6 +247,8 @@ export default function App() {
         gridAngle={gridAngle}
         onGridAngleChange={setGridAngle}
         confirmedIds={confirmedIds}
+        user={user}
+        onLogout={logout}
       />
     </div>
   )

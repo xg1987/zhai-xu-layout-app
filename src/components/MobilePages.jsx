@@ -164,7 +164,7 @@ export function MobileShop({ cartIds, onToggle, onCheckout }) {
   )
 }
 
-export function MobileProfile({ cartCount, confirmedCount }) {
+export function MobileProfile({ user, cartCount, confirmedCount, onLogout }) {
   const [activeSetting, setActiveSetting] = useState('')
   const settings = ['通知设置', '方案偏好', '收货地址', '关于宅序']
   const shortcuts = [
@@ -172,12 +172,13 @@ export function MobileProfile({ cartCount, confirmedCount }) {
     { count: confirmedCount, label: '确认点位' },
     { count: cartCount, label: '商城清单' },
   ]
+  const maskedPhone = user.phone.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2')
 
   return (
     <section className="mobile-page profile-page" aria-label="我的">
       <div className="profile-identity">
         <div className="profile-avatar"><Icon name="user" size={30} /></div>
-        <div><h2>罗莉</h2><p>已保存 1 个住宅项目</p></div>
+        <div><h2>{user.name}</h2><p>{maskedPhone} · 已保存 1 个住宅项目</p></div>
       </div>
       <div className="profile-shortcuts">
         {shortcuts.map((shortcut) => (
@@ -201,6 +202,9 @@ export function MobileProfile({ cartCount, confirmedCount }) {
           已打开“{activeSetting}”
         </div>
       )}
+      <button className="logout-button" type="button" onClick={onLogout}>
+        退出登录
+      </button>
     </section>
   )
 }
