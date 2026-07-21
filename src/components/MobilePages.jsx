@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { APP_VERSION } from '../version.js'
 import { Icon } from './Icons.jsx'
 
 export function MobileHome({ onOpenProject }) {
@@ -199,7 +200,7 @@ export function MobileProfile({ user, cartCount, confirmedCount, onLogout }) {
       {activeSetting && (
         <div className="setting-feedback">
           <Icon name="check" size={18} />
-          已打开“{activeSetting}”
+          {activeSetting === '关于宅序' ? `宅序 v${APP_VERSION} · 家居风水调整平台` : `已打开“${activeSetting}”`}
         </div>
       )}
       <button className="logout-button" type="button" onClick={onLogout}>

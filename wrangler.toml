@@ -1,0 +1,8 @@
+name = "zhai-xu-layout-app"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-07-21"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zhai-xu-auth-db"
+database_id = "dbadfd63-2725-43fd-8064-644567a0164d"
