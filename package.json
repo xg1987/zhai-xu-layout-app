@@ -1,7 +1,7 @@
 {
   "name": "zhai-xu-layout-app",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web \"node server/index.js\" \"vite --host 0.0.0.0\"",

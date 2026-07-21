@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { BottomNav } from './BottomNav.jsx'
 import { ConstructionChecklist } from './ConstructionChecklist.jsx'
 import { DesktopInspector } from './DesktopInspector.jsx'
-import { DesktopSidebar } from './DesktopSidebar.jsx'
 import { Icon } from './Icons.jsx'
 import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './MobilePages.jsx'
 import { PlanCanvas } from './PlanCanvas.jsx'
 
 const sectionHeaders = {
-  home: ['首页', '让每个建议落到准确位置'],
+  home: ['宅序', '让每个建议落到准确位置'],
   shop: ['商城', '方案配套好物'],
   consult: ['咨询', 'AI 布局助手 · 方案沟通'],
   profile: ['我的', '账户与方案设置'],
@@ -85,8 +85,6 @@ export function DesktopWorkspace({
 
   return (
     <main className="web-shell">
-      <DesktopSidebar active={activeNav} onChange={setActiveNav} user={user} onLogout={onLogout} />
-
       {activeNav !== 'review' ? (
         <WebSectionPage activeNav={activeNav}>
           {activeNav === 'home' && (
@@ -204,6 +202,11 @@ export function DesktopWorkspace({
 
       <DesktopInspector item={selected} onNext={onNext} />
       </>}
+
+      <BottomNav
+        active={activeNav === 'review' ? 'projects' : activeNav}
+        onChange={(next) => setActiveNav(next === 'projects' ? 'review' : next)}
+      />
     </main>
   )
 }
