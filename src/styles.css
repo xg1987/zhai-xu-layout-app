@@ -294,6 +294,63 @@ button:focus-visible {
   line-height: 1.55;
 }
 
+.project-list {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.project-row {
+  width: 100%;
+  padding: 14px 2px;
+  display: grid;
+  grid-template-columns: 88px 1fr 22px;
+  gap: 15px;
+  align-items: center;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+}
+
+.project-row img {
+  width: 88px;
+  height: 64px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #efebe3;
+  mix-blend-mode: multiply;
+  opacity: 0.8;
+}
+
+.project-row span {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.project-row strong {
+  overflow: hidden;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-row small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.project-row.is-active strong {
+  color: var(--primary);
+}
+
+.project-row > svg {
+  color: var(--muted);
+}
+
 .current-project {
   width: 100%;
   margin-top: 28px;

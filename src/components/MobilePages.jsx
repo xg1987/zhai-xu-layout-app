@@ -55,6 +55,34 @@ export function MobileHome({ onOpenProject, onUpload, analyzing = false, analysi
   )
 }
 
+export function MobileProjects({ projects, activeId, onOpen }) {
+  return (
+    <section className="mobile-page projects-page" aria-label="项目">
+      <div className="home-intro">
+        <h2>已生成的住宅方案</h2>
+        <p>AI 分析过的户型都会保存在这里，点击任意方案继续查看和确认。</p>
+      </div>
+      <div className="project-list">
+        {projects.map((project) => (
+          <button
+            className={`project-row ${project.id === activeId ? 'is-active' : ''}`}
+            key={project.id}
+            onClick={() => onOpen(project.id)}
+            type="button"
+          >
+            <img src={project.image} alt={`${project.title}户型缩略图`} />
+            <span>
+              <strong>{project.title}</strong>
+              <small>{project.note || `${project.points.length}个建议点位`}</small>
+            </span>
+            <Icon name="chevronRight" size={19} />
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function MobileConsult({ messages, onSend }) {
   const [draft, setDraft] = useState('')
   const listRef = useRef(null)

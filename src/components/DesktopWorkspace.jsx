@@ -3,11 +3,12 @@ import { BottomNav } from './BottomNav.jsx'
 import { ConstructionChecklist } from './ConstructionChecklist.jsx'
 import { DesktopInspector } from './DesktopInspector.jsx'
 import { Icon } from './Icons.jsx'
-import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './MobilePages.jsx'
+import { MobileConsult, MobileHome, MobileProfile, MobileProjects, MobileShop } from './MobilePages.jsx'
 import { PlanCanvas } from './PlanCanvas.jsx'
 
 const sectionHeaders = {
   home: ['宅序', '让每个建议落到准确位置'],
+  projects: ['项目', '已生成的住宅方案'],
   shop: ['商城', '方案配套好物'],
   consult: ['咨询', 'AI 布局助手 · 方案沟通'],
   profile: ['我的', '账户与方案设置'],
@@ -42,12 +43,12 @@ export function DesktopWorkspace({
   onCheckout,
   messages,
   onSendMessage,
-  planImage,
-  projectTitle,
+  projects,
+  activeProject,
+  onOpenProject,
   onUploadFloorPlan,
   analyzing,
   analysisError,
-  hasAnalysis,
 }) {
   const [activeNav, setActiveNav] = useState('home')
   const [calibrating, setCalibrating] = useState(false)
@@ -58,7 +59,7 @@ export function DesktopWorkspace({
 
   const exportReport = () => {
     const report = [
-      projectTitle,
+      activeProject.title,
       `空间已确认 · ${recommendations.length}个建议点位`,
       '',
       ...recommendations.map((item) => `${item.id} ${item.sector} · ${item.place}\n${item.advice}\n${item.schedule}\n${item.warning}\n`),
@@ -67,7 +68,7 @@ export function DesktopWorkspace({
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${projectTitle}.txt`
+    link.download = `${activeProject.title}.txt`
     link.click()
     URL.revokeObjectURL(url)
     setExported(true)
@@ -96,10 +97,20 @@ export function DesktopWorkspace({
               }}
               analyzing={analyzing}
               analysisError={analysisError}
-              projectTitle={projectTitle}
-              projectNote={hasAnalysis ? `AI 已分析 · ${recommendations.length}个建议点位` : '空间已确认 · 还有5项细节待补全'}
-              planImage={planImage}
+              projectTitle={activeProject.title}
+              projectNote={activeProject.note}
+              planImage={activeProject.image}
               pointCount={recommendations.length}
+            />
+          )}
+          {activeNav === 'projects' && (
+            <MobileProjects
+              projects={projects}
+              activeId={activeProject.id}
+              onOpen={(id) => {
+                onOpenProject(id)
+                setActiveNav('review')
+              }}
             />
           )}
           {activeNav === 'shop' && (
@@ -126,7 +137,7 @@ export function DesktopWorkspace({
 
       <header className="web-header">
         <div>
-          <h1>{projectTitle}</h1>
+          <h1>{activeProject.title}</h1>
           <p>空间已确认 · {recommendations.length}个建议点位</p>
         </div>
         <div className="web-header-actions">
@@ -179,7 +190,7 @@ export function DesktopWorkspace({
               showFloorControl
               gridAngle={gridAngle}
               confirmedIds={confirmedIds}
-              planImage={planImage}
+              planImage={activeProject.image}
             />
           ) : (
             <ConstructionChecklist groups={checklistGroups} />
@@ -205,7 +216,7 @@ export function DesktopWorkspace({
 
       <BottomNav
         active={activeNav === 'review' ? 'projects' : activeNav}
-        onChange={(next) => setActiveNav(next === 'projects' ? 'review' : next)}
+        onChange={setActiveNav}
       />
     </main>
   )

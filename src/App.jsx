@@ -4,11 +4,41 @@ import { BottomNav } from './components/BottomNav.jsx'
 import { ConstructionChecklist } from './components/ConstructionChecklist.jsx'
 import { DesktopWorkspace } from './components/DesktopWorkspace.jsx'
 import { Icon } from './components/Icons.jsx'
-import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './components/MobilePages.jsx'
+import { MobileConsult, MobileHome, MobileProfile, MobileProjects, MobileShop } from './components/MobilePages.jsx'
 import { PlanCanvas } from './components/PlanCanvas.jsx'
 import { RecommendationSheet } from './components/RecommendationSheet.jsx'
 import { checklistGroups, recommendations } from './data.js'
 import { useDismiss } from './useDismiss.js'
+
+const PROJECTS_STORAGE_KEY = 'zx_projects'
+
+const demoProject = {
+  id: 'demo',
+  title: '罗莉的住宅方案',
+  note: '空间已确认 · 还有5项细节待补全',
+  image: '/assets/demo-floor-plan.png',
+  summary: '',
+  points: recommendations,
+}
+
+const loadSavedProjects = () => {
+  try {
+    const list = JSON.parse(localStorage.getItem(PROJECTS_STORAGE_KEY) || '[]')
+    return Array.isArray(list) ? list : []
+  } catch {
+    return []
+  }
+}
+
+const buildChecklist = (points) => {
+  const groups = new Map()
+  for (const point of points) {
+    const key = point.schedule || '待安排'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(`${point.sector}${point.place} · ${point.short}`)
+  }
+  return [...groups].map(([title, items]) => ({ title, items }))
+}
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -16,8 +46,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('plan')
   const [selectedId, setSelectedId] = useState('02')
   const [sheetExpanded, setSheetExpanded] = useState(false)
-  const [activeNav, setActiveNav] = useState('projects')
-  const [confirmedIds, setConfirmedIds] = useState([])
+  const [activeNav, setActiveNav] = useState('home')
+  const [projectOpen, setProjectOpen] = useState(false)
+  const [confirmedMap, setConfirmedMap] = useState({})
   const [gridAngle, setGridAngle] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileCalibrating, setMobileCalibrating] = useState(false)
@@ -26,7 +57,8 @@ export default function App() {
     { id: 1, from: 'teacher', text: '罗莉家的5个重点位置已经整理好了，你可以点开方案逐项确认。' },
   ])
   const [cartIds, setCartIds] = useState([])
-  const [analysis, setAnalysis] = useState(null)
+  const [savedProjects, setSavedProjects] = useState(loadSavedProjects)
+  const [activeProjectId, setActiveProjectId] = useState(() => loadSavedProjects()[0]?.id || 'demo')
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisError, setAnalysisError] = useState('')
   const nextMessageId = useRef(2)
@@ -57,25 +89,47 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [menuFeedback])
 
-  const activeRecommendations = analysis?.points || recommendations
-  const planImage = analysis?.image || '/assets/demo-floor-plan.png'
-  const projectTitle = analysis ? '我的住宅方案' : '罗莉的住宅方案'
+  const projects = useMemo(() => [...savedProjects, demoProject], [savedProjects])
+  const activeProject = projects.find((item) => item.id === activeProjectId) || demoProject
+  const activeRecommendations = activeProject.points
+  const confirmedIds = confirmedMap[activeProject.id] || []
+  const totalPoints = activeRecommendations.length
 
-  const activeChecklist = useMemo(() => {
-    if (!analysis) return checklistGroups
-    const groups = new Map()
-    for (const point of analysis.points) {
-      const key = point.schedule || '待安排'
-      if (!groups.has(key)) groups.set(key, [])
-      groups.get(key).push(`${point.sector}${point.place} · ${point.short}`)
-    }
-    return [...groups].map(([title, items]) => ({ title, items }))
-  }, [analysis])
+  const activeChecklist = useMemo(
+    () => (activeProject.id === 'demo' ? checklistGroups : buildChecklist(activeProject.points)),
+    [activeProject],
+  )
 
   const selected = useMemo(
     () => activeRecommendations.find((item) => item.id === selectedId) || activeRecommendations[0],
     [selectedId, activeRecommendations],
   )
+
+  const openProject = (id) => {
+    const project = projects.find((item) => item.id === id)
+    if (!project) return
+    setActiveProjectId(id)
+    setSelectedId(project.points[0]?.id || '01')
+    setSheetExpanded(false)
+    setActiveTab('plan')
+  }
+
+  const selectPoint = (id) => {
+    setSelectedId(id)
+    setSheetExpanded(false)
+  }
+
+  const confirmAndSelectNextPoint = () => {
+    setConfirmedMap((current) => {
+      const list = current[activeProject.id] || []
+      if (list.includes(selectedId)) return current
+      return { ...current, [activeProject.id]: [...list, selectedId] }
+    })
+    const index = activeRecommendations.findIndex((item) => item.id === selectedId)
+    const next = activeRecommendations[(index + 1) % activeRecommendations.length]
+    setSelectedId(next.id)
+    setSheetExpanded(false)
+  }
 
   const analyzeFloorPlanImage = async (file) => {
     setAnalysisError('')
@@ -94,16 +148,35 @@ export default function App() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'AI 分析失败，请稍后重试')
-      setAnalysis({ image: dataUrl, summary: data.summary, points: data.points })
-      setConfirmedIds([])
+
+      const now = new Date()
+      const project = {
+        id: `p${now.getTime()}`,
+        title: `我的住宅方案 · ${now.getMonth() + 1}月${now.getDate()}日`,
+        note: `AI 已分析 · ${data.points.length}个建议点位`,
+        image: dataUrl,
+        summary: data.summary,
+        points: data.points,
+      }
+      setSavedProjects((current) => {
+        const next = [project, ...current]
+        try {
+          localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(next))
+        } catch {
+          // 图片过大导致 localStorage 存不下时，方案仅保留在本次会话内存中
+        }
+        return next
+      })
+      setActiveProjectId(project.id)
       setSelectedId(data.points[0]?.id || '01')
       setSheetExpanded(false)
       setMessages((current) => [...current, {
         id: nextMessageId.current++,
         from: 'teacher',
-        text: `你的户型图我已经分析好了：${data.summary}共整理出 ${data.points.length} 个重点点位，可以打开方案逐项确认。`,
+        text: `你的户型图我已经分析好了：${data.summary}共整理出 ${data.points.length} 个重点点位，已保存到「项目」里，可以逐项确认。`,
       }])
       setActiveNav('projects')
+      setProjectOpen(true)
       setActiveTab('plan')
       return true
     } catch (error) {
@@ -112,19 +185,6 @@ export default function App() {
     } finally {
       setAnalyzing(false)
     }
-  }
-
-  const selectPoint = (id) => {
-    setSelectedId(id)
-    setSheetExpanded(false)
-  }
-
-  const confirmAndSelectNextPoint = () => {
-    setConfirmedIds((current) => current.includes(selectedId) ? current : [...current, selectedId])
-    const index = activeRecommendations.findIndex((item) => item.id === selectedId)
-    const next = activeRecommendations[(index + 1) % activeRecommendations.length]
-    setSelectedId(next.id)
-    setSheetExpanded(false)
   }
 
   const sendConsultMessage = (text) => {
@@ -162,10 +222,13 @@ export default function App() {
     tabs[next === 'plan' ? 0 : 1]?.focus()
   }
 
-  const totalPoints = activeRecommendations.length
+  const inProjectDetail = activeNav === 'projects' && projectOpen
+
   const mobileHeader = {
     home: ['宅序', '让每个建议落到准确位置'],
-    projects: [projectTitle, confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/${totalPoints}点位已复核` : `空间已确认 · ${totalPoints}个建议点位`],
+    projects: projectOpen
+      ? [activeProject.title, confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/${totalPoints}点位已复核` : `空间已确认 · ${totalPoints}个建议点位`]
+      : ['项目', `${projects.length}个住宅方案`],
     shop: ['商城', '方案配套好物'],
     consult: ['咨询', 'AI 布局助手 · 方案沟通'],
     profile: ['我的', '账户与方案设置'],
@@ -179,7 +242,12 @@ export default function App() {
       <main className="app-shell mobile-shell">
         <header className="app-header">
           {activeNav === 'projects' ? (
-            <button className="header-icon" type="button" aria-label="返回首页" onClick={() => setActiveNav('home')}>
+            <button
+              className="header-icon"
+              type="button"
+              aria-label={projectOpen ? '返回项目列表' : '返回首页'}
+              onClick={() => (projectOpen ? setProjectOpen(false) : setActiveNav('home'))}
+            >
               <Icon name="back" size={27} strokeWidth={1.7} />
             </button>
           ) : <span className="header-spacer" />}
@@ -199,6 +267,7 @@ export default function App() {
               type="button"
               onClick={() => {
                 setActiveNav('projects')
+                setProjectOpen(true)
                 setActiveTab('plan')
                 setMobileCalibrating((value) => !value)
                 setMobileMenuOpen(false)
@@ -211,7 +280,7 @@ export default function App() {
           </div>
         )}
 
-        {activeNav === 'projects' && <div className="view-tabs" role="tablist" aria-label="方案视图" onKeyDown={onTabListKeyDown}>
+        {inProjectDetail && <div className="view-tabs" role="tablist" aria-label="方案视图" onKeyDown={onTabListKeyDown}>
           <button
             aria-selected={activeTab === 'plan'}
             className={activeTab === 'plan' ? 'is-active' : ''}
@@ -234,17 +303,30 @@ export default function App() {
           </button>
         </div>}
 
-        <div className={`content-region ${activeNav === 'projects' ? '' : 'is-simple'}`}>
+        <div className={`content-region ${inProjectDetail ? '' : 'is-simple'}`}>
           {activeNav === 'home' && (
             <MobileHome
-              onOpenProject={() => setActiveNav('projects')}
+              onOpenProject={() => {
+                setActiveNav('projects')
+                setProjectOpen(true)
+              }}
               onUpload={analyzeFloorPlanImage}
               analyzing={analyzing}
               analysisError={analysisError}
-              projectTitle={projectTitle}
-              projectNote={analysis ? `AI 已分析 · ${totalPoints}个建议点位` : '空间已确认 · 还有5项细节待补全'}
-              planImage={planImage}
+              projectTitle={activeProject.title}
+              projectNote={activeProject.note}
+              planImage={activeProject.image}
               pointCount={totalPoints}
+            />
+          )}
+          {activeNav === 'projects' && !projectOpen && (
+            <MobileProjects
+              projects={projects}
+              activeId={activeProject.id}
+              onOpen={(id) => {
+                openProject(id)
+                setProjectOpen(true)
+              }}
             />
           )}
           {activeNav === 'shop' && (
@@ -259,7 +341,7 @@ export default function App() {
               onLogout={logout}
             />
           )}
-          {activeNav === 'projects' && (activeTab === 'plan' ? (
+          {inProjectDetail && (activeTab === 'plan' ? (
             <>
               <PlanCanvas
                 recommendations={activeRecommendations}
@@ -267,7 +349,7 @@ export default function App() {
                 onSelect={selectPoint}
                 gridAngle={gridAngle}
                 confirmedIds={confirmedIds}
-                planImage={planImage}
+                planImage={activeProject.image}
               />
               {mobileCalibrating && (
                 <label className="mobile-calibration-control">
@@ -298,6 +380,7 @@ export default function App() {
           active={activeNav}
           onChange={(next) => {
             setActiveNav(next)
+            if (next === 'projects') setProjectOpen(false)
             setMobileMenuOpen(false)
           }}
         />
@@ -322,12 +405,12 @@ export default function App() {
         onCheckout={submitCartToConsult}
         messages={messages}
         onSendMessage={sendConsultMessage}
-        planImage={planImage}
-        projectTitle={projectTitle}
+        projects={projects}
+        activeProject={activeProject}
+        onOpenProject={openProject}
         onUploadFloorPlan={analyzeFloorPlanImage}
         analyzing={analyzing}
         analysisError={analysisError}
-        hasAnalysis={Boolean(analysis)}
       />
     </div>
   )
