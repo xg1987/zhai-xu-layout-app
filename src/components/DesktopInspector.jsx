@@ -43,7 +43,7 @@ export function DesktopInspector({ item, onNext }) {
       {showRule && (
         <div className="rule-evidence">
           <span>规则依据</span>
-          <p>该建议来自当前项目的专家口述记录，正式施工参数仍需老师复核。</p>
+          <p>该建议由 AI 根据当前项目生成，正式施工参数可在咨询中进一步确认。</p>
         </div>
       )}
 

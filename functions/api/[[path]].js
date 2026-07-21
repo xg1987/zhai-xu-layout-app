@@ -1,3 +1,5 @@
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BASE64_LENGTH, analyzeFloorPlan } from '../../server/floorplan.js'
+
 const COOKIE_NAME = 'zx_session'
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14
 const PASSWORD_ITERATIONS = 100_000
@@ -145,9 +147,9 @@ const logout = async (request, db) => {
   return json({ ok: true }, 200, { 'Set-Cookie': sessionCookie('', 0) })
 }
 
-const currentUser = async (request, db) => {
+const sessionUser = async (request, db) => {
   const token = getCookie(request, COOKIE_NAME)
-  if (!token) return json({ user: null })
+  if (!token) return null
 
   const now = Date.now()
   await db.prepare('DELETE FROM sessions WHERE expires_at < ?').bind(now).run()
@@ -157,7 +159,48 @@ const currentUser = async (request, db) => {
     JOIN users u ON u.id = s.user_id
     WHERE s.token = ? AND s.expires_at >= ?
   `).bind(token, now).first()
+  return user || null
+}
+
+const currentUser = async (request, db) => {
+  const user = await sessionUser(request, db)
   return json({ user: user ? publicUser(user) : null })
+}
+
+const analyzeFloorPlanRoute = async (request, db, env) => {
+  if (!(await sessionUser(request, db))) return json({ error: '请先登录' }, 401)
+
+  const body = await parseBody(request)
+  if (!body) return json({ error: '请求格式不正确' }, 400)
+
+  const imageBase64 = String(body.image || '')
+  const mediaType = String(body.mediaType || '')
+  if (!ALLOWED_IMAGE_TYPES.includes(mediaType)) {
+    return json({ error: '请上传 JPG、PNG 或 WebP 格式的户型图' }, 400)
+  }
+  if (!imageBase64 || imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
+    return json({ error: '图片过大或为空，请上传 10MB 以内的户型图' }, 400)
+  }
+  if (!env.ANTHROPIC_API_KEY) {
+    return json({ error: '服务端尚未配置 AI 密钥（ANTHROPIC_API_KEY）' }, 503)
+  }
+
+  try {
+    const result = await analyzeFloorPlan({
+      apiKey: env.ANTHROPIC_API_KEY,
+      imageBase64,
+      mediaType,
+    })
+    return json(result)
+  } catch (error) {
+    if (error.code === 'refusal' || error.code === 'empty') {
+      return json({ error: error.message }, 422)
+    }
+    if (error.status === 401) return json({ error: '服务端 AI 密钥无效' }, 503)
+    if (error.status === 429) return json({ error: 'AI 分析请求过于频繁，请稍后重试' }, 429)
+    console.error('Floor plan analysis error', error)
+    return json({ error: 'AI 分析暂时不可用，请稍后重试' }, 502)
+  }
 }
 
 export const onRequest = async ({ request, env }) => {
@@ -169,6 +212,9 @@ export const onRequest = async ({ request, env }) => {
     if (pathname === '/api/login' && request.method === 'POST') return await login(request, env.DB)
     if (pathname === '/api/logout' && request.method === 'POST') return await logout(request, env.DB)
     if (pathname === '/api/me' && request.method === 'GET') return await currentUser(request, env.DB)
+    if (pathname === '/api/analyze-floorplan' && request.method === 'POST') {
+      return await analyzeFloorPlanRoute(request, env.DB, env)
+    }
     return json({ error: '接口不存在' }, 404)
   } catch (error) {
     console.error('Auth API error', error)

@@ -242,7 +242,7 @@ export function AuthPage({ onAuthed }) {
             {mode === 'login' && (
               <button
                 className="auth-forgot"
-                onClick={() => setNotice('请联系一宸老师协助重置密码')}
+                onClick={() => setNotice('请在咨询页联系 AI 助手协助重置密码')}
                 type="button"
               >
                 忘记密码？

@@ -1,9 +1,11 @@
 import crypto from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import Anthropic from '@anthropic-ai/sdk'
 import bcrypt from 'bcryptjs'
 import Database from 'better-sqlite3'
 import express from 'express'
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BASE64_LENGTH, analyzeFloorPlan } from './floorplan.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const db = new Database(path.join(__dirname, 'data.db'))
@@ -27,7 +29,7 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14
 const COOKIE_NAME = 'zx_session'
 
 const app = express()
-app.use(express.json())
+app.use(express.json({ limit: '20mb' }))
 
 const publicUser = (user) => ({ id: user.id, name: user.name, phone: user.phone })
 
@@ -106,6 +108,47 @@ app.post('/api/logout', (req, res) => {
 
 app.get('/api/me', (req, res) => {
   res.json({ user: currentUser(req) })
+})
+
+app.post('/api/analyze-floorplan', async (req, res) => {
+  if (!currentUser(req)) return res.status(401).json({ error: '请先登录' })
+
+  const imageBase64 = String(req.body?.image || '')
+  const mediaType = String(req.body?.mediaType || '')
+  if (!ALLOWED_IMAGE_TYPES.includes(mediaType)) {
+    return res.status(400).json({ error: '请上传 JPG、PNG 或 WebP 格式的户型图' })
+  }
+  if (!imageBase64 || imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
+    return res.status(400).json({ error: '图片过大或为空，请上传 10MB 以内的户型图' })
+  }
+
+  try {
+    const result = await analyzeFloorPlan({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      imageBase64,
+      mediaType,
+    })
+    res.json(result)
+  } catch (error) {
+    if (error instanceof Anthropic.AuthenticationError) {
+      return res.status(503).json({ error: '服务端 AI 密钥无效，请检查 ANTHROPIC_API_KEY' })
+    }
+    if (error instanceof Anthropic.RateLimitError) {
+      return res.status(429).json({ error: 'AI 分析请求过于频繁，请稍后重试' })
+    }
+    if (error.code === 'refusal' || error.code === 'empty') {
+      return res.status(422).json({ error: error.message })
+    }
+    if (error instanceof Anthropic.APIError) {
+      console.error('Floor plan analysis API error', error.status, error.message)
+      return res.status(502).json({ error: 'AI 分析暂时不可用，请稍后重试' })
+    }
+    if (String(error.message).includes('Could not resolve authentication method')) {
+      return res.status(503).json({ error: '服务端尚未配置 AI 密钥（ANTHROPIC_API_KEY）' })
+    }
+    console.error('Floor plan analysis error', error)
+    res.status(502).json({ error: 'AI 分析暂时不可用，请稍后重试' })
+  }
 })
 
 if (process.env.NODE_ENV === 'production') {

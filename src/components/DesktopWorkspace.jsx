@@ -3,43 +3,22 @@ import { ConstructionChecklist } from './ConstructionChecklist.jsx'
 import { DesktopInspector } from './DesktopInspector.jsx'
 import { DesktopSidebar } from './DesktopSidebar.jsx'
 import { Icon } from './Icons.jsx'
+import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './MobilePages.jsx'
 import { PlanCanvas } from './PlanCanvas.jsx'
 
-function WebSectionPage({ activeNav, ruleSelection, onRuleSelect, onOpenReview }) {
-  if (activeNav === 'projects') {
-    return (
-      <section className="web-section-page">
-        <header><div><h1>项目</h1><p>管理客户住宅方案与当前进度</p></div></header>
-        <div className="web-page-body">
-          <h2>进行中的项目</h2>
-          <button className="web-project-row" type="button" onClick={onOpenReview}>
-            <img src="/assets/demo-floor-plan.png" alt="罗莉住宅户型缩略图" />
-            <span><strong>罗莉的住宅方案</strong><small>空间已确认 · 5个建议点位</small></span>
-            <em>继续审核</em>
-            <Icon name="chevronRight" size={20} />
-          </button>
-        </div>
-      </section>
-    )
-  }
+const sectionHeaders = {
+  home: ['首页', '让每个建议落到准确位置'],
+  shop: ['商城', '方案配套好物'],
+  consult: ['咨询', 'AI 布局助手 · 方案沟通'],
+  profile: ['我的', '账户与方案设置'],
+}
 
+function WebSectionPage({ activeNav, children }) {
+  const [title, subtitle] = sectionHeaders[activeNav]
   return (
     <section className="web-section-page">
-      <header><div><h1>规则库</h1><p>维护老师确认过的布局规则与施工模板</p></div></header>
-      <div className="web-page-body">
-        <h2>规则分类</h2>
-        <div className="rule-library-list">
-          <button type="button" onClick={() => onRuleSelect('水局规则')}><span>水局规则</span><small>2条待补充</small><Icon name="chevronRight" size={19} /></button>
-          <button type="button" onClick={() => onRuleSelect('土局规则')}><span>土局规则</span><small>1条待补充</small><Icon name="chevronRight" size={19} /></button>
-          <button type="button" onClick={() => onRuleSelect('入户门处理')}><span>入户门处理</span><small>3条已审核</small><Icon name="chevronRight" size={19} /></button>
-        </div>
-        {ruleSelection && (
-          <div className="rule-selection-detail" role="status">
-            <strong>{ruleSelection}</strong>
-            <span>已打开该分类，后续可在这里维护触发条件和施工模板。</span>
-          </div>
-        )}
-      </div>
+      <header><div><h1>{title}</h1><p>{subtitle}</p></div></header>
+      <div className="web-page-body">{children}</div>
     </section>
   )
 }
@@ -58,19 +37,29 @@ export function DesktopWorkspace({
   confirmedIds,
   user,
   onLogout,
+  cartIds,
+  onToggleCartItem,
+  onCheckout,
+  messages,
+  onSendMessage,
+  planImage,
+  projectTitle,
+  onUploadFloorPlan,
+  analyzing,
+  analysisError,
+  hasAnalysis,
 }) {
-  const [activeNav, setActiveNav] = useState('review')
+  const [activeNav, setActiveNav] = useState('home')
   const [calibrating, setCalibrating] = useState(false)
   const [exported, setExported] = useState(false)
-  const [ruleSelection, setRuleSelection] = useState('')
   const exportTimer = useRef(null)
 
   useEffect(() => () => clearTimeout(exportTimer.current), [])
 
   const exportReport = () => {
     const report = [
-      '罗莉的住宅方案',
-      '空间已确认 · 5个建议点位',
+      projectTitle,
+      `空间已确认 · ${recommendations.length}个建议点位`,
       '',
       ...recommendations.map((item) => `${item.id} ${item.sector} · ${item.place}\n${item.advice}\n${item.schedule}\n${item.warning}\n`),
     ].join('\n')
@@ -78,7 +67,7 @@ export function DesktopWorkspace({
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = '罗莉的住宅方案.txt'
+    link.download = `${projectTitle}.txt`
     link.click()
     URL.revokeObjectURL(url)
     setExported(true)
@@ -99,18 +88,48 @@ export function DesktopWorkspace({
       <DesktopSidebar active={activeNav} onChange={setActiveNav} user={user} onLogout={onLogout} />
 
       {activeNav !== 'review' ? (
-        <WebSectionPage
-          activeNav={activeNav}
-          ruleSelection={ruleSelection}
-          onRuleSelect={setRuleSelection}
-          onOpenReview={() => setActiveNav('review')}
-        />
+        <WebSectionPage activeNav={activeNav}>
+          {activeNav === 'home' && (
+            <MobileHome
+              onOpenProject={() => setActiveNav('review')}
+              onUpload={async (file) => {
+                const ok = await onUploadFloorPlan(file)
+                if (ok) setActiveNav('review')
+              }}
+              analyzing={analyzing}
+              analysisError={analysisError}
+              projectTitle={projectTitle}
+              projectNote={hasAnalysis ? `AI 已分析 · ${recommendations.length}个建议点位` : '空间已确认 · 还有5项细节待补全'}
+              planImage={planImage}
+              pointCount={recommendations.length}
+            />
+          )}
+          {activeNav === 'shop' && (
+            <MobileShop
+              cartIds={cartIds}
+              onToggle={onToggleCartItem}
+              onCheckout={() => {
+                onCheckout()
+                setActiveNav('consult')
+              }}
+            />
+          )}
+          {activeNav === 'consult' && <MobileConsult messages={messages} onSend={onSendMessage} />}
+          {activeNav === 'profile' && (
+            <MobileProfile
+              user={user}
+              cartCount={cartIds.length}
+              confirmedCount={confirmedIds.length}
+              onLogout={onLogout}
+            />
+          )}
+        </WebSectionPage>
       ) : <>
 
       <header className="web-header">
         <div>
-          <h1>罗莉的住宅方案</h1>
-          <p>空间已确认 · 5个建议点位</p>
+          <h1>{projectTitle}</h1>
+          <p>空间已确认 · {recommendations.length}个建议点位</p>
         </div>
         <div className="web-header-actions">
           <button
@@ -162,6 +181,7 @@ export function DesktopWorkspace({
               showFloorControl
               gridAngle={gridAngle}
               confirmedIds={confirmedIds}
+              planImage={planImage}
             />
           ) : (
             <ConstructionChecklist groups={checklistGroups} />

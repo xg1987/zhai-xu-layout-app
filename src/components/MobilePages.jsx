@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { APP_VERSION } from '../version.js'
 import { Icon } from './Icons.jsx'
 
-export function MobileHome({ onOpenProject }) {
+export function MobileHome({ onOpenProject, onUpload, analyzing = false, analysisError = '', projectTitle = '罗莉的住宅方案', projectNote = '空间已确认 · 还有5项细节待补全', planImage = '/assets/demo-floor-plan.png', pointCount = 5 }) {
+  const pickFile = (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) onUpload?.(file)
+  }
+
   return (
     <section className="mobile-page home-overview" aria-label="首页">
       <div className="home-intro">
@@ -10,15 +16,32 @@ export function MobileHome({ onOpenProject }) {
         <p>把待确认的细节处理完，就可以生成完整报告。</p>
       </div>
 
+      <div className="upload-card">
+        <h3>上传我的户型图</h3>
+        <p>AI 会识别户型格局，找出需要调整的位置并生成布置方案。</p>
+        <label className={`upload-button ${analyzing ? 'is-busy' : ''}`}>
+          <input
+            accept="image/jpeg,image/png,image/webp"
+            aria-label="上传户型图"
+            disabled={analyzing}
+            onChange={pickFile}
+            type="file"
+          />
+          <Icon name={analyzing ? 'clock' : 'plus'} size={18} strokeWidth={1.9} />
+          {analyzing ? 'AI 正在分析户型，请稍候…' : '上传户型图，开始 AI 分析'}
+        </label>
+        {analysisError && <span className="upload-error" role="alert">{analysisError}</span>}
+      </div>
+
       <button className="current-project" type="button" onClick={onOpenProject}>
         <div className="project-thumbnail">
-          <img src="/assets/demo-floor-plan.png" alt="罗莉住宅户型缩略图" />
-          <span>5个点位</span>
+          <img src={planImage} alt="住宅户型缩略图" />
+          <span>{pointCount}个点位</span>
         </div>
         <div className="project-summary">
           <span>当前方案</span>
-          <h3>罗莉的住宅方案</h3>
-          <p>空间已确认 · 还有5项细节待补全</p>
+          <h3>{projectTitle}</h3>
+          <p>{projectNote}</p>
           <strong>继续查看方案 <Icon name="chevronRight" size={18} /></strong>
         </div>
       </button>
@@ -52,8 +75,8 @@ export function MobileConsult({ messages, onSend }) {
   return (
     <section className="mobile-page consult-page" aria-label="咨询">
       <div className="teacher-row">
-        <div className="teacher-avatar">宸</div>
-        <div><h2>一宸老师</h2><p>方案咨询中</p></div>
+        <div className="teacher-avatar">AI</div>
+        <div><h2>AI 布局助手</h2><p>方案咨询中</p></div>
       </div>
       <div className="message-list" ref={listRef}>
         {messages.map((message) => (
@@ -110,7 +133,7 @@ export function MobileShop({ cartIds, onToggle, onCheckout }) {
     <section className="mobile-page shop-page" aria-label="商城">
       <div className="home-intro">
         <h2>为方案挑选合适的物件</h2>
-        <p>按老师方案中的点位建议，挑选对应的布置好物。</p>
+        <p>按方案中的点位建议，挑选对应的布置好物。</p>
       </div>
 
       <div className="shop-categories" role="tablist" aria-label="商品分类">
@@ -158,7 +181,7 @@ export function MobileShop({ cartIds, onToggle, onCheckout }) {
       {cartIds.length > 0 && (
         <button className="shop-cart-bar" type="button" onClick={onCheckout}>
           <span>已选 {cartIds.length} 件 · 合计 ¥{cartTotal}</span>
-          <strong>发给老师确认 <Icon name="chevronRight" size={16} /></strong>
+          <strong>发给 AI 助手确认 <Icon name="chevronRight" size={16} /></strong>
         </button>
       )}
     </section>

@@ -26,6 +26,9 @@ export default function App() {
     { id: 1, from: 'teacher', text: '罗莉家的5个重点位置已经整理好了，你可以点开方案逐项确认。' },
   ])
   const [cartIds, setCartIds] = useState([])
+  const [analysis, setAnalysis] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysisError, setAnalysisError] = useState('')
   const nextMessageId = useRef(2)
   const menuRef = useRef(null)
   const menuButtonRef = useRef(null)
@@ -54,10 +57,62 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [menuFeedback])
 
+  const activeRecommendations = analysis?.points || recommendations
+  const planImage = analysis?.image || '/assets/demo-floor-plan.png'
+  const projectTitle = analysis ? '我的住宅方案' : '罗莉的住宅方案'
+
+  const activeChecklist = useMemo(() => {
+    if (!analysis) return checklistGroups
+    const groups = new Map()
+    for (const point of analysis.points) {
+      const key = point.schedule || '待安排'
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key).push(`${point.sector}${point.place} · ${point.short}`)
+    }
+    return [...groups].map(([title, items]) => ({ title, items }))
+  }, [analysis])
+
   const selected = useMemo(
-    () => recommendations.find((item) => item.id === selectedId) || recommendations[0],
-    [selectedId],
+    () => activeRecommendations.find((item) => item.id === selectedId) || activeRecommendations[0],
+    [selectedId, activeRecommendations],
   )
+
+  const analyzeFloorPlanImage = async (file) => {
+    setAnalysisError('')
+    setAnalyzing(true)
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = () => reject(new Error('读取图片失败，请重新选择'))
+        reader.readAsDataURL(file)
+      })
+      const res = await fetch('/api/analyze-floorplan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl.split(',')[1] || '', mediaType: file.type }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'AI 分析失败，请稍后重试')
+      setAnalysis({ image: dataUrl, summary: data.summary, points: data.points })
+      setConfirmedIds([])
+      setSelectedId(data.points[0]?.id || '01')
+      setSheetExpanded(false)
+      setMessages((current) => [...current, {
+        id: nextMessageId.current++,
+        from: 'teacher',
+        text: `你的户型图我已经分析好了：${data.summary}共整理出 ${data.points.length} 个重点点位，可以打开方案逐项确认。`,
+      }])
+      setActiveNav('projects')
+      setActiveTab('plan')
+      return true
+    } catch (error) {
+      setAnalysisError(error.message)
+      return false
+    } finally {
+      setAnalyzing(false)
+    }
+  }
 
   const selectPoint = (id) => {
     setSelectedId(id)
@@ -66,8 +121,8 @@ export default function App() {
 
   const confirmAndSelectNextPoint = () => {
     setConfirmedIds((current) => current.includes(selectedId) ? current : [...current, selectedId])
-    const index = recommendations.findIndex((item) => item.id === selectedId)
-    const next = recommendations[(index + 1) % recommendations.length]
+    const index = activeRecommendations.findIndex((item) => item.id === selectedId)
+    const next = activeRecommendations[(index + 1) % activeRecommendations.length]
     setSelectedId(next.id)
     setSheetExpanded(false)
   }
@@ -81,7 +136,7 @@ export default function App() {
   }
 
   const submitCartToConsult = () => {
-    sendConsultMessage(`我在商城选好了 ${cartIds.length} 件布置物件，麻烦老师帮我确认是否合适。`)
+    sendConsultMessage(`我在商城选好了 ${cartIds.length} 件布置物件，请帮我确认是否合适。`)
     setActiveNav('consult')
   }
 
@@ -107,11 +162,12 @@ export default function App() {
     tabs[next === 'plan' ? 0 : 1]?.focus()
   }
 
+  const totalPoints = activeRecommendations.length
   const mobileHeader = {
     home: ['宅序', '让每个建议落到准确位置'],
-    projects: ['罗莉的住宅方案', confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/5点位已复核` : '空间已确认 · 5个建议点位'],
+    projects: [projectTitle, confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/${totalPoints}点位已复核` : `空间已确认 · ${totalPoints}个建议点位`],
     shop: ['商城', '方案配套好物'],
-    consult: ['咨询', '一宸老师 · 方案沟通'],
+    consult: ['咨询', 'AI 布局助手 · 方案沟通'],
     profile: ['我的', '账户与方案设置'],
   }[activeNav]
 
@@ -179,7 +235,18 @@ export default function App() {
         </div>}
 
         <div className={`content-region ${activeNav === 'projects' ? '' : 'is-simple'}`}>
-          {activeNav === 'home' && <MobileHome onOpenProject={() => setActiveNav('projects')} />}
+          {activeNav === 'home' && (
+            <MobileHome
+              onOpenProject={() => setActiveNav('projects')}
+              onUpload={analyzeFloorPlanImage}
+              analyzing={analyzing}
+              analysisError={analysisError}
+              projectTitle={projectTitle}
+              projectNote={analysis ? `AI 已分析 · ${totalPoints}个建议点位` : '空间已确认 · 还有5项细节待补全'}
+              planImage={planImage}
+              pointCount={totalPoints}
+            />
+          )}
           {activeNav === 'shop' && (
             <MobileShop cartIds={cartIds} onToggle={toggleCartItem} onCheckout={submitCartToConsult} />
           )}
@@ -195,11 +262,12 @@ export default function App() {
           {activeNav === 'projects' && (activeTab === 'plan' ? (
             <>
               <PlanCanvas
-                recommendations={recommendations}
+                recommendations={activeRecommendations}
                 selectedId={selectedId}
                 onSelect={selectPoint}
                 gridAngle={gridAngle}
                 confirmedIds={confirmedIds}
+                planImage={planImage}
               />
               {mobileCalibrating && (
                 <label className="mobile-calibration-control">
@@ -222,7 +290,7 @@ export default function App() {
               />
             </>
           ) : (
-            <ConstructionChecklist groups={checklistGroups} />
+            <ConstructionChecklist groups={activeChecklist} />
           ))}
         </div>
 
@@ -237,11 +305,11 @@ export default function App() {
 
       <DesktopWorkspace
         activeTab={activeTab}
-        checklistGroups={checklistGroups}
+        checklistGroups={activeChecklist}
         onNext={confirmAndSelectNextPoint}
         onSelectPoint={selectPoint}
         onTabChange={switchViewTab}
-        recommendations={recommendations}
+        recommendations={activeRecommendations}
         selected={selected}
         selectedId={selectedId}
         gridAngle={gridAngle}
@@ -249,6 +317,17 @@ export default function App() {
         confirmedIds={confirmedIds}
         user={user}
         onLogout={logout}
+        cartIds={cartIds}
+        onToggleCartItem={toggleCartItem}
+        onCheckout={submitCartToConsult}
+        messages={messages}
+        onSendMessage={sendConsultMessage}
+        planImage={planImage}
+        projectTitle={projectTitle}
+        onUploadFloorPlan={analyzeFloorPlanImage}
+        analyzing={analyzing}
+        analysisError={analysisError}
+        hasAnalysis={Boolean(analysis)}
       />
     </div>
   )

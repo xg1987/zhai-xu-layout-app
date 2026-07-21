@@ -3,9 +3,11 @@ import { Icon } from './Icons.jsx'
 import { useDismiss } from '../useDismiss.js'
 
 const items = [
-  { id: 'projects', label: '项目', icon: 'home' },
-  { id: 'review', label: '方案审核', icon: 'review' },
-  { id: 'rules', label: '规则库', icon: 'book' },
+  { id: 'home', label: '首页', icon: 'home' },
+  { id: 'review', label: '项目', icon: 'project' },
+  { id: 'shop', label: '商城', icon: 'shop' },
+  { id: 'consult', label: '咨询', icon: 'chat' },
+  { id: 'profile', label: '我的', icon: 'user' },
 ]
 
 export function DesktopSidebar({ active, onChange, user, onLogout }) {
@@ -17,7 +19,7 @@ export function DesktopSidebar({ active, onChange, user, onLogout }) {
   return (
     <aside className="web-sidebar">
       <div className="web-brand">宅序</div>
-      <nav aria-label="老师端导航">
+      <nav aria-label="主导航">
         {items.map((item) => (
           <button
             className={active === item.id ? 'is-active' : ''}
@@ -34,7 +36,7 @@ export function DesktopSidebar({ active, onChange, user, onLogout }) {
         {accountOpen && (
           <div className="account-popover">
             <strong>{user.name}</strong>
-            <span>方案审核账号</span>
+            <span>个人账号</span>
             <button type="button" onClick={onLogout}>退出登录</button>
           </div>
         )}

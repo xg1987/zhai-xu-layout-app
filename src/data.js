@@ -41,7 +41,7 @@ export const recommendations = [
     sector: '东北',
     place: '楼梯安全区域',
     short: '土局',
-    advice: '根据现场空间完成土局处理，材料和结构由老师进一步确认。',
+    advice: '根据现场空间完成土局处理，材料和结构由 AI 助手进一步确认。',
     schedule: '装修施工阶段完成',
     warning: '待确认：土局材料与具体做法',
     status: '待定土局',

@@ -26,7 +26,7 @@ function Compass() {
   )
 }
 
-export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'mobile', showFloorControl = false, gridAngle = 0, confirmedIds = [] }) {
+export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'mobile', showFloorControl = false, gridAngle = 0, confirmedIds = [], planImage = '/assets/demo-floor-plan.png' }) {
   const [scale, setScale] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [floor, setFloor] = useState('1F')
@@ -160,7 +160,7 @@ export function PlanCanvas({ recommendations, selectedId, onSelect, variant = 'm
           className="plan-transform"
           style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${scale})` }}
         >
-          <img src="/assets/demo-floor-plan.png" alt="罗莉住宅户型平面图" draggable="false" />
+          <img src={planImage} alt="住宅户型平面图" draggable="false" />
           <DirectionGrid angle={gridAngle} />
           <span className="artboard-label artboard-north">北</span>
           <span className="artboard-label artboard-west">西</span>
