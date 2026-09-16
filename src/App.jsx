@@ -1,255 +1,69 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { AuthPage } from './components/AuthPage.jsx'
-import { BottomNav } from './components/BottomNav.jsx'
-import { ConstructionChecklist } from './components/ConstructionChecklist.jsx'
-import { DesktopWorkspace } from './components/DesktopWorkspace.jsx'
-import { Icon } from './components/Icons.jsx'
-import { MobileConsult, MobileHome, MobileProfile, MobileShop } from './components/MobilePages.jsx'
-import { PlanCanvas } from './components/PlanCanvas.jsx'
-import { RecommendationSheet } from './components/RecommendationSheet.jsx'
-import { checklistGroups, recommendations } from './data.js'
-import { useDismiss } from './useDismiss.js'
+import { useRef, useState, useEffect } from 'react'
+import { APP_VERSION } from './version.js'
+import { ProductPages } from './components/ProductPages.jsx'
+import { createPlan, updatePlan, readDisplayName, writeDisplayName } from './storage/localWorkspace.js'
 
-export default function App() {
-  const [user, setUser] = useState(null)
-  const [authChecked, setAuthChecked] = useState(false)
-  const [activeTab, setActiveTab] = useState('plan')
-  const [selectedId, setSelectedId] = useState('02')
-  const [sheetExpanded, setSheetExpanded] = useState(false)
-  const [activeNav, setActiveNav] = useState('projects')
-  const [confirmedIds, setConfirmedIds] = useState([])
-  const [gridAngle, setGridAngle] = useState(0)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [mobileCalibrating, setMobileCalibrating] = useState(false)
-  const [menuFeedback, setMenuFeedback] = useState('')
-  const [messages, setMessages] = useState([
-    { id: 1, from: 'teacher', text: '罗莉家的5个重点位置已经整理好了，你可以点开方案逐项确认。' },
-  ])
-  const [cartIds, setCartIds] = useState([])
-  const nextMessageId = useRef(2)
-  const menuRef = useRef(null)
-  const menuButtonRef = useRef(null)
+const palaces = [ ['北','坎',[0,1,0]], ['东北','艮',[1,0,0]], ['东','震',[0,0,1]], ['东南','巽',[1,1,0]], ['南','离',[1,0,1]], ['西南','坤',[0,0,0]], ['西','兑',[0,1,1]], ['西北','乾',[1,1,1]] ]
+const branches = '子丑寅卯辰巳午未申酉戌亥'.split('')
+const zodiacAnimals = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪']
+function Icon({name,size=22}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{name==='compass'?<><circle cx="12" cy="12" r="9"/><path d="m15.7 8.3-2.2 5.2-5.2 2.2 2.2-5.2zM12 1v3M12 20v3"/></>:name==='layers'?<><path d="m3 8 9-5 9 5-9 5zM3 12l9 5 9-5M3 16l9 5 9-5"/></>:name==='outline'?<><path strokeDasharray="3 3" d="M4 4h16v16H4z"/><path d="M2 2h4v4H2zM18 18h4v4h-4z"/></>:name==='upload'?<><path d="M12 16V3m-4 4 4-4 4 4M4 15v6h16v-6"/></>:name==='arrow'?<path d="m14 5-7 7 7 7"/>:name==='trash'?<><path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></>:name==='close'?<path d="m6 6 12 12M6 18 18 6"/>:<><path d="m3 11 9-8 9 8M5 10v11h14V10M10 21v-7h4v7"/></>}</svg>}
+function Gua({bits,x=0,y=0,size=25}){return <g transform={`translate(${x},${y})`} fill="currentColor">{bits.map((b,i)=>b?<rect key={i} x={-size/2} y={i*6} width={size} height="3"/>:<g key={i}><rect x={-size/2} y={i*6} width={size*.4} height="3"/><rect x={size*.1} y={i*6} width={size*.4} height="3"/></g>)}</g>}
+// Display south at the top; persisted bearings and image-local nodes stay unchanged.
+const DISPLAY_OFFSET=180
+const displayRadians=a=>(a+DISPLAY_OFFSET)*Math.PI/180
+const point=(a,r)=>[400+Math.sin(displayRadians(a))*r,400-Math.cos(displayRadians(a))*r]
+function Compass({angle,layers,photo,points,setPoints,editing,selected,select,remember,zoom}) {
+ const ref=useRef(),drag=useRef(null)
+ function local(e){const p=ref.current.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(ref.current.getScreenCTM().inverse());const a=-displayRadians(angle);return [Math.round(400+(q.x-400)*Math.cos(a)-(q.y-400)*Math.sin(a)),Math.round(400+(q.x-400)*Math.sin(a)+(q.y-400)*Math.cos(a))]}
+ return <svg ref={ref} className={'compass '+(editing?'editing':'')} viewBox="0 0 800 800" aria-label="完整360度罗盘" style={{width:`${zoom}%`}} onPointerMove={e=>{if(drag.current!==null){const p=local(e);setPoints(ps=>ps.map((v,i)=>i===drag.current?p:v))}}} onPointerUp={()=>drag.current=null} onPointerCancel={()=>drag.current=null}>
+ <defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="#eef0f2" strokeWidth=".5"/></pattern></defs>
+ {layers.compass&&<g className="ring"><circle cx="400" cy="400" r="365"/><circle cx="400" cy="400" r="352"/>{Array.from({length:360},(_,a)=>{const [x,y]=point(a,364),[xx,yy]=point(a,a%10===0?354:a%5===0?358:361);return <line key={a} x1={x} y1={y} x2={xx} y2={yy} strokeOpacity={a%5===0?.85:.42}/>})}{Array.from({length:36},(_,i)=>{const [x,y]=point(i*10,337);return <text key={i} className="degree" x={x} y={y+3}>{i===0?'0 / 360':i*10}</text>})}{['北','东','南','西'].map((n,i)=>{const [x,y]=point(i*90,378);return <g key={n}><text className={'cardinal '+(i===0?'north':'')} x={x} y={y+7}>{n}</text>{i===0&&<path d="M397 761l3 7 3-7" className="north-mark"/>}</g>})}</g>}
+ {layers.branches&&<g className="branches"><circle cx="400" cy="400" r="267"/>{branches.map((n,i)=>{const [x,y]=point(i*30,294),a=displayRadians(i*30),ix=x+Math.cos(a)*39,iy=y+Math.sin(a)*39;return <g key={n} className="branch-pair" data-branch={n} data-animal={zodiacAnimals[i]} aria-label={`${n}${zodiacAnimals[i]}`}><text x={x} y={y} dominantBaseline="central">{n}</text><svg className="zodiac-portrait" x={ix-22} y={iy-22} width="44" height="44" viewBox={`${(i%4)*362} ${Math.floor(i/4)*362} 362 362`} overflow="hidden" role="img" aria-label={zodiacAnimals[i]}><title>{zodiacAnimals[i]}</title><image href="/assets/zodiac-portraits.png" width="1448" height="1086"/></svg></g>})}</g>}
+ {layers.palaces&&<g className="palaces">{palaces.map((_,i)=>{const [x,y]=point(i*45+22.5,190),[xx,yy]=point(i*45+22.5,267);return <line key={i} x1={x} y1={y} x2={xx} y2={yy}/>})}{palaces.map(([d,n,b],i)=>{const [x,y]=point(i*45,240);return <g key={n} className={'palace '+(selected===i?'selected':'')} tabIndex="0" role="button" aria-label={`${d}${n}宫`} onClick={()=>!editing&&select(i)} onKeyDown={e=>{if(e.key==='Enter')select(i)}}><circle cx={x} cy={y} r="29" className="palace-hit"/><text x={x} y={y-4}>{n}</text><Gua bits={b} x={x} y={y+6} size={21}/></g>})}</g>}
+ {photo&&<g transform={`rotate(${angle+DISPLAY_OFFSET} 400 400)`}>{layers.plan&&<image className="user-plan" href={photo} x="245" y="245" width="310" height="310" preserveAspectRatio="xMidYMid meet"/>}{editing&&<rect x="195" y="195" width="410" height="410" fill="transparent" onPointerDown={e=>{if(e.target!==e.currentTarget)return;remember();setPoints(ps=>[...ps,local(e)])}}/>}{(layers.outline||editing)&&points.length>0&&<polyline className="outline" points={[...points,...(points.length>2?[points[0]]:[])].map(p=>p.join(',')).join(' ')}/>} {editing&&points.map(([x,y],i)=><circle key={i} className="node" cx={x} cy={y} r="7" onPointerDown={e=>{e.stopPropagation();remember();drag.current=i;ref.current.setPointerCapture(e.pointerId)}}/>)} </g>}
+ </svg>
+}
+const defaultLayers={compass:true,branches:true,palaces:true,plan:true,outline:true}
+export default function App(){
+ const [photo,setPhoto]=useState(null),[filename,setFilename]=useState(''),[step,setStep]=useState(0),[panel,setPanel]=useState(null),[angle,setAngle]=useState(0),[points,setPoints]=useState([]),[history,setHistory]=useState([]),[layers,setLayers]=useState(defaultLayers),[selected,setSelected]=useState(null),[space,setSpace]=useState(true),[zoom,setZoom]=useState(100),[message,setMessage]=useState(''),[outdoor,setOutdoor]=useState(false),[reduced,setReduced]=useState(false)
+ const [page,setPage]=useState('workspace'),[displayName,setDisplayName]=useState(readDisplayName),[activeId,setActiveId]=useState(null),[uploadBusy,setUploadBusy]=useState(false)
+ const scene=useRef(),file=useRef(),raf=useRef(),pointer=useRef({x:0,y:0});const precise=panel==='calibrate'||panel==='outline'||!space||reduced
+ useEffect(()=>{const m=matchMedia('(prefers-reduced-motion: reduce)');const fn=()=>setReduced(m.matches);fn();m.addEventListener('change',fn);return()=>m.removeEventListener('change',fn)},[])
+ useEffect(()=>()=>{if(photo)URL.revokeObjectURL(photo)},[photo]);useEffect(()=>{if(!message)return;const t=setTimeout(()=>setMessage(''),3500);return()=>clearTimeout(t)},[message]);useEffect(()=>()=>cancelAnimationFrame(raf.current),[])
+ useEffect(()=>{if(!activeId||!photo)return;updatePlan(activeId,{angle,points,layers,step}).catch(()=>setMessage('当前修改未保存到本机，请检查存储空间'))},[activeId,photo,angle,points,layers,step])
+ function openRecord(record){setPhoto(URL.createObjectURL(record.blob));setFilename(record.filename);setAngle(record.angle||0);setPoints(record.points||[]);setHistory([]);setLayers(record.layers||defaultLayers);setStep(record.step||1);setActiveId(record.id);setSelected(null);setPanel('calibrate');setZoom(100);setPage('workspace');setOutdoor(false);leave()}
+ function saveDisplayName(name){writeDisplayName(name);setDisplayName(name)}
+ function move(e){if(e.pointerType==='touch'||precise)return;const r=e.currentTarget.getBoundingClientRect();pointer.current={x:(e.clientX-r.left)/r.width-.5,y:(e.clientY-r.top)/r.height-.5};cancelAnimationFrame(raf.current);raf.current=requestAnimationFrame(()=>{scene.current?.style.setProperty('--px',pointer.current.x);scene.current?.style.setProperty('--py',pointer.current.y)})}
+ function leave(){cancelAnimationFrame(raf.current);scene.current?.style.setProperty('--px',0);scene.current?.style.setProperty('--py',0)}
+ function remember(){setHistory(h=>[...h,points.map(p=>[...p])])}
+ async function upload(f){if(!f||uploadBusy)return;if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>20*1024*1024){setMessage('请选择小于 20 MB 的 PNG、JPG 或 WebP 图片');return}setUploadBusy(true);let record=null;try{record=await createPlan(f)}catch{setMessage('图片已打开，但无法保存本机记录，请检查浏览器存储空间')}setPhoto(URL.createObjectURL(f));setFilename(f.name);setPoints([]);setHistory([]);setSelected(null);setAngle(0);setStep(1);setActiveId(record?.id||null);setPanel('calibrate');setZoom(100);setPage('workspace');setOutdoor(false);setUploadBusy(false);leave()}
 
-  useDismiss([menuRef, menuButtonRef], mobileMenuOpen, () => setMobileMenuOpen(false))
+ function removePhoto(){setActiveId(null);setPhoto(null);setFilename('');setPoints([]);setHistory([]);setSelected(null);setAngle(0);setStep(0);setPanel(null);setZoom(100);setMessage(activeId?'已移除工作台图片，历史记录仍保留':'');if(file.current)file.current.value='';leave()}
+ function go(i){if(i>0&&!photo){file.current.click();return}setStep(i);setSelected(null);setPanel(i===0?'upload':i===1?'calibrate':i===2?'outline':'analysis');leave()}
+ function select(i){setSelected(i);setPanel('palace')}
+ const normalize=v=>setAngle(((Number(v)||0)%360+360)%360)
+ const title={upload:'上传户型',calibrate:'方位校准',outline:'轮廓确认',layers:'图层',analysis:'分析',palace:selected!==null?`${palaces[selected][0]} · ${palaces[selected][1]}宫`:'宫位'}[panel]
+ return <div className="app"><header><div className="brand"><Icon name="compass" size={26}/><h1>家居风水系统</h1></div><nav className="mode"><button className={!outdoor?'active':''} onClick={()=>{setOutdoor(false);setPage('workspace')}}>室内</button><button className={outdoor?'active':''} onClick={()=>{setOutdoor(true);setPage('workspace')}}>室外</button></nav><nav className="utility-nav" aria-label="个人导航"><button className={page==='history'?'active':''} onClick={()=>setPage('history')}>历史记录</button><button className={['account','profile','password','about'].includes(page)?'active':''} onClick={()=>setPage('account')} aria-label="账户设置"><span className="account-dot">{displayName?displayName.slice(0,1):'人'}</span><span className="header-name">{displayName||'账户'}</span></button><button className="header-version" onClick={()=>setPage('about')}>v{APP_VERSION}</button></nav></header>
+ <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>{upload(e.target.files[0]);e.target.value=''}}/>
+ {page!=='workspace'?<ProductPages {...{page,setPage,displayName}} onNameSave={saveDisplayName} onOpen={openRecord} onDeleteActive={id=>{if(id===activeId)setActiveId(null)}} notify={setMessage}/>:outdoor?<div className="outdoor"><Icon name="home" size={40}/><h2>室外功能尚未开放</h2><button className="primary" onClick={()=>setOutdoor(false)}>返回室内</button></div>:<>
+ <main ref={scene} className={`scene ${precise?'precise':''} ${panel?'panel-open':''} ${photo?'has-photo':''}`} onPointerMove={move} onPointerLeave={leave} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();upload(e.dataTransfer.files[0])}}>
 
-  useEffect(() => {
-    fetch('/api/me')
-      .then((res) => res.json())
-      .then((data) => setUser(data.user))
-      .catch(() => {})
-      .finally(() => setAuthChecked(true))
-  }, [])
+ <div className="readout"><span className="red-dash"/>北向 <b>{angle.toFixed(1)}<i>°</i></b></div>
+ <div className="stage-position"><div className="stage"><div className="plane-shadow"/><div className="compass-plane"><div className="compass-scroll"><Compass {...{angle,layers,photo,points,setPoints,selected,select,remember,zoom}} editing={panel==='outline'}/></div></div>
+ {!photo&&<div className="upload-float"><button className="upload-entry" disabled={uploadBusy} onClick={()=>file.current.click()} aria-label="上传户型图"><span className="upload-orb"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path className="upload-corners" d="M13 7H8a1 1 0 0 0-1 1v5M27 7h5a1 1 0 0 1 1 1v5M7 27v5a1 1 0 0 0 1 1h5M33 27v5a1 1 0 0 1-1 1h-5"/><path className="upload-sheet" d="M13 20v8h14v-8"/><path className="upload-arrow" d="M20 23V11m-5 5 5-5 5 5"/></svg></span><span className="upload-label">{uploadBusy?'正在保存…':'上传户型图'}</span><span className="upload-hint">或将图片拖入此处</span></button></div>}
+ {selected!==null&&panel==='palace'&&<div className="focus-label"><svg viewBox="-15 -2 30 23"><Gua bits={palaces[selected][2]}/></svg><span>{palaces[selected][0]} · {palaces[selected][1]}宫</span><small>{selected*45}°</small></div>}
+ {photo&&<div className="image-actions" aria-label="当前图片操作"><button onClick={()=>file.current.click()}><Icon name="upload" size={14}/><span>更换图片</span></button><span className="action-divider"/><button onClick={removePhoto}><Icon name="trash" size={14}/><span>删除图片</span></button></div>}
+ </div></div>
+ <div className="tool-rail"><button className={panel==='layers'?'active':''} aria-label="打开图层设置" onClick={()=>setPanel(p=>p==='layers'?null:'layers')}><Icon name="layers"/></button><span/>{photo&&<><button className="workflow-tool" aria-label="打开方位校准" onClick={()=>go(1)}>校准</button><button className="workflow-tool" aria-label="打开轮廓编辑" onClick={()=>go(2)}>轮廓</button><button className="workflow-tool" aria-label="打开分析面板" onClick={()=>go(3)}>分析</button></>}<button className={precise?'active':''} aria-label={space?'锁定俯视':'空间视图'} onClick={()=>{setSpace(v=>!v);leave()}}><Icon name="compass"/></button><button aria-label="放大罗盘" onClick={()=>setZoom(z=>Math.min(200,z+25))}>＋</button><button className="zoom-value" aria-label="重置缩放" onClick={()=>setZoom(100)}>{zoom}%</button><button aria-label="缩小罗盘" onClick={()=>setZoom(z=>Math.max(75,z-25))}>−</button></div>
 
-  const logout = async () => {
-    try {
-      await fetch('/api/logout', { method: 'POST' })
-    } finally {
-      setUser(null)
-    }
-  }
-
-  useEffect(() => {
-    if (!menuFeedback) return
-    const timer = setTimeout(() => setMenuFeedback(''), 2400)
-    return () => clearTimeout(timer)
-  }, [menuFeedback])
-
-  const selected = useMemo(
-    () => recommendations.find((item) => item.id === selectedId) || recommendations[0],
-    [selectedId],
-  )
-
-  const selectPoint = (id) => {
-    setSelectedId(id)
-    setSheetExpanded(false)
-  }
-
-  const confirmAndSelectNextPoint = () => {
-    setConfirmedIds((current) => current.includes(selectedId) ? current : [...current, selectedId])
-    const index = recommendations.findIndex((item) => item.id === selectedId)
-    const next = recommendations[(index + 1) % recommendations.length]
-    setSelectedId(next.id)
-    setSheetExpanded(false)
-  }
-
-  const sendConsultMessage = (text) => {
-    setMessages((current) => [...current, { id: nextMessageId.current++, from: 'user', text }])
-  }
-
-  const toggleCartItem = (id) => {
-    setCartIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
-  }
-
-  const submitCartToConsult = () => {
-    sendConsultMessage(`我在商城选好了 ${cartIds.length} 件布置物件，麻烦老师帮我确认是否合适。`)
-    setActiveNav('consult')
-  }
-
-  const shareCurrentProject = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      setMenuFeedback('方案链接已复制')
-    } catch {
-      setMenuFeedback('复制失败，请手动复制浏览器地址')
-    }
-  }
-
-  const switchViewTab = (tab) => {
-    setActiveTab(tab)
-    if (tab === 'checklist') setSheetExpanded(false)
-  }
-
-  const onTabListKeyDown = (event) => {
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-    const next = activeTab === 'plan' ? 'checklist' : 'plan'
-    switchViewTab(next)
-    const tabs = event.currentTarget.querySelectorAll('[role="tab"]')
-    tabs[next === 'plan' ? 0 : 1]?.focus()
-  }
-
-  const mobileHeader = {
-    home: ['宅序', '让每个建议落到准确位置'],
-    projects: ['罗莉的住宅方案', confirmedIds.length ? `空间已确认 · ${confirmedIds.length}/5点位已复核` : '空间已确认 · 5个建议点位'],
-    shop: ['商城', '方案配套好物'],
-    consult: ['咨询', '一宸老师 · 方案沟通'],
-    profile: ['我的', '账户与方案设置'],
-  }[activeNav]
-
-  if (!authChecked) return null
-  if (!user) return <AuthPage onAuthed={setUser} />
-
-  return (
-    <div className="product-root">
-      <main className="app-shell mobile-shell">
-        <header className="app-header">
-          {activeNav === 'projects' ? (
-            <button className="header-icon" type="button" aria-label="返回首页" onClick={() => setActiveNav('home')}>
-              <Icon name="back" size={27} strokeWidth={1.7} />
-            </button>
-          ) : <span className="header-spacer" />}
-          <div>
-            <h1>{mobileHeader[0]}</h1>
-            <p>{mobileHeader[1]}</p>
-          </div>
-          <button ref={menuButtonRef} className="header-icon" type="button" aria-label="更多操作" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((value) => !value)}>
-            <Icon name="more" size={27} />
-          </button>
-        </header>
-
-        {mobileMenuOpen && (
-          <div className="mobile-more-menu" ref={menuRef}>
-            <button type="button" onClick={shareCurrentProject}>分享当前方案</button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveNav('projects')
-                setActiveTab('plan')
-                setMobileCalibrating((value) => !value)
-                setMobileMenuOpen(false)
-              }}
-            >
-              {mobileCalibrating ? '结束方位校准' : '重新校准'}
-            </button>
-            <button type="button" onClick={() => { setActiveNav('profile'); setMobileMenuOpen(false) }}>项目设置</button>
-            {menuFeedback && <span>{menuFeedback}</span>}
-          </div>
-        )}
-
-        {activeNav === 'projects' && <div className="view-tabs" role="tablist" aria-label="方案视图" onKeyDown={onTabListKeyDown}>
-          <button
-            aria-selected={activeTab === 'plan'}
-            className={activeTab === 'plan' ? 'is-active' : ''}
-            onClick={() => switchViewTab('plan')}
-            role="tab"
-            tabIndex={activeTab === 'plan' ? 0 : -1}
-            type="button"
-          >
-            平面图
-          </button>
-          <button
-            aria-selected={activeTab === 'checklist'}
-            className={activeTab === 'checklist' ? 'is-active' : ''}
-            onClick={() => switchViewTab('checklist')}
-            role="tab"
-            tabIndex={activeTab === 'checklist' ? 0 : -1}
-            type="button"
-          >
-            施工清单
-          </button>
-        </div>}
-
-        <div className={`content-region ${activeNav === 'projects' ? '' : 'is-simple'}`}>
-          {activeNav === 'home' && <MobileHome onOpenProject={() => setActiveNav('projects')} />}
-          {activeNav === 'shop' && (
-            <MobileShop cartIds={cartIds} onToggle={toggleCartItem} onCheckout={submitCartToConsult} />
-          )}
-          {activeNav === 'consult' && <MobileConsult messages={messages} onSend={sendConsultMessage} />}
-          {activeNav === 'profile' && (
-            <MobileProfile
-              user={user}
-              cartCount={cartIds.length}
-              confirmedCount={confirmedIds.length}
-              onLogout={logout}
-            />
-          )}
-          {activeNav === 'projects' && (activeTab === 'plan' ? (
-            <>
-              <PlanCanvas
-                recommendations={recommendations}
-                selectedId={selectedId}
-                onSelect={selectPoint}
-                gridAngle={gridAngle}
-                confirmedIds={confirmedIds}
-              />
-              {mobileCalibrating && (
-                <label className="mobile-calibration-control">
-                  <span>校准正北：{gridAngle}°</span>
-                  <input
-                    aria-label="手机方位线角度"
-                    max="30"
-                    min="-30"
-                    onInput={(event) => setGridAngle(Number(event.currentTarget.value))}
-                    type="range"
-                    value={gridAngle}
-                  />
-                </label>
-              )}
-              <RecommendationSheet
-                item={selected}
-                expanded={sheetExpanded}
-                onExpandedChange={setSheetExpanded}
-                onNext={confirmAndSelectNextPoint}
-              />
-            </>
-          ) : (
-            <ConstructionChecklist groups={checklistGroups} />
-          ))}
-        </div>
-
-        <BottomNav
-          active={activeNav}
-          onChange={(next) => {
-            setActiveNav(next)
-            setMobileMenuOpen(false)
-          }}
-        />
-      </main>
-
-      <DesktopWorkspace
-        activeTab={activeTab}
-        checklistGroups={checklistGroups}
-        onNext={confirmAndSelectNextPoint}
-        onSelectPoint={selectPoint}
-        onTabChange={switchViewTab}
-        recommendations={recommendations}
-        selected={selected}
-        selectedId={selectedId}
-        gridAngle={gridAngle}
-        onGridAngleChange={setGridAngle}
-        confirmedIds={confirmedIds}
-        user={user}
-        onLogout={logout}
-      />
-    </div>
-  )
+ {panel&&<section className="control-panel" key={panel} aria-label={title}><div className="panel-heading"><h2>{title}</h2><button aria-label="关闭面板" onClick={()=>{setPanel(null);setSelected(null)}}><Icon name="close" size={18}/></button></div>
+ {panel==='upload'&&<><p>选择带方位标记的完整户型图。</p><button className="primary" onClick={()=>file.current.click()}>{photo?'更换户型图片':'选择图片'}</button><small>PNG / JPG / WebP · 最大 20 MB</small></>}
+ {panel==='calibrate'&&<><p>旋转图片，让图中北向对齐罗盘下方的北向标记。</p><div className="angle-field"><input type="number" step="0.1" aria-label="北向角度" value={angle} onChange={e=>normalize(e.target.value)}/><span>°</span></div><input className="slider" type="range" min="0" max="359.9" step=".1" value={angle} aria-label="旋转户型" onChange={e=>normalize(e.target.value)}/><div className="range-labels"><span>0°</span><span>180°</span><span>360°</span></div><div className="paired"><button onClick={()=>normalize(angle-90)}>左转 90°</button><button onClick={()=>normalize(angle+90)}>右转 90°</button></div><button className="text-button" onClick={()=>normalize(0)}>恢复 0°</button><button className="primary" onClick={()=>go(2)}>确认方位 <span>→</span></button></>}
+ {panel==='outline'&&<><p>沿图片外边界逐点点击，拖动节点可微调。</p><div className="node-count"><b>{points.length}</b><span>个边界节点</span></div><div className="paired"><button disabled={!history.length} onClick={()=>{setPoints(history.at(-1));setHistory(h=>h.slice(0,-1))}}>撤销</button><button disabled={!points.length} onClick={()=>{remember();setPoints([])}}>清空轮廓</button></div><small>至少标记 3 个节点。轮廓由你手动确认。</small><button className="primary" disabled={points.length<3} onClick={()=>go(3)}>确认轮廓 <span>→</span></button></>}
+ {panel==='layers'&&<>{[['compass','360° 刻度'],['branches','十二地支'],['palaces','八卦八宫'],['plan','户型图片'],['outline','确认轮廓']].map(([key,label])=><button className="layer-row" key={key} role="switch" aria-label={label} aria-checked={layers[key]} disabled={!photo&&(key==='plan'||key==='outline')} onClick={()=>setLayers(l=>({...l,[key]:!l[key]}))}><span>{label}</span><span className={'switch '+(layers[key]?'on':'')}/></button>)}<button className="text-button" onClick={()=>setLayers(defaultLayers)}>恢复默认</button></>}
+ {panel==='analysis'&&<><div className="pending-mark"><Icon name="outline" size={28}/></div><h3>规则待配置</h3><p>中心、缺角判断标准与解释数据库尚未配置。</p><small>已保留当前图片、方向和轮廓，未执行分析。</small><button className="primary" onClick={()=>go(2)}>返回核对轮廓</button></>}
+ {panel==='palace'&&selected!==null&&<><div className="palace-detail"><svg viewBox="-20 -4 40 26"><Gua bits={palaces[selected][2]} size={34}/></svg><b>{selected*45}<span>°</span></b></div><dl><div><dt>方位</dt><dd>{palaces[selected][0]}</dd></div><div><dt>八宫</dt><dd>{palaces[selected][1]}宫</dd></div></dl><small>系统方位信息{photo?' · 分析规则待配置':''}</small><button className="text-button" onClick={()=>{setPanel(null);setSelected(null)}}>返回工作台</button></>}
+ </section>}
+ </main>
+ </>}{message&&<div className="toast" role="status">{message}</div>}</div>
 }
