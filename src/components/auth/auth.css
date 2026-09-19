@@ -1,0 +1,124 @@
+/* Approved residential glass design: warm room, clear glass, vermilion action.
+   Keep all controls opaque; only the panel surface is translucent. */
+.residential-auth {
+  --auth-ink: #202329;
+  --auth-muted: #555b60;
+  --auth-accent: #c4402b;
+  --auth-radius: 32px;
+  min-height: 100svh;
+  color: var(--auth-ink);
+  background: #e6ded1;
+  isolation: isolate;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.residential-scene { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.residential-scene img, .residential-scene video { position: absolute; inset: 0; width: 100%; height: 100%; }
+.residential-scene img, .residential-scene video { object-fit: cover; object-position: center; }
+.residential-scene video { display: block; opacity: 0; transition: opacity .4s ease; }
+.residential-scene video[data-ready='true'] { opacity: 1; }
+.residential-auth .auth-stage {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  place-items: center;
+  min-height: 100svh;
+  padding: 36px 20px 68px;
+}
+.residential-auth .auth-main {
+  width: 392px;
+  max-width: 100%;
+  padding: 36px 36px 24px;
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: var(--auth-radius);
+  background: radial-gradient(ellipse at var(--glass-x, 30%) 0%,rgba(255,255,255,.44),transparent 65%), linear-gradient(140deg,rgba(255,255,255,.23),rgba(255,255,255,.13));
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.38), 0 12px 42px rgba(48,42,32,.08);
+  animation: auth-glass-arrive 1s cubic-bezier(.2,.7,.2,1) both;
+}
+.residential-auth h1 {
+  margin: 0;
+  padding: 0;
+  color: var(--auth-ink);
+  font: 650 34px/1.4 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  letter-spacing: .035em;
+  text-align: center;
+  outline: none;
+}
+.residential-auth:not(.auth-registration) .auth-main {
+  scale: .9;
+  transform-origin: center;
+}
+.residential-auth .auth-form { margin-top: 26px; }
+.residential-auth .auth-field { display: block; margin: 0 0 20px; padding: 0; border: 0; background: none; }
+.residential-auth .auth-field label { display:block; margin:0 0 9px; color:var(--auth-ink); font-size:14px; line-height:1.5; font-weight:500; }
+.residential-auth .auth-field > input,
+.residential-auth .auth-password {
+  display:flex; width:100%; height:48px; border:1px solid rgba(222,220,219,.9);
+  border-radius:13px; background:rgba(255,255,255,.94);
+  box-shadow:inset 0 1px 2px #ffffff70;
+  transition:border-color .18s,box-shadow .18s;
+}
+.residential-auth .auth-field input { color:#26272b; font-family:inherit; font-size:14px; font-weight:400; line-height:1.5; padding:0 15px; min-width:0; outline:none; }
+.residential-auth .auth-field input::placeholder { color:#74777d; opacity:1; }
+.residential-auth .auth-password { align-items:center; }
+.residential-auth .auth-password input { width:100%; height:100%; border:0; border-radius:13px; background:transparent; }
+.residential-auth .auth-password button { display:grid; place-items:center; flex:0 0 44px; height:44px; padding:0; border:0; border-radius:10px; background:transparent; color:#33383c; cursor:pointer; }
+.residential-auth .auth-password button:hover { background:#252b3508; }
+.residential-auth .auth-field > input:focus-visible,
+.residential-auth .auth-password:focus-within { border-color:#b84a39; box-shadow:0 0 0 3px #b84a391f; }
+.residential-auth .auth-field > input[aria-invalid='true'],
+.residential-auth .auth-password:has(input[aria-invalid='true']) { border-color:#ad3124; }
+.residential-auth .auth-submit {
+  display:flex; align-items:center; justify-content:center; gap:22px;
+  width:100%; min-height:52px; padding:12px 18px; margin:26px 0 0;
+  border:1px solid #c5402b; border-radius:17px;
+  background:linear-gradient(120deg,#ca432d,#c43b28); color:#fff;
+  font:500 16px/1.5 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  text-decoration:none; cursor:pointer; box-shadow:0 3px 10px #90301f0d;
+  transition:background .18s,box-shadow .18s,transform .18s;
+}
+.residential-auth .auth-submit:hover:not(:disabled) { background:#b83625; box-shadow:0 5px 14px #7f2a2521; transform:translateY(-1px); color:#fff; }
+.residential-auth .auth-submit:active:not(:disabled) { transform:translateY(0); }
+.residential-auth .auth-submit:disabled { opacity:.7; cursor:wait; }
+.residential-auth .auth-switch { margin:20px 0 0; text-align:center; font-size:14px; line-height:24px; color:#303339; }
+.residential-auth .auth-switch a { display:inline-flex; align-items:center; min-height:32px; margin-left:8px; color:#ad2f1e; text-decoration:none; font-weight:500; }
+.residential-auth .auth-switch a:hover { text-decoration:underline; text-underline-offset:4px; }
+.residential-auth a:focus-visible,.residential-auth button:focus-visible { outline:2px solid #9c3225; outline-offset:4px; }
+.residential-auth .auth-error { margin:7px 0 0; padding:5px 8px; border-radius:6px; color:#962416; background:#fff4eff0; font-size:12px; line-height:1.6; }
+.residential-auth .auth-feedback { margin:14px 0 0; padding:10px 12px; border-radius:10px; background:#fff9f2e8; color:#6b3027; font-size:13px; line-height:1.7; }
+.residential-auth .auth-field small { display:block; margin-top:7px; color:#42474a; font-size:12px; line-height:1.5; }
+.residential-auth .auth-intro { margin:20px 0 0; font-size:14px; line-height:1.8; color:#353a3e; text-align:center; }
+.residential-auth.auth-registration .auth-main { padding-block:28px; }
+.residential-auth.auth-registration h1 { font-size:28px; }
+.residential-auth.auth-registration .auth-form { margin-top:20px; }
+.residential-auth.auth-registration .auth-field { margin-bottom:15px; }
+.residential-auth.auth-registration .auth-submit { margin-top:22px; }
+.residential-auth.auth-registration .auth-switch { margin-top:14px; }
+/* Shared authenticated account controls retain their existing behavior. */
+.session-controls{display:inline-flex;align-items:center;gap:12px;font-size:11px;flex-wrap:wrap}
+.session-controls button{min-height:40px;color:var(--blue)}
+.session-message{padding:80px 24px;text-align:center}
+.session-message a{display:inline-block;margin:20px;color:var(--blue)}
+.account-auth-entry{display:flex;gap:12px;align-items:center;font-size:12px;color:var(--muted);margin-top:26px}
+.account-auth-entry a{color:#7a899b;min-height:40px;display:inline-flex;align-items:center;text-decoration:none}
+.admin-login-entry{font-size:11px}
+@keyframes auth-glass-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+ .residential-auth .auth-main { background:rgba(255,255,255,.86); }
+}
+@media(max-width:600px) {
+ .residential-auth .auth-stage { padding:24px 18px; }
+ .residential-auth .auth-main { width:100%; max-width:368px; padding:30px 26px; border-radius:30px; background:rgba(255,255,255,.27); }
+ .residential-auth h1 { font-size:30px; }
+ .residential-auth .auth-field input { font-size:16px; }
+ .residential-auth .auth-field { margin-bottom:22px; }
+ .residential-auth .auth-submit { min-height:52px; }
+ .residential-auth.auth-registration .auth-main { padding:26px; }
+ .admin-header-end .session-controls>span{display:none}
+}
+@media(prefers-reduced-motion:reduce) {
+ .residential-auth .auth-main { animation:none; }
+ .residential-scene video { transition:none; }
+ .residential-auth .auth-submit,.residential-auth .auth-field>input,.residential-auth .auth-password { transition:none; }
+ .residential-auth .auth-submit:hover:not(:disabled) { transform:none; }
+}

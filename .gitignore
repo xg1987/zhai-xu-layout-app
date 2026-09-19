@@ -4,3 +4,9 @@ dist/
 npm-debug.log*
 server/data.db
 server/data.db-*
+
+# Isolated local authentication test database
+server/local-auth.sqlite*
+server/.vision-master-key
+.env
+.env.local
