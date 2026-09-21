@@ -1,0 +1,15 @@
+import React, { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { SessionGate } from './components/auth/SessionGate.jsx';
+import AdminAccounts from './components/admin/AdminAccounts.jsx';
+import AdminOverview from './components/admin/AdminOverview.jsx';
+import AdminInvitations from './components/admin/AdminInvitations.jsx';
+import AdminEvents from './components/admin/AdminEvents.jsx';
+import ModelSettings from './components/admin/ModelSettings.jsx';
+import UsageCosts from './components/admin/UsageCosts.jsx';
+import SystemSettings from './components/admin/SystemSettings.jsx';
+import './base.css';
+import './components/admin/spatial.css';
+const pages={overview:AdminOverview,invitations:AdminInvitations,events:AdminEvents,models:ModelSettings,usage:UsageCosts,settings:SystemSettings};
+const Page=pages[location.pathname.replace(/\/$/,'').split('/')[2]]||AdminAccounts;
+createRoot(document.getElementById('root')).render(<StrictMode><SessionGate admin><Page/></SessionGate></StrictMode>);

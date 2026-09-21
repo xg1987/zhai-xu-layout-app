@@ -1,6 +1,6 @@
 # 家居风水在线工作台
 
-当前独立站点版本：0.2.0。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
+当前独立站点版本：0.2.1。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
 - 工作台：https://zhai-xu-workspace-preview.pages.dev/
 - 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
@@ -19,7 +19,7 @@
 
 ## 当前边界
 
-户型图片仍仅在当前浏览器页面中读取，历史记录随页面刷新清空；分析服务未接入，不生成模拟报告。当前管理后台范围为账号、注册审核和邀请码，不包含模型配置或计费。
+户型图片仍仅在当前浏览器页面中读取，历史记录随页面刷新清空；分析服务未接入，不生成模拟报告。管理后台已复用原项目冰蓝玻璃界面（原提交 ebd711bb7b5a20e48526c3fd7b07983af07dfc8f），恢复概览、账号管理、邀请码、图片识别配置、用量费用、操作日志和系统设置。模型调用与费用数据从新云端数据库产生；本地模型密钥、历史账号和调用记录未自动上传。模型实际付费调用需管理员配置有效 API Key 后验证。
 
 ## 构建和发布
 
@@ -30,12 +30,20 @@ wrangler d1 migrations apply DB --remote
 wrangler pages deploy dist --project-name zhai-xu-workspace-preview --branch main
 ```
 
-构建不需要额外依赖。服务端代码通过 Functions 打包，公开 dist 仅包含白名单静态资源。`.wrangler/` 和 `dist/` 均不提交。
+构建前运行 `npm ci`，React 管理后台由 esbuild 打包。服务端代码通过 Functions 打包，公开 dist 仅包含白名单静态资源。`.wrangler/` 和 `dist/` 均不提交。
 
 ## 验证
 
-六组服务端测试覆盖会话保护、错误密码、跨站请求、邀请限额与事务回滚、注册审核、权限、管理员保护、限速、页面守卫及退出。
+九组服务端测试覆盖会话保护、错误密码、跨站请求、邀请限额与事务回滚、注册审核、权限、管理员保护、限速、页面守卫及退出。
 已使用本地 Cloudflare Workers/D1 运行完整邀请注册→审核→用户登录→越权拒绝→退出流程。
 内置浏览器检查登录、注册、管理后台桌面及 390px 手机布局；工作台此前检查 320×568、390×844、430×932 和 1280×800。未声称真机验证。
 
 设计参考：项目原有 60fps.design、Navbar Gallery、Component Gallery 等参考集。
+
+## 原版后台适配
+
+- `admin-src/components/admin/` 复用原版 React 组件及样式；原有用户工作台保持独立。
+- 数据库迁移 0002 仅增加审核备注与模型、用量表，保留现有用户和密码。
+- `MODEL_ENCRYPTION_KEY` 必须作为 Pages secret 设置为随机 32 字节十六进制字符串；不得放入源码或公开变量。模型密钥经 AES-GCM 加密后写入 D1。
+- 费用计算沿用原项目计价规则，属于估算，实际扣费以服务商账单为准。
+- 验证包含原版管理接口、资料更新、重置密码、审核、角色与状态保护、模型密钥加密、受控模型响应的用量入账与错误脱敏；没有用真实密钥产生测试费用。

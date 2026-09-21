@@ -1,3 +1,4 @@
+import { originalAdmin } from './original-admin.mjs';
 const enc = new TextEncoder();
 export const COOKIE = '__Host-zx_workspace';
 const TTL = 7 * 86400000;
@@ -22,7 +23,7 @@ async function verifyPassword(password,stored){
 }
 const cookie=(token,age)=>`${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${age}`;
 const rawToken=request=>request.headers.get('Cookie')?.split(';').map(s=>s.trim()).find(s=>s.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'';
-const publicUser=u=>({id:u.id,login:u.login,name:u.name,role:u.role,status:u.status,approval:u.approval,createdAt:u.created_at,lastLoginAt:u.last_login_at});
+const publicUser=u=>({id:u.id,phone:u.login,invitationId:u.invitation_id,reviewNote:u.review_note||'',login:u.login,name:u.name,role:u.role,status:u.status,approval:u.approval,createdAt:u.created_at,lastLoginAt:u.last_login_at});
 export async function currentUser(request,db){
  const token=rawToken(request);if(!/^[a-f0-9]{64}$/.test(token))return null;
  return db.prepare("SELECT u.* FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND u.status='enabled' AND u.approval='approved'").bind(await digest(token),Date.now()).first();
@@ -45,7 +46,7 @@ async function limit(db,key,max){
  const row=await db.prepare('INSERT INTO auth_limits(key,count,expires_at) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN expires_at<=? THEN 1 ELSE count+1 END,expires_at=CASE WHEN expires_at<=? THEN ? ELSE expires_at END RETURNING count').bind(await digest(key),until,at,at,until).first();
  if(row.count>max)fail('尝试次数过多，请 15 分钟后重试',429);
 }
-const event=(db,user,action,target)=>db.prepare('INSERT INTO audit_events(actor_id,action,target,created_at) VALUES(?,?,?,?)').bind(user.id,action,target,Date.now());
+const event=(db,user,action,target,result='success')=>db.prepare('INSERT INTO audit_events(actor_id,action,target,created_at,result) VALUES(?,?,?,?,?)').bind(user.id,action,target,Date.now(),result);
 const inviteDigest=code=>digest(String(code||'').trim().toUpperCase().replace(/-/g,''));
 
 export async function api({request,env}){
@@ -95,6 +96,8 @@ export async function api({request,env}){
   const user=await currentUser(request,db);
   if(path==='/api/me'&&method==='GET')return json({user:user?publicUser(user):null});
   if(!user)fail('请先登录',401);
+  const restored=await originalAdmin({request,env,db,url,path,method,user,json,fail,bodyOf,fields,hashPassword,verifyPassword,publicUser,event,limit});
+  if(restored)return restored;
   if(!path.startsWith('/api/admin/'))fail('接口不存在',404);
   if(user.role!=='admin')fail('此账号没有管理员权限',403);
   if(path==='/api/admin/overview'&&method==='GET'){
@@ -134,11 +137,11 @@ export async function api({request,env}){
    return json({invitations:(await db.prepare('SELECT id,hint,name,created_at,expires_at,max_uses,use_count,enabled FROM invitations ORDER BY created_at DESC LIMIT 50').all()).results});
   }
   if(path==='/api/admin/invitations'&&method==='POST'){
-   const body=await bodyOf(request),name=String(body.name||'邀请注册').trim().slice(0,40),uses=Number(body.maxUses||1),days=Number(body.days||7);
-   if(!Number.isInteger(uses)||uses<1||uses>100||!Number.isInteger(days)||days<1||days>90)fail('使用次数需为 1–100，有效天数需为 1–90');
+   const body=await bodyOf(request),name=String(body.name||'邀请注册').trim().slice(0,40),uses=Number(body.maxUses||1),days=Number(body.expiresInDays||body.days||7);
+   if(!Number.isInteger(uses)||uses<1||uses>1000||!Number.isInteger(days)||days<1||days>90)fail('使用次数需为 1–1000，有效天数需为 1–90');
    const code=hex(crypto.getRandomValues(new Uint8Array(12))).toUpperCase(),id=crypto.randomUUID(),at=Date.now();
    await db.batch([db.prepare('INSERT INTO invitations(id,code_hash,hint,name,created_by,created_at,expires_at,max_uses) VALUES(?,?,?,?,?,?,?,?)').bind(id,await inviteDigest(code),code.slice(-4),name,user.id,at,at+days*86400000,uses),event(db,user,'invitation.create',name)]);
-   return json({code},201);
+   return json({code,invitation:{id,name,maxUses:uses,expiresAt:at+days*86400000}},201);
   }
   const invitationMatch=path.match(/^\/api\/admin\/invitations\/([a-f0-9-]+)$/);
   if(invitationMatch&&method==='PATCH'){

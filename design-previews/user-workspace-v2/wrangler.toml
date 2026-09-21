@@ -1,6 +1,7 @@
 name = "zhai-xu-workspace-preview"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-04-22"
+compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"

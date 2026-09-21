@@ -26,3 +26,5 @@ const video=document.querySelector('video'),reduced=matchMedia('(prefers-reduced
 function syncVideo(){if(reduced.matches||document.hidden){video.pause();return;}if(!video.getAttribute('src'))video.src='/assets/auth-residential-loop-v2.mp4';video.muted=true;video.play().catch(()=>{});}
 reduced.addEventListener('change',syncVideo);document.addEventListener('visibilitychange',syncVideo);syncVideo();
 window.addEventListener('pagehide',()=>{form.elements.password.value='';form.elements.confirm.value='';});
+
+if(register){const invite=new URLSearchParams(location.search).get('invite');if(invite)form.elements.inviteCode.value=invite;}
