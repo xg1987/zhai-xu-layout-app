@@ -19,7 +19,7 @@ wrangler pages deploy dist --project-name zhai-xu-workspace-preview --branch mai
 ```
 
 构建不需要安装依赖。只复制明确列出的静态资源，不包括参考图、源目录说明、账户数据库或本地文件。
-部署前核对 Cloudflare 账户为仓库 AGENTS.md 指定的账户。本预览项目独立于正式的 zhai-xu-layout-app，不部署根目录的 Functions/D1。
+本次独立预览经用户明确授权，发布到 marsxiong19@gmail.com 的 Cloudflare 账户；正式应用仍遵守根目录 AGENTS.md 的账户规则。本预览项目独立于正式的 zhai-xu-layout-app，不部署根目录的 Functions/D1。
 
 ## 验证
 
