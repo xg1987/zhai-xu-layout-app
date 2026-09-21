@@ -6,9 +6,10 @@ import { api, hashPassword } from './auth-core.mjs';
 import { onRequest as middleware } from '../functions/_middleware.js';
 const schema=(await readFile(new URL('../migrations/0001_accounts.sql',import.meta.url),'utf8'))+(await readFile(new URL('../migrations/0002_original_admin.sql',import.meta.url),'utf8'));
 const auditSchema=await readFile(new URL('../migrations/0003_audit_result.sql',import.meta.url),'utf8');
+const enabledSchema=await readFile(new URL('../migrations/0004_model_enabled.sql',import.meta.url),'utf8');
 const password='Test-only!472905';
 async function setup(){
- const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema);
+ const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema+enabledSchema);
  const db={async batch(statements){sql.exec('BEGIN');try{const out=[];for(const statement of statements)out.push(await statement.run());sql.exec('COMMIT');return out;}catch(error){sql.exec('ROLLBACK');throw error;}}};
  // D1 batches return SELECT rows as well as mutation metadata.
  db.prepare=query=>{const bound=(values=[])=>({async first(){return sql.prepare(query).get(...values)||null;},async all(){return {results:sql.prepare(query).all(...values)};},async run(){const stmt=sql.prepare(query);if(/^SELECT/i.test(query))return {results:stmt.all(...values),meta:{changes:0}};return {results:[],meta:{changes:Number(stmt.run(...values).changes)}};},bind(...v){return bound(v);}});return bound();};
@@ -139,4 +140,20 @@ test('Workers request compatibility and distinct, sanitized failure reporting',a
  await assert.rejects(()=>callVision('gemini','synthetic-key',{test:true},async(url,options)=>{calls++;assert.equal(options.redirect,'manual');return new Response('',{status:302,headers:{Location:'https://untrusted.example'}});}),/已阻止转发密钥/);assert.equal(calls,1);
  await assert.rejects(()=>upstreamFetch('https://api.frankfurter.dev/v2/rate/USD/CNY',{},async(url,options)=>{assert.equal(options.redirect,'manual');return new Response('',{status:307});}),/redirect/);
  const result=await callVision('gemini','synthetic-key',{test:true},async(url,options)=>{assert.equal(options.redirect,'manual');assert.ok(url.endsWith('gemini-3.8-flash:generateContent'));return Response.json({candidates:[{content:{parts:[{text:'{"ok":true}'}]}}]});});assert.equal(result.ok,true);
+});
+
+test('model toggles persist, preserve keys, block disabled calls and expose shared prices',async()=>{
+ const {sql,request,admin}=await setup(),call=(p,m='GET',b)=>request(p,m,b,admin.cookie);
+ assert.equal((await call('/api/admin/vision/qwen','PATCH',{enabled:true})).status,400);
+ await call('/api/admin/vision/qwen','POST',{apiKey:'synthetic-toggle-key-123456'});
+ const before=sql.prepare("SELECT encrypted_key FROM vision_settings WHERE provider='qwen'").get().encrypted_key;
+ assert.equal((await call('/api/admin/vision/qwen','PATCH',{enabled:'false'})).status,400);
+ await call('/api/admin/vision/qwen','PATCH',{enabled:false});
+ let p=(await call('/api/admin/vision')).data.providers[0];assert.equal(p.enabled,false);assert.equal(p.price.input,12);assert.equal(p.price.output,36);
+ assert.equal((await call('/api/admin/vision/qwen/test','POST')).status,409);
+ assert.equal((await call('/api/admin/vision/usage')).data.summary.calls,0);
+ await call('/api/admin/vision/qwen','POST',{apiKey:'synthetic-toggle-key-123456'});
+ assert.equal((await call('/api/admin/vision')).data.providers[0].enabled,false);
+ await call('/api/admin/vision/qwen','PATCH',{enabled:true});assert.equal((await call('/api/admin/vision')).data.providers[0].enabled,true);
+ assert.ok(before);assert.equal((await request('/api/admin/vision/qwen','PATCH',{enabled:false})).status,401);sql.close();
 });

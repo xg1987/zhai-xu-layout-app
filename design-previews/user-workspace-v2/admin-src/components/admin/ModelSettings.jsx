@@ -18,21 +18,23 @@ function ProviderCard({ provider, onUpdate }) {
   if (busy) return
   setBusy(action);setFeedback(null)
   try {
-   const result=await request(`/${provider.id}${action==='test'?'/test':''}`,{method:action==='remove'?'DELETE':'POST',...(action==='save'?{headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey:key.trim()})}:{})})
+   const result=await request(`/${provider.id}${action==='test'?'/test':''}`,{method:action==='remove'?'DELETE':action==='toggle'?'PATCH':'POST',...(['save','toggle'].includes(action)?{headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='toggle'?{enabled:!provider.enabled}:{apiKey:key.trim()})}:{})})
    onUpdate(result.providers);setKey('');setRemoving(false)
-   setFeedback({ok:true,text:action==='save'?'已保存，可测试连接。':action==='remove'?'已移除此模型的密钥。':'连接成功，模型可调用。'})
+   setFeedback({ok:true,text:action==='toggle'?(provider.enabled?'模型已关闭':'模型已开启'):action==='save'?'已保存，可测试连接。':action==='remove'?'已移除此模型的密钥。':'连接成功，模型可调用。'})
   } catch(error) {setFeedback({ok:false,text:error.message})}
   finally {setBusy('');if(action==='test'){try{onUpdate((await request('')).providers)}catch{}}}
  }
  return <section className="model-card" aria-labelledby={`model-${provider.id}`}>
   <div className="model-card-top"><span className="model-priority">{provider.priority}</span><span className={`model-status ${provider.checkState}`}><i/>{statusLabels[provider.checkState]}</span></div>
   <div className="model-name"><div className={`model-symbol ${provider.id}`} aria-hidden="true">{provider.id==='gemini'?<svg viewBox="0 0 32 32"><path d="M16 3C16 11 21 16 29 16C21 16 16 21 16 29C16 21 11 16 3 16C11 16 16 11 16 3Z"/></svg>:<svg viewBox="0 0 32 32"><path d="m16 4 11 6v12l-11 6-11-6V10Z M5 10l11 6 11-6 M16 16v12"/></svg>}</div><div><h3 id={`model-${provider.id}`}>{provider.name}</h3><p>{provider.region}</p></div></div>
-  <p className="model-description">{provider.role==='primary'?'优先识别户型文字、方位标记与房屋边界。':'主模型暂时不可用时接替识别，也可单独使用。'}</p>
+  <div className="model-enable-row"><span>{provider.enabled?'已开启':'已关闭'}</span><button type="button" className="model-enable-switch" role="switch" aria-label={`启用 ${provider.name}`} aria-checked={provider.enabled} disabled={!!busy||!provider.configured} onClick={()=>run('toggle')}><span/></button></div>
+  {provider.price&&<div className="model-pricing"><div className="model-pricing-heading"><span>使用费用 · 每百万 Token</span><a href={provider.price.source} target="_blank" rel="noreferrer">官方价格 ↗</a></div><div className="model-price-values"><div><small>输入</small><strong>{provider.price.currency==='CNY'?'¥':'US$'}{provider.price.input}</strong></div><div><small>输出</small><strong>{provider.price.currency==='CNY'?'¥':'US$'}{provider.price.output}</strong></div></div><small className="model-price-note">{provider.price.currency==='CNY'?'人民币 · 北京地域公开原价':'美元 · 当前标准服务价格'}，实际扣费以服务商账单为准</small></div>}
+
   <form onSubmit={e=>{e.preventDefault();run('save')}} autoComplete="off">
    <label htmlFor={`key-${provider.id}`}>API Key <span>{provider.configured?'已保存，填写新密钥可替换':'待填写'}</span></label>
    <input id={`key-${provider.id}`} type="password" value={key} onChange={e=>{setKey(e.target.value);setFeedback(null)}} placeholder={provider.configured?'已安全保存 · 不回显原密钥':'粘贴你的 API Key'} autoComplete="new-password" spellCheck={false} autoCapitalize="none" maxLength={512} disabled={!!busy} />
    <div className="model-key-help"><span>{provider.id==='qwen'?'请使用百炼北京地域的 API Key':'使用 Google AI Studio 的 API Key'}</span><a href={provider.keyUrl} target="_blank" rel="noreferrer">获取密钥 ↗</a></div>
-   <div className="model-actions"><button type="submit" className="admin-primary" disabled={!!busy||!key.trim()}>{busy==='save'?'正在保存…':'保存密钥'}</button><button type="button" className="admin-secondary" disabled={!!busy||!provider.configured||!!key.trim()} onClick={()=>run('test')}>{busy==='test'?'连接测试中…':'测试连接'}</button>{provider.configured&&<button type="button" className="model-remove" disabled={!!busy} onClick={()=>setRemoving(v=>!v)}>移除</button>}</div>
+   <div className="model-actions"><button type="submit" className="admin-primary" disabled={!!busy||!key.trim()}>{busy==='save'?'正在保存…':'保存密钥'}</button><button type="button" className="admin-secondary" disabled={!!busy||!provider.configured||!provider.enabled||!!key.trim()} onClick={()=>run('test')}>{busy==='test'?'连接测试中…':'测试连接'}</button>{provider.configured&&<button type="button" className="model-remove" disabled={!!busy} onClick={()=>setRemoving(v=>!v)}>移除</button>}</div>
   </form>
   {removing&&<div className="model-remove-confirm"><p>移除后此模型将停止识别，之后可以重新填写密钥。</p><button disabled={!!busy} onClick={()=>run('remove')}>确认移除</button><button disabled={!!busy} onClick={()=>setRemoving(false)}>取消</button></div>}
   {feedback&&<p role={feedback.ok?'status':'alert'} className={`model-feedback ${feedback.ok?'success':'error'}`}>{feedback.text}</p>}

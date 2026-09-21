@@ -1,6 +1,6 @@
 # 家居风水在线工作台
 
-当前独立站点版本：0.2.4。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
+当前独立站点版本：0.2.5。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
 - 工作台：https://zhai-xu-workspace-preview.pages.dev/
 - 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
@@ -59,3 +59,7 @@ Qwen 切换为 Qwen3.8-Max，使用北京默认业务空间专属接口；同步
 ### 0.2.4 模型优先级
 
 后台配置将 Qwen3.8-Max 列为主模型，Gemini 3.8 Flash 列为备用模型，卡片顺序和说明随角色同步。已保存密钥及连接测试记录保留。独立工作台的真实图片识别流程尚未接入，本次变更不代表自动识图与故障切换已经完成。
+
+### 0.2.5 模型启用与价格
+
+删除模型用途描述，展示与用量计费共用的输入输出单价。增加持久化启用开关，关闭后服务端禁止连接测试且保留密钥；更新密钥不会重新开启已关闭的模型。部署需应用 0004_model_enabled.sql。

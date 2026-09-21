@@ -2,8 +2,8 @@ import { upstreamFetch } from './upstream-fetch.mjs';
 import { PROVIDERS, callVision } from './vision-provider.mjs';
 import { normalizeUsage, priceSnapshot, calculateCost } from './usage-math.mjs';
 export async function providers(db){
- const rows=(await db.prepare('SELECT provider,checked_at,check_state FROM vision_settings').all()).results;
- return Object.values(PROVIDERS).map(p=>{const r=rows.find(r=>r.provider===p.id);return {...p,configured:!!r,checkedAt:r?.checked_at||null,checkState:r?.check_state||'empty'};});
+ const rows=(await db.prepare('SELECT provider,checked_at,check_state,enabled FROM vision_settings').all()).results;
+ return Object.values(PROVIDERS).map(p=>{const r=rows.find(r=>r.provider===p.id);return {...p,configured:!!r,enabled:!!r&&r.enabled===1,price:priceSnapshot(p.id),checkedAt:r?.checked_at||null,checkState:r?.check_state||'empty'};});
 }
 async function encryptionKey(env){
  if(!/^[a-f0-9]{64}$/.test(env.MODEL_ENCRYPTION_KEY||''))throw new Error('Encryption unavailable');
@@ -42,6 +42,12 @@ export async function visionRoute(c){
   return json(await usageList(db,Object.fromEntries(url.searchParams)));
  }
  const match=path.match(/^\/api\/admin\/vision\/(gemini|qwen)(\/test)?$/);if(!match)fail('模型接口不存在',404);const id=match[1];
+ if(method==='PATCH'&&!match[2]){
+  const b=await bodyOf(request);if(typeof b.enabled!=='boolean')fail('请选择开启或关闭');
+  const saved=await db.prepare('SELECT provider FROM vision_settings WHERE provider=?').bind(id).first();if(!saved)fail('请先保存 API Key');
+  await db.batch([db.prepare('UPDATE vision_settings SET enabled=? WHERE provider=?').bind(b.enabled?1:0,id),event(db,user,b.enabled?'model.enable':'model.disable',id)]);
+  return json({providers:await providers(db)});
+ }
  if(method==='POST'&&!match[2]){
   const b=await bodyOf(request),key=b.apiKey;if(typeof key!=='string'||key.trim().length<16||key.length>512||/[^\x21-\x7e]/.test(key.trim()))fail('请输入完整有效的 API Key');
   let encrypted;try{encrypted=await seal(key.trim(),env);}catch{fail('密钥加密服务尚未就绪',503);}
@@ -50,7 +56,7 @@ export async function visionRoute(c){
  if(method==='DELETE'&&!match[2]){await db.batch([db.prepare('DELETE FROM vision_settings WHERE provider=?').bind(id),event(db,user,'model.remove',id)]);return json({providers:await providers(db)});}
  if(method==='POST'&&match[2]){
   await limit(db,'vision-test:'+user.id,15);
-  const saved=await db.prepare('SELECT * FROM vision_settings WHERE provider=?').bind(id).first();if(!saved)fail('请先保存此模型的 API Key');
+  const saved=await db.prepare('SELECT * FROM vision_settings WHERE provider=?').bind(id).first();if(!saved)fail('请先保存此模型的 API Key');if(!saved.enabled)fail('此模型已关闭，请先开启',409);
   let key;try{key=await open(saved.encrypted_key,env);}catch{fail('模型密钥无法读取，请重新保存',503);}
   const at=new Date().toISOString(),record=crypto.randomUUID(),price=priceSnapshot(id,at),fx=price.currency==='USD'?await exchange(db,at.slice(0,10)):null;
   await db.prepare('INSERT INTO vision_usage(id,request_id,attempt,user_id,account,user_name,provider,model,operation,started_at,price_json,fx_json) VALUES(?,?,1,?,?,?,?,?,?,?, ?,?)').bind(record,record,user.id,user.login,user.name,id,PROVIDERS[id].model,'test',at,JSON.stringify(price),fx?JSON.stringify(fx):null).run();
