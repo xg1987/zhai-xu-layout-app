@@ -4,7 +4,7 @@ import './admin.css'
 import './models.css'
 import './usage.css'
 
-const names = { gemini: 'Gemini 3.8 Flash', qwen: 'Qwen3.7-Plus' }
+const modelName = record => ({ 'gemini-3.8-flash': 'Gemini 3.8 Flash', 'qwen3.7-plus': 'Qwen3.7-Plus', 'qwen3.8-max': 'Qwen3.8-Max' }[record.model] || record.model || record.provider)
 const statusNames = { success: '成功', failed: '失败', interrupted: '已中断', running: '进行中' }
 const number = value => value?.toLocaleString('zh-CN') ?? '—'
 const money = value => value === null ? '待核对' : value > 0 && value < 0.000001 ? '< ¥0.000001' : `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: value === 0 ? 2 : 6, maximumFractionDigits: 6 })}`
@@ -18,7 +18,7 @@ function CostDetails({ record, onClose }) {
   <div className="drawer-heading"><h2>调用明细</h2><button className="drawer-close" aria-label="关闭明细" onClick={onClose}>×</button></div>
   <div className="usage-detail-amount"><small>人民币费用 · 估算</small><strong>{money(record.cnyAmount)}</strong></div>
   <dl className="account-details">
-   <div><dt>模型</dt><dd>{names[record.provider]}</dd></div>
+   <div><dt>模型</dt><dd>{modelName(record)}</dd></div>
    <div><dt>调用账号</dt><dd>{record.account}</dd></div>
    <div><dt>时间</dt><dd>{time(record.startedAt)}</dd></div>
    <div><dt>用途 / 结果</dt><dd>{record.operation === 'test' ? '连接测试' : '图片识别'} / {statusNames[record.status]}</dd></div>
@@ -62,7 +62,7 @@ export default function UsageCosts() {
   {error ? <p className="model-feedback error" role="alert">{error}<button onClick={() => setRevision(v => v + 1)}>重试</button></p> : <section className="usage-records" aria-busy={loading}>
    {data?.records.length ? <table className="usage-table"><thead><tr><th>时间 / 账号</th><th>模型 / 用途</th><th>输入 / 输出 Token</th><th>费用（元）· 估算</th><th>结果</th><th><span className="usage-sr-only">明细</span></th></tr></thead><tbody>{data.records.map(record => <tr key={record.id}>
     <td data-label="时间 / 账号"><div>{time(record.startedAt)}<small>{record.name ? `${record.name} · ` : ''}{record.account}</small></div></td>
-    <td data-label="模型 / 用途"><div>{names[record.provider]}<small>{record.operation === 'test' ? '连接测试' : '图片识别'}{record.attempt > 1 ? ' · 备用接替' : ''}</small></div></td>
+    <td data-label="模型 / 用途"><div>{modelName(record)}<small>{record.operation === 'test' ? '连接测试' : '图片识别'}{record.attempt > 1 ? ' · 备用接替' : ''}</small></div></td>
     <td data-label="输入 / 输出"><div>{number(record.usage?.input)} / {number(record.usage?.output)}{record.usage?.cached > 0 && <small>缓存 {number(record.usage.cached)}</small>}</div></td>
     <td data-label="费用（元）" className="usage-cost">{money(record.cnyAmount)}</td><td data-label="结果"><span className={`usage-status ${record.status}`}>{statusNames[record.status]}</span></td><td><button className="usage-link" onClick={() => setSelected(record)} aria-label={`查看 ${record.account} ${time(record.startedAt)} 的调用明细`}>明细 ↗</button></td>
    </tr>)}</tbody></table> : <div className="usage-empty"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="3"/><path d="M15 14h10M15 20h10M15 26h5"/></svg><h3>{loading ? '正在读取记录…' : '暂无调用记录'}</h3>{!loading && <p>模型调用后，费用明细将在这里显示。</p>}</div>}

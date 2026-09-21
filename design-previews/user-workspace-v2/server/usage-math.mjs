@@ -3,7 +3,7 @@ const FX_SOURCE = 'Frankfurter / ECB'
 const count = value => Number.isSafeInteger(value) && value >= 0 && value <= 100000000
 export const PRICE_SOURCES = {
  gemini: 'https://ai.google.dev/gemini-api/docs/pricing',
- qwen: 'https://help.aliyun.com/zh/model-studio/model-pricing',
+ qwen: 'https://help.aliyun.com/zh/model-studio/qwen3-8-max',
 }
 
 // Only store allowlisted metering fields, never provider bodies, keys or image data.
@@ -28,7 +28,7 @@ export function priceSnapshot(provider, at = new Date().toISOString()) {
   const factor = at.slice(0, 10) < '2027-01-01' ? 1 : 2
   return { ...common, currency: 'USD', input: 0.75 * factor, cached: 0.075 * factor, output: 3.75 * factor, basis: `标准服务价格${factor === 1 ? '（含 2026 年官方优惠）' : ''}，未扣除免费额度和账户抵扣` }
  }
- if (provider === 'qwen') return { ...common, currency: 'CNY', input: 2, cached: 0.4, output: 8, longInput: 6, longCached: 1.2, longOutput: 24, threshold: 256000, basis: '北京地域公开原价，未扣除限时折扣、免费额度和账户抵扣' }
+ if (provider === 'qwen') return { ...common, verifiedAt: '2026-09-21', currency: 'CNY', input: 12, cached: 1.5, output: 36, basis: '北京地域公开原价，未扣除限时折扣、免费额度和账户抵扣' }
  throw new Error('Unknown pricing provider')
 }
 

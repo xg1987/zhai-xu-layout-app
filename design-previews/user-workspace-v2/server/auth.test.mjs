@@ -120,9 +120,9 @@ test('model test records real normalized usage and redacts upstream errors',asyn
  await call('/api/admin/vision/qwen','POST',{apiKey:'synthetic-provider-key-only-19483'});
  const originalFetch=globalThis.fetch;
  try{
-  globalThis.fetch=async(url,options)=>{assert.equal(url,'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions');assert.equal(options.redirect,'manual');return new Response(JSON.stringify({choices:[{message:{content:'{"ok":true}'}}],usage:{prompt_tokens:100,completion_tokens:10}}),{status:200});};
+  globalThis.fetch=async(url,options)=>{assert.equal(url,'https://ws-ve2w77z439rxpw30.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions');assert.equal(options.redirect,'manual');assert.equal(JSON.parse(options.body).model,'qwen3.8-max');return new Response(JSON.stringify({choices:[{message:{content:'{"ok":true}'}}],usage:{prompt_tokens:100,completion_tokens:10}}),{status:200});};
   const tested=await call('/api/admin/vision/qwen/test','POST');assert.equal(tested.status,200);assert.equal(tested.data.providers.find(p=>p.id==='qwen').checkState,'ok');
-  const usage=await call('/api/admin/vision/usage');assert.equal(usage.data.summary.calls,1);assert.equal(usage.data.summary.successful,1);assert.equal(usage.data.records[0].usage.input,100);assert.ok(usage.data.records[0].cnyAmount>0);
+  const usage=await call('/api/admin/vision/usage');assert.equal(usage.data.summary.calls,1);assert.equal(usage.data.summary.successful,1);assert.equal(usage.data.records[0].usage.input,100);assert.equal(usage.data.records[0].model,'qwen3.8-max');assert.equal(usage.data.records[0].cnyAmount,0.00156);
   globalThis.fetch=async()=>new Response(JSON.stringify({error:'synthetic-provider-key-only-19483'}),{status:401});
   const failed=await call('/api/admin/vision/qwen/test','POST');assert.equal(failed.status,502);assert.ok(!JSON.stringify(failed.data).includes('synthetic-provider-key-only-19483'));
   assert.equal((await call('/api/admin/vision/usage?status=failed')).data.summary.calls,1);assert.equal((await call('/api/admin/events')).data.records[0].result,'failed');

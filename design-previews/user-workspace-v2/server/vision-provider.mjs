@@ -3,7 +3,7 @@ import { Buffer } from 'node:buffer';
 // Endpoints are fixed: a submitted key cannot be forwarded to an arbitrary URL.
 export const PROVIDERS = Object.freeze({
   gemini: { id: 'gemini', name: 'Gemini 3.8 Flash', model: 'gemini-3.8-flash', priority: '主模型', region: 'Google AI Studio', keyUrl: 'https://aistudio.google.com/apikey' },
-  qwen: { id: 'qwen', name: 'Qwen3.7-Plus', model: 'qwen3.7-plus', priority: '备用模型', region: '阿里云百炼 · 北京', keyUrl: 'https://bailian.console.aliyun.com/' },
+  qwen: { id: 'qwen', name: 'Qwen3.8-Max', model: 'qwen3.8-max', priority: '备用模型', region: '阿里云百炼 · 北京', keyUrl: 'https://bailian.console.aliyun.com/' },
 })
 export class VisionError extends Error {
   constructor(message, status = 400, retryable = false) { super(message); this.status = status; this.retryable = retryable }
@@ -47,7 +47,7 @@ export async function callVision(id, key, { image, test = false, onUsage = () =>
     headers = { 'Content-Type': 'application/json', 'x-goog-api-key': key }
     body = { contents: [{ role: 'user', parts: [{ text: prompt }, ...(image ? [{ inlineData: image }] : [])] }], generationConfig: { responseMimeType: 'application/json', maxOutputTokens: test ? 1024 : 8192, thinkingConfig: { thinkingLevel: 'low' } } }
   } else {
-    url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
+    url = 'https://ws-ve2w77z439rxpw30.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions'
     headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }
     body = { model: provider.model, enable_thinking: false, response_format: { type: 'json_object' }, max_tokens: test ? 100 : 4096, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...(image ? [{ type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] : [])] }] }
   }

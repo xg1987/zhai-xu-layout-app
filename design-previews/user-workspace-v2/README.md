@@ -1,6 +1,6 @@
 # 家居风水在线工作台
 
-当前独立站点版本：0.2.2。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
+当前独立站点版本：0.2.3。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
 - 工作台：https://zhai-xu-workspace-preview.pages.dev/
 - 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
@@ -51,3 +51,7 @@ wrangler pages deploy dist --project-name zhai-xu-workspace-preview --branch mai
 ### 0.2.2 请求兼容修复
 
 模型与汇率请求统一使用 Workers 支持的 manual 重定向模式，拒绝 3xx，防止密钥被转发；区分超时、连接失败、运行环境异常和重定向。十组测试覆盖上述分支。真实 Workers 本地运行验证 Google 无密钥请求可返回 HTTP 响应，汇率接口可访问。
+
+### 0.2.3 Qwen 模型更新
+
+Qwen 切换为 Qwen3.8-Max，使用北京默认业务空间专属接口；同步 Max 公开原价。保留已保存的加密密钥和历史调用价格，历史记录按实际模型显示。
