@@ -2,6 +2,10 @@
 
 版本：0.1.0。此目录是独立静态界面预览，不替换正式应用，也不连接账号、数据库或分析接口。
 
+在线地址：https://zhai-xu-workspace-preview.pages.dev/
+
+手机交互预览：https://zhai-xu-workspace-preview.pages.dev/phone
+
 ## 页面与交互
 
 - `/`：响应式工作台，手机使用底部悬浮的工作台、历史记录、图层、大小四个入口；桌面保留侧栏。
