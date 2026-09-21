@@ -111,7 +111,7 @@ test('workspace and admin HTML require a valid session and are not cached',async
  const key='synthetic-provider-key-only-19483';
  assert.equal((await call('/api/admin/vision/qwen','POST',{apiKey:key})).status,200);
  const stored=sql.prepare('SELECT encrypted_key FROM vision_settings').get();assert.ok(!stored.encrypted_key.includes(key));
- const result=await call('/api/admin/vision');assert.ok(!JSON.stringify(result.data).includes(key));assert.equal(result.data.providers.find(p=>p.id==='qwen').checkState,'untested');
+ const result=await call('/api/admin/vision');assert.deepEqual(result.data.providers.map(p=>[p.id,p.role,p.priority]),[['qwen','primary','主模型'],['gemini','fallback','备用模型']]);assert.ok(!JSON.stringify(result.data).includes(key));assert.equal(result.data.providers.find(p=>p.id==='qwen').checkState,'untested');
  const usage=await call('/api/admin/vision/usage');assert.equal(usage.data.summary.calls,0);assert.equal(usage.data.records.length,0);
  assert.equal((await call('/api/admin/vision/qwen','DELETE')).status,200);assert.equal((await call('/api/admin/vision/qwen/test','POST')).status,400);sql.close();
  });

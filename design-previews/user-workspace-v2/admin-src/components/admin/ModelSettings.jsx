@@ -27,7 +27,7 @@ function ProviderCard({ provider, onUpdate }) {
  return <section className="model-card" aria-labelledby={`model-${provider.id}`}>
   <div className="model-card-top"><span className="model-priority">{provider.priority}</span><span className={`model-status ${provider.checkState}`}><i/>{statusLabels[provider.checkState]}</span></div>
   <div className="model-name"><div className={`model-symbol ${provider.id}`} aria-hidden="true">{provider.id==='gemini'?<svg viewBox="0 0 32 32"><path d="M16 3C16 11 21 16 29 16C21 16 16 21 16 29C16 21 11 16 3 16C11 16 16 11 16 3Z"/></svg>:<svg viewBox="0 0 32 32"><path d="m16 4 11 6v12l-11 6-11-6V10Z M5 10l11 6 11-6 M16 16v12"/></svg>}</div><div><h3 id={`model-${provider.id}`}>{provider.name}</h3><p>{provider.region}</p></div></div>
-  <p className="model-description">{provider.id==='gemini'?'优先识别户型文字、方位标记与房屋边界。':'主模型暂时不可用时接替识别，也可单独使用。'}</p>
+  <p className="model-description">{provider.role==='primary'?'优先识别户型文字、方位标记与房屋边界。':'主模型暂时不可用时接替识别，也可单独使用。'}</p>
   <form onSubmit={e=>{e.preventDefault();run('save')}} autoComplete="off">
    <label htmlFor={`key-${provider.id}`}>API Key <span>{provider.configured?'已保存，填写新密钥可替换':'待填写'}</span></label>
    <input id={`key-${provider.id}`} type="password" value={key} onChange={e=>{setKey(e.target.value);setFeedback(null)}} placeholder={provider.configured?'已安全保存 · 不回显原密钥':'粘贴你的 API Key'} autoComplete="new-password" spellCheck={false} autoCapitalize="none" maxLength={512} disabled={!!busy} />

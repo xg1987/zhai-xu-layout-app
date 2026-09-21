@@ -2,8 +2,8 @@ import { upstreamFetch, UpstreamError } from './upstream-fetch.mjs';
 import { Buffer } from 'node:buffer';
 // Endpoints are fixed: a submitted key cannot be forwarded to an arbitrary URL.
 export const PROVIDERS = Object.freeze({
-  gemini: { id: 'gemini', name: 'Gemini 3.8 Flash', model: 'gemini-3.8-flash', priority: '主模型', region: 'Google AI Studio', keyUrl: 'https://aistudio.google.com/apikey' },
-  qwen: { id: 'qwen', name: 'Qwen3.8-Max', model: 'qwen3.8-max', priority: '备用模型', region: '阿里云百炼 · 北京', keyUrl: 'https://bailian.console.aliyun.com/' },
+  qwen: { id: 'qwen', name: 'Qwen3.8-Max', model: 'qwen3.8-max', priority: '主模型', role: 'primary', region: '阿里云百炼 · 北京', keyUrl: 'https://bailian.console.aliyun.com/' },
+  gemini: { id: 'gemini', name: 'Gemini 3.8 Flash', model: 'gemini-3.8-flash', priority: '备用模型', role: 'fallback', region: 'Google AI Studio', keyUrl: 'https://aistudio.google.com/apikey' },
 })
 export class VisionError extends Error {
   constructor(message, status = 400, retryable = false) { super(message); this.status = status; this.retryable = retryable }
