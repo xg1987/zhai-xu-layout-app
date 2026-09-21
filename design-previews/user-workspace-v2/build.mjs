@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const files = ['index.html', 'phone.html', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers', '_routes.json', '_redirects', 'login.html', 'login.js', 'admin.html', 'account.css', 'auth-client.js', 'session.js', 'assets/auth-residential-loop-v2.mp4', 'assets/auth-residential-video-poster-v2.jpg'];
+const files = ['plan-workflow.js','plan-workflow.css','index.html', 'phone.html', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers', '_routes.json', '_redirects', 'login.html', 'login.js', 'admin.html', 'account.css', 'auth-client.js', 'session.js', 'assets/auth-residential-loop-v2.mp4', 'assets/auth-residential-video-poster-v2.jpg'];
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 for (const script of ['workspace.js', 'luopan.js','login.js','session.js','auth-client.js','server/auth-core.mjs']) {
   execFileSync(process.execPath, ['--check', join(root, script)]);

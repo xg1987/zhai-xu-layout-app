@@ -17,7 +17,7 @@ export async function originalAdmin(c){
  if(!path.startsWith('/api/admin/'))return null;
  if(user.role!=='admin')fail('此账号没有管理员权限',403);
  if(path==='/api/admin/access'&&method==='GET')return json({user:publicUser(user)});
- if(path==='/api/admin/settings'&&method==='GET')return json({user:publicUser(user),software:{name:'家居布局',version:'0.2.5',language:'简体中文'}});
+ if(path==='/api/admin/settings'&&method==='GET')return json({user:publicUser(user),software:{name:'家居布局',version:'0.3.0',language:'简体中文'}});
  const summary=()=>db.prepare("SELECT COUNT(*) AS total,COALESCE(SUM(approval='pending'),0) AS pending,COALESCE(SUM(status='enabled' AND approval='approved'),0) AS enabled FROM users").first();
  const events=async(q='',page=1)=>{
   const pattern='%'+q+'%',where=' WHERE u.name LIKE ? OR u.login LIKE ? OR e.target LIKE ?';

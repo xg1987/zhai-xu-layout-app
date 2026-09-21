@@ -7,9 +7,10 @@ import { onRequest as middleware } from '../functions/_middleware.js';
 const schema=(await readFile(new URL('../migrations/0001_accounts.sql',import.meta.url),'utf8'))+(await readFile(new URL('../migrations/0002_original_admin.sql',import.meta.url),'utf8'));
 const auditSchema=await readFile(new URL('../migrations/0003_audit_result.sql',import.meta.url),'utf8');
 const enabledSchema=await readFile(new URL('../migrations/0004_model_enabled.sql',import.meta.url),'utf8');
+const planSchema=await readFile(new URL('../migrations/0005_plan_analysis.sql',import.meta.url),'utf8');
 const password='Test-only!472905';
 async function setup(){
- const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema+enabledSchema);
+ const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema+enabledSchema+planSchema);
  const db={async batch(statements){sql.exec('BEGIN');try{const out=[];for(const statement of statements)out.push(await statement.run());sql.exec('COMMIT');return out;}catch(error){sql.exec('ROLLBACK');throw error;}}};
  // D1 batches return SELECT rows as well as mutation metadata.
  db.prepare=query=>{const bound=(values=[])=>({async first(){return sql.prepare(query).get(...values)||null;},async all(){return {results:sql.prepare(query).all(...values)};},async run(){const stmt=sql.prepare(query);if(/^SELECT/i.test(query))return {results:stmt.all(...values),meta:{changes:0}};return {results:[],meta:{changes:Number(stmt.run(...values).changes)}};},bind(...v){return bound(v);}});return bound();};
@@ -156,4 +157,42 @@ test('model toggles persist, preserve keys, block disabled calls and expose shar
  assert.equal((await call('/api/admin/vision')).data.providers[0].enabled,false);
  await call('/api/admin/vision/qwen','PATCH',{enabled:true});assert.equal((await call('/api/admin/vision')).data.providers[0].enabled,true);
  assert.ok(before);assert.equal((await request('/api/admin/vision/qwen','PATCH',{enabled:false})).status,401);sql.close();
+});
+
+test('real analysis flow: Qwen first, fallback, metering, saved confirmation, ownership and duplicate protection',async()=>{
+ const {sql,request,admin}=await setup(),call=(p,m='GET',b)=>request(p,m,b,admin.cookie),originalFetch=globalThis.fetch;
+ const image='data:image/png;base64,iVBORw0KGgo=',id=crypto.randomUUID(),outline=[[100,100],[900,100],[900,900],[100,900]];
+ try{
+  for(const id of ['qwen','gemini'])await call('/api/admin/vision/'+id,'POST',{apiKey:'synthetic-plan-key-123456'});
+  let calls=[];globalThis.fetch=async(url,options)=>{if(url.includes('frankfurter'))return Response.json({base:'USD',quote:'CNY',date:new Date().toISOString().slice(0,10),rate:7});calls.push(url);if(url.includes('aliyuncs'))return Response.json({error:'Unavailable'},{status:503});return Response.json({candidates:[{content:{parts:[{text:JSON.stringify({isFloorPlan:true,northAngleDeg:0,outline,rooms:['客厅'],notes:[]})}]}}],usageMetadata:{promptTokenCount:100,candidatesTokenCount:50}});};
+  const recognized=await call('/api/plans/'+id,'POST',{image,width:800,height:800});assert.equal(recognized.status,200);assert.equal(recognized.data.plan.status,'recognized');assert.equal(calls.length,2);assert.ok(calls[0].includes('aliyuncs'));assert.equal(recognized.data.plan.recognition.provider,'Gemini 3.8 Flash');
+  const repeat=await call('/api/plans/'+id,'POST',{image,width:800,height:800});assert.equal(repeat.status,200);assert.equal(calls.length,2);
+  assert.equal((await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:null})).status,400);
+  assert.equal((await call('/api/plans/'+id+'/confirm','POST',{outline:[[0,0],[900,900],[0,900],[900,0]],northAngleDeg:0})).status,400);
+  const completed=await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0});assert.equal(completed.status,200);assert.equal(completed.data.plan.status,'complete');assert.equal(completed.data.plan.result.sectors.length,8);
+  assert.equal((await call('/api/plans/'+id)).data.plan.result.version,1);assert.equal((await call('/api/plans')).data.plans.length,1);assert.equal((await call('/api/plans')).data.plans[0].image,undefined);
+  const usage=(await call('/api/admin/vision/usage')).data;assert.equal(usage.summary.calls,2);assert.equal(usage.summary.successful,1);assert.equal(usage.records.filter(r=>r.operation==='recognize').length,2);assert.ok(usage.records.some(r=>r.attempt===2));
+  await call('/api/admin/users','POST',{login:'plan-other',name:'另一用户',password,role:'user'});const other=await request('/api/login','POST',{login:'plan-other',password});assert.equal(other.status,200);
+  assert.equal((await request('/api/plans/'+id,'GET',undefined,other.cookie)).status,404);assert.equal((await request('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0},other.cookie)).status,404);assert.equal((await request('/api/plans','GET',undefined,other.cookie)).data.plans.length,0);
+  assert.equal((await request('/api/plans/'+id,'POST',{image,width:800,height:800},other.cookie)).status,409);assert.equal(calls.length,2);
+ }finally{globalThis.fetch=originalFetch;sql.close();}
+});
+test('disabled models, failure retries, non-plan images and invalid request handling',async()=>{
+ const {sql,request,admin}=await setup(),call=(p,m='GET',b)=>request(p,m,b,admin.cookie),originalFetch=globalThis.fetch,id=crypto.randomUUID(),body={image:'data:image/png;base64,iVBORw0KGgo=',width:800,height:800};let calls=0;
+ try{
+  assert.equal((await call('/api/plans/'+id,'POST',body)).status,503);
+  await call('/api/admin/vision/qwen','POST',{apiKey:'synthetic-plan-key-123456'});await call('/api/admin/vision/qwen','PATCH',{enabled:false});assert.equal((await call('/api/plans/'+id,'POST',body)).status,503);
+  await call('/api/admin/vision/qwen','PATCH',{enabled:true});globalThis.fetch=async()=>{calls++;return new Response('',{status:503});};
+  assert.equal((await call('/api/plans/'+id,'POST',{...body,image:'invalid'})).status,400);assert.equal(calls,0);
+  assert.equal((await call('/api/plans/'+id,'POST',body)).status,502);assert.equal((await call('/api/plans/'+id)).data.plan.status,'failed');
+  globalThis.fetch=async()=>{calls++;return Response.json({choices:[{message:{content:JSON.stringify({isFloorPlan:false,northAngleDeg:null,outline:[],rooms:[],notes:['不是户型图']})}}],usage:{prompt_tokens:10,completion_tokens:20}});};
+  assert.equal((await call('/api/plans/'+id,'POST',body)).data.plan.status,'not_plan');assert.equal((await call('/api/plans/'+id+'/confirm','POST',{})).status,409);assert.equal(calls,2);
+  sql.prepare("UPDATE plans SET status='processing',updated_at=? WHERE id=?").run(new Date().toISOString(),id);assert.equal((await call('/api/plans/'+id,'POST',body)).status,409);assert.equal(calls,2);
+ }finally{globalThis.fetch=originalFetch;sql.close();}
+});
+test('geometry preserves aspect ratio, rejects intersecting edges, rotates directions',async()=>{
+ const {analyzePlan,validateOutline}=await import('./plan-geometry.mjs');
+ const outline=[[0,0],[1000,0],[1000,1000],[0,1000]],a=analyzePlan({outline,northAngleDeg:0,width:1000,height:500}),b=analyzePlan({outline,northAngleDeg:90,width:1000,height:500});
+ assert.deepEqual(a.center,[500,500]);assert.ok(a.sectors[2].percent>a.sectors[0].percent);assert.equal(a.sectors[2].percent,b.sectors[0].percent);assert.ok(Math.abs(a.sectors.reduce((n,s)=>n+s.percent,0)-100)<.5);
+ assert.throws(()=>validateOutline([[0,0],[1000,0],[500,0],[1000,1000],[0,1000]]));assert.throws(()=>analyzePlan({outline,northAngleDeg:360,width:1000,height:500}));
 });

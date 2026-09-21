@@ -10,8 +10,8 @@ async function encryptionKey(env){
  return crypto.subtle.importKey('raw',Uint8Array.from(env.MODEL_ENCRYPTION_KEY.match(/../g),v=>parseInt(v,16)),'AES-GCM',false,['encrypt','decrypt']);
 }
 async function seal(value,env){const iv=crypto.getRandomValues(new Uint8Array(12)),data=await crypto.subtle.encrypt({name:'AES-GCM',iv},await encryptionKey(env),new TextEncoder().encode(value));return JSON.stringify({iv:Array.from(iv),data:Array.from(new Uint8Array(data))});}
-async function open(value,env){const {iv,data}=JSON.parse(value);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(iv)},await encryptionKey(env),new Uint8Array(data)));}
-async function exchange(db,date){
+export async function open(value,env){const {iv,data}=JSON.parse(value);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(iv)},await encryptionKey(env),new Uint8Array(data)));}
+export async function exchange(db,date){
  const cached=await db.prepare('SELECT * FROM vision_fx WHERE requested_date=?').bind(date).first();
  if(cached&&Date.now()-Date.parse(cached.fetched_at)<21600000)return JSON.parse(cached.rate_json);
  try{

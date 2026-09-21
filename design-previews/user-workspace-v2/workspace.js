@@ -32,13 +32,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('layersPop').hidd
 document.addEventListener('click',e=>{if(!$('mobileTools').open&&!e.target.closest('.popover-anchor')){$('layersPop').hidden=true;$('layersButton').setAttribute('aria-expanded','false')}if(!e.target.closest('.account,.account-pop')){$('accountPop').hidden=true;$('accountButton').setAttribute('aria-expanded','false')}});
 $('workspace').addEventListener('dragover',e=>{e.preventDefault()});$('workspace').addEventListener('drop',e=>{e.preventDefault();loadImage(e.dataTransfer.files[0])});setState('empty');
 
-function requestAnalysis(){if(!currentImage)return;$('analysisThumb').src=currentImage.url;$('analysisName').textContent=currentImage.name;$('analysisError').hidden=true;$('analysisDialog').showModal()}
-function dismissAnalysis(){$('analysisDialog').close()}
-$('closeAnalysis').onclick=dismissAnalysis;$('cancelAnalysis').onclick=dismissAnalysis;
-$('confirmAnalysis').onclick=()=>{$('analysisError').textContent='分析服务尚未连接，暂时无法生成结果。';$('analysisError').hidden=false};
-$('analysisDialog').addEventListener('click',e=>{if(e.target===$('analysisDialog')){const rect=$('analysisDialog').getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)dismissAnalysis()}});
-
-
 function alignSpaceSwitch(){const header=document.querySelector('.header');const canvas=document.querySelector('.canvas-wrap');const headerRect=header.getBoundingClientRect();const canvasRect=canvas.getBoundingClientRect();const center=canvasRect.width>0?canvasRect.left+canvasRect.width/2-headerRect.left:headerRect.width/2;header.style.setProperty('--mode-center',center+'px')}
 const spaceAlignmentObserver=new ResizeObserver(alignSpaceSwitch);spaceAlignmentObserver.observe(document.querySelector('.canvas-wrap'));spaceAlignmentObserver.observe(document.querySelector('.header'));alignSpaceSwitch();
 

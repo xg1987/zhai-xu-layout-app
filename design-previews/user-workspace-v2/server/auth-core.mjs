@@ -1,3 +1,4 @@
+import { planRoute } from './plan-cloud.mjs';
 import { originalAdmin } from './original-admin.mjs';
 const enc = new TextEncoder();
 export const COOKIE = '__Host-zx_workspace';
@@ -96,6 +97,7 @@ export async function api({request,env}){
   const user=await currentUser(request,db);
   if(path==='/api/me'&&method==='GET')return json({user:user?publicUser(user):null});
   if(!user)fail('请先登录',401);
+  const planResponse=await planRoute({request,env,db,url,path,method,user,json,fail,bodyOf,limit});if(planResponse)return planResponse;
   const restored=await originalAdmin({request,env,db,url,path,method,user,json,fail,bodyOf,fields,hashPassword,verifyPassword,publicUser,event,limit});
   if(restored)return restored;
   if(!path.startsWith('/api/admin/'))fail('接口不存在',404);
