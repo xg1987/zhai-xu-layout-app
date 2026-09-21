@@ -169,7 +169,7 @@ test('real analysis flow: Qwen first, fallback, metering, saved confirmation, ow
   const repeat=await call('/api/plans/'+id,'POST',{image,width:800,height:800});assert.equal(repeat.status,200);assert.equal(calls.length,2);
   assert.equal((await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:null})).status,400);
   assert.equal((await call('/api/plans/'+id+'/confirm','POST',{outline:[[0,0],[900,900],[0,900],[900,0]],northAngleDeg:0})).status,400);
-  const completed=await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0});assert.equal(completed.status,200);assert.equal(completed.data.plan.status,'complete');assert.equal(completed.data.plan.result.sectors.length,8);
+  const completed=await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0});assert.equal(completed.status,200);assert.equal(completed.data.plan.status,'complete');assert.equal(completed.data.plan.result.sectors.length,8);assert.ok(completed.data.plan.image.startsWith('data:image/'));
   assert.equal((await call('/api/plans/'+id)).data.plan.result.version,1);assert.equal((await call('/api/plans')).data.plans.length,1);assert.equal((await call('/api/plans')).data.plans[0].image,undefined);
   const usage=(await call('/api/admin/vision/usage')).data;assert.equal(usage.summary.calls,2);assert.equal(usage.summary.successful,1);assert.equal(usage.records.filter(r=>r.operation==='recognize').length,2);assert.ok(usage.records.some(r=>r.attempt===2));
   await call('/api/admin/users','POST',{login:'plan-other',name:'另一用户',password,role:'user'});const other=await request('/api/login','POST',{login:'plan-other',password});assert.equal(other.status,200);

@@ -13,7 +13,7 @@ const PROMPT = `识别住宅户型图，仅提取可见信息，不给出风水�
 输出 JSON：{"isFloorPlan":true,"northAngleDeg":null,"outline":[],"rooms":[],"notes":[]}。
 northAngleDeg 是原始图片中北箭头从正上方顺时针量出的角度，0为上、90为右、180为下、270为左；仅有明确方向证据时填写0到359.9，否则为null，不能默认上北。
 outline是房屋外墙边界的有序顶点数组，每点为[x,y]，左上原点，横纵分别按原图宽高归一化到0到1000，最多80点，不重复最后一点。不能把图片边框或文字尺寸线当外墙；无法确定就返回[]并说明。
-rooms是图上可见房间名称字符串数组，最多30项。notes是最多8条待人工核对的事项。不确定项必须说明，非户型图isFloorPlan=false且outline=[]。只返回JSON。`
+rooms是图上可见房间名称字符串数组，最多30项，排除电视墙、门、洗手台等设施名称。notes是最多8条简洁的中文待人工核对事项，不写字段名或代码。公共楼梯、电梯间与住宅专有面积边界不明确时必须提示用户核对。不确定项必须说明，非户型图isFloorPlan=false且outline=[]。只返回JSON。`
 
 export function validateImage(image) {
   if (typeof image !== 'string' || image.length > 7 * 1024 * 1024) throw new VisionError('图片过大，请使用较小的户型图片')
