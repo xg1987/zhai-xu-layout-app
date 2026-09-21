@@ -1,3 +1,9 @@
 name = "zhai-xu-workspace-preview"
 pages_build_output_dir = "./dist"
-compatibility_date = "2026-09-21"
+compatibility_date = "2026-04-22"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zhai-xu-workspace-auth"
+database_id = "9bdeb598-8d98-4761-85cb-22dec53104c8"
+migrations_dir = "migrations"

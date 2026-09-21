@@ -1,0 +1,9 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>登录 · 家居风水</title><link rel="stylesheet" href="/account.css"></head>
+<body class="login-page"><div class="residential-scene" aria-hidden="true"><img src="/assets/auth-residential-video-poster-v2.jpg" alt=""><video muted autoplay loop playsinline poster="/assets/auth-residential-video-poster-v2.jpg"></video></div>
+<main class="login-card"><h1 id="authTitle">登录</h1><form id="authForm">
+<label>账号<input name="login" required minlength="3" maxlength="64" autocomplete="username" placeholder="请输入账号" autocapitalize="none"></label>
+<div class="register-field" hidden><label>显示名称<input name="name" maxlength="24" autocomplete="nickname" placeholder="请输入显示名称"></label><label>邀请码<input name="inviteCode" maxlength="64" placeholder="请输入邀请码" autocapitalize="characters"></label></div>
+<label>密码<span class="password-field"><input id="password" name="password" type="password" required minlength="8" maxlength="72" autocomplete="current-password" placeholder="请输入密码"><button type="button" id="togglePassword" aria-label="显示密码" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+<label class="register-field" hidden>确认密码<input name="confirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="请再次输入密码"></label>
+<button class="primary" id="submitAuth" type="submit">登录 <span aria-hidden="true">→</span></button><p class="feedback" id="authFeedback" role="status" hidden></p>
+</form><p class="auth-switch"><a id="switchAuth" href="/register">注册账号</a></p><a class="admin-entry" id="adminEntry" href="/login?admin=1">管理员入口</a></main><script type="module" src="/login.js"></script></body></html>

@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const files = ['index.html', 'phone.html', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers'];
+const files = ['index.html', 'phone.html', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers', '_routes.json', '_redirects', 'login.html', 'login.js', 'admin.html', 'admin.js', 'account.css', 'auth-client.js', 'session.js', 'assets/auth-residential-loop-v2.mp4', 'assets/auth-residential-video-poster-v2.jpg'];
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-for (const script of ['workspace.js', 'luopan.js']) {
+for (const script of ['workspace.js', 'luopan.js','login.js','admin.js','session.js','auth-client.js','server/auth-core.mjs']) {
   execFileSync(process.execPath, ['--check', join(root, script)]);
 }
 for (const htmlFile of ['index.html', 'phone.html']) {
@@ -16,6 +16,7 @@ for (const htmlFile of ['index.html', 'phone.html']) {
 const output = join(root, 'dist');
 await mkdir(join(output, 'assets'), { recursive: true });
 for (const file of files) await copyFile(join(root, file), join(output, file));
+await copyFile(join(root,'login.html'),join(output,'register.html'));
 const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 await writeFile(join(output, 'version.json'), JSON.stringify({ name: pkg.name, version: pkg.version, channel: 'ui-preview', commit }, null, 2) + '\n');
-console.log(`Built ${pkg.name} ${pkg.version}: ${files.length + 1} public files`);
+console.log(`Built ${pkg.name} ${pkg.version}: ${files.length + 2} public files`);
