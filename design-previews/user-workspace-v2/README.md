@@ -1,6 +1,6 @@
 # 家居风水在线工作台
 
-当前独立站点版本：0.2.1。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
+当前独立站点版本：0.2.2。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
 - 工作台：https://zhai-xu-workspace-preview.pages.dev/
 - 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
@@ -47,3 +47,7 @@ wrangler pages deploy dist --project-name zhai-xu-workspace-preview --branch mai
 - `MODEL_ENCRYPTION_KEY` 必须作为 Pages secret 设置为随机 32 字节十六进制字符串；不得放入源码或公开变量。模型密钥经 AES-GCM 加密后写入 D1。
 - 费用计算沿用原项目计价规则，属于估算，实际扣费以服务商账单为准。
 - 验证包含原版管理接口、资料更新、重置密码、审核、角色与状态保护、模型密钥加密、受控模型响应的用量入账与错误脱敏；没有用真实密钥产生测试费用。
+
+### 0.2.2 请求兼容修复
+
+模型与汇率请求统一使用 Workers 支持的 manual 重定向模式，拒绝 3xx，防止密钥被转发；区分超时、连接失败、运行环境异常和重定向。十组测试覆盖上述分支。真实 Workers 本地运行验证 Google 无密钥请求可返回 HTTP 响应，汇率接口可访问。

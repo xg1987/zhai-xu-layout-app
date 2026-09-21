@@ -120,11 +120,23 @@ test('model test records real normalized usage and redacts upstream errors',asyn
  await call('/api/admin/vision/qwen','POST',{apiKey:'synthetic-provider-key-only-19483'});
  const originalFetch=globalThis.fetch;
  try{
-  globalThis.fetch=async(url,options)=>{assert.equal(url,'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions');assert.equal(options.redirect,'error');return new Response(JSON.stringify({choices:[{message:{content:'{"ok":true}'}}],usage:{prompt_tokens:100,completion_tokens:10}}),{status:200});};
+  globalThis.fetch=async(url,options)=>{assert.equal(url,'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions');assert.equal(options.redirect,'manual');return new Response(JSON.stringify({choices:[{message:{content:'{"ok":true}'}}],usage:{prompt_tokens:100,completion_tokens:10}}),{status:200});};
   const tested=await call('/api/admin/vision/qwen/test','POST');assert.equal(tested.status,200);assert.equal(tested.data.providers.find(p=>p.id==='qwen').checkState,'ok');
   const usage=await call('/api/admin/vision/usage');assert.equal(usage.data.summary.calls,1);assert.equal(usage.data.summary.successful,1);assert.equal(usage.data.records[0].usage.input,100);assert.ok(usage.data.records[0].cnyAmount>0);
   globalThis.fetch=async()=>new Response(JSON.stringify({error:'synthetic-provider-key-only-19483'}),{status:401});
   const failed=await call('/api/admin/vision/qwen/test','POST');assert.equal(failed.status,502);assert.ok(!JSON.stringify(failed.data).includes('synthetic-provider-key-only-19483'));
   assert.equal((await call('/api/admin/vision/usage?status=failed')).data.summary.calls,1);assert.equal((await call('/api/admin/events')).data.records[0].result,'failed');
  }finally{globalThis.fetch=originalFetch;sql.close();}
+});
+
+test('Workers request compatibility and distinct, sanitized failure reporting',async()=>{
+ const {callVision}=await import('./vision-provider.mjs');
+ const {upstreamFetch}=await import('./upstream-fetch.mjs');
+ for(const [error,pattern,status] of [[new DOMException('secret','TimeoutError'),/响应超时/,504],[new TypeError('fetch failed secret'),/无法连接/,502],[new TypeError('Invalid redirect value secret'),/配置异常/,502]]){
+  await assert.rejects(()=>callVision('gemini','synthetic-key',{test:true},async()=>{throw error;}),e=>pattern.test(e.message)&&e.status===status&&!e.message.includes('secret'));
+ }
+ let calls=0;
+ await assert.rejects(()=>callVision('gemini','synthetic-key',{test:true},async(url,options)=>{calls++;assert.equal(options.redirect,'manual');return new Response('',{status:302,headers:{Location:'https://untrusted.example'}});}),/已阻止转发密钥/);assert.equal(calls,1);
+ await assert.rejects(()=>upstreamFetch('https://api.frankfurter.dev/v2/rate/USD/CNY',{},async(url,options)=>{assert.equal(options.redirect,'manual');return new Response('',{status:307});}),/redirect/);
+ const result=await callVision('gemini','synthetic-key',{test:true},async(url,options)=>{assert.equal(options.redirect,'manual');assert.ok(url.endsWith('gemini-3.8-flash:generateContent'));return Response.json({candidates:[{content:{parts:[{text:'{"ok":true}'}]}}]});});assert.equal(result.ok,true);
 });

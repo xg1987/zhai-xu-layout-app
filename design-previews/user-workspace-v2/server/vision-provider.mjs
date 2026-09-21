@@ -1,3 +1,4 @@
+import { upstreamFetch, UpstreamError } from './upstream-fetch.mjs';
 import { Buffer } from 'node:buffer';
 // Endpoints are fixed: a submitted key cannot be forwarded to an arbitrary URL.
 export const PROVIDERS = Object.freeze({
@@ -51,7 +52,7 @@ export async function callVision(id, key, { image, test = false, onUsage = () =>
     body = { model: provider.model, enable_thinking: false, response_format: { type: 'json_object' }, max_tokens: test ? 100 : 4096, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...(image ? [{ type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] : [])] }] }
   }
   try {
-    const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(test ? 20000 : 45000), redirect: 'error' })
+    const response = await upstreamFetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(test ? 20000 : 45000), }, fetchImpl)
     const data = await response.json().catch(() => null)
     onUsage(data)
     if (!response.ok) {
@@ -69,7 +70,8 @@ export async function callVision(id, key, { image, test = false, onUsage = () =>
     return parseRecognition(text)
   } catch (error) {
     if (error instanceof VisionError) throw error
-    throw new VisionError(`${provider.name}：连接失败或超时，请检查网络后重试`, 502, true)
+    const reason=error instanceof UpstreamError?error.code:(error?.name==='TimeoutError'||error?.name==='AbortError')?'timeout':'runtime'
+    const messages={timeout:'服务响应超时，请稍后重试',network:'服务器无法连接模型服务，请稍后重试',runtime:'后台请求配置异常，请联系管理员',redirect:'模型接口返回重定向，已阻止转发密钥'}
+    throw new VisionError(`${provider.name}：${messages[reason]}`, reason==='timeout'?504:502, ['timeout','network'].includes(reason))
   }
 }
-

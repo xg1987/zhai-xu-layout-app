@@ -1,3 +1,4 @@
+import { upstreamFetch } from './upstream-fetch.mjs';
 import { PROVIDERS, callVision } from './vision-provider.mjs';
 import { normalizeUsage, priceSnapshot, calculateCost } from './usage-math.mjs';
 export async function providers(db){
@@ -14,7 +15,7 @@ async function exchange(db,date){
  const cached=await db.prepare('SELECT * FROM vision_fx WHERE requested_date=?').bind(date).first();
  if(cached&&Date.now()-Date.parse(cached.fetched_at)<21600000)return JSON.parse(cached.rate_json);
  try{
-  const res=await fetch(`https://api.frankfurter.dev/v2/rate/USD/CNY?providers=ecb&date=${date}`,{signal:AbortSignal.timeout(4000),redirect:'error'});if(!res.ok)throw 0;const v=await res.json(),age=Date.parse(date)-Date.parse(v.date);
+  const res=await upstreamFetch(`https://api.frankfurter.dev/v2/rate/USD/CNY?providers=ecb&date=${date}`,{signal:AbortSignal.timeout(4000)});if(!res.ok)throw 0;const v=await res.json(),age=Date.parse(date)-Date.parse(v.date);
   if(v.base!=='USD'||v.quote!=='CNY'||!Number.isFinite(v.rate)||v.rate<=0||v.rate>100||!Number.isFinite(age)||age<0||age>7*86400000)throw 0;
   const fx={rate:v.rate,date:v.date,source:'Frankfurter / ECB'};await db.prepare('INSERT INTO vision_fx VALUES(?,?,?) ON CONFLICT(requested_date) DO UPDATE SET rate_json=excluded.rate_json,fetched_at=excluded.fetched_at').bind(date,JSON.stringify(fx),new Date().toISOString()).run();return fx;
  }catch{return cached?JSON.parse(cached.rate_json):null;}
