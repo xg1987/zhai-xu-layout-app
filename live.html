@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>实景罗盘 · 家居风水</title>
+  <link rel="stylesheet" href="/live.css?v=0.4.0">
+</head>
+<body>
+  <header class="live-header">
+    <a class="back-link" href="/" aria-label="返回工作台">← <span>工作台</span></a>
+    <strong>实景罗盘</strong>
+    <span class="header-space" aria-hidden="true"></span>
+  </header>
+  <main class="live-app">
+    <div class="scene-tabs" role="group" aria-label="实景场景">
+      <button id="indoorScene" class="selected" aria-pressed="true">室内</button>
+      <button id="outdoorScene" aria-pressed="false">室外</button>
+    </div>
+    <section class="live-view" aria-label="相机和罗盘画面">
+      <video id="cameraView" autoplay muted playsinline hidden></video>
+      <div class="camera-placeholder" id="cameraPlaceholder" aria-hidden="true"><span class="placeholder-ring"></span></div>
+      <div class="view-top"><span class="scene-chip" id="sceneChip">室内实景</span><span class="source-chip" id="sourceChip">手动方位</span></div>
+      <div class="compass-stage"><svg id="liveCompass" viewBox="0 0 400 400" role="img" aria-label="实时方位罗盘"></svg><div class="heading-pointer" aria-hidden="true"></div><div class="heading-center"><strong id="headingValue">0°</strong><small id="headingDirection">北</small></div></div>
+      <div class="view-bottom"><span id="cameraState">相机未开启</span><span id="headingState">请手动校准方位</span></div>
+    </section>
+    <section class="live-controls" aria-label="实景罗盘控制">
+      <div class="main-actions"><button class="primary-action" id="startCamera">开启相机</button><button class="secondary-action" id="stopCamera" hidden>关闭相机</button><button class="secondary-action" id="startSensor">启用方向感应</button></div>
+      <p class="status" id="liveStatus" role="status">相机画面仅在本机显示，不会上传。</p>
+      <div class="control-grid">
+        <label class="control-field" for="manualAngle"><span id="angleLabel">手动朝向</span><output id="angleOutput">0°</output><input id="manualAngle" type="range" min="0" max="359" step="1" value="0"></label>
+        <label class="control-field" for="compassSize"><span>罗盘大小</span><output id="sizeOutput">100%</output><input id="compassSize" type="range" min="70" max="130" step="5" value="100"></label>
+      </div>
+      <button class="style-button" id="styleButton" aria-pressed="false">切换为简洁罗盘</button>
+    </section>
+  </main>
+  <script src="/luopan.js?rev=b1059dad65"></script>
+  <script src="/live.js?v=0.4.0"></script>
+</body>
+</html>

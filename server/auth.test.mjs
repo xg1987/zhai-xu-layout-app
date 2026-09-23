@@ -83,9 +83,11 @@ test('workspace and admin HTML require a valid session and are not cached',async
  const {db,sql,admin}=await setup();
  const context=(path,cookie='')=>({request:new Request('https://app.example'+path,{headers:{Cookie:cookie}}),env:{DB:db,MODEL_ENCRYPTION_KEY:'ab'.repeat(32)},next:async()=>new Response('page')});
  assert.equal((await middleware(context('/'))).status,302);
+ assert.equal((await middleware(context('/live'))).status,302);
  assert.equal((await middleware(context('/settings'))).headers.get('Location'),'https://app.example/login');
  assert.equal((await middleware(context('/admin/'))).headers.get('Location'),'https://app.example/login');
  const settings=await middleware(context('/settings',admin.cookie));assert.equal(settings.status,200);assert.equal(settings.headers.get('Cache-Control'),'no-store');
+ const live=await middleware(context('/live',admin.cookie));assert.equal(live.status,200);assert.equal(live.headers.get('Cache-Control'),'no-store');
  const logged=await middleware(context('/admin',admin.cookie));assert.equal(logged.status,200);assert.equal(logged.headers.get('Cache-Control'),'no-store');assert.equal(await logged.text(),'page');sql.close();
 });
 test('ordinary users can open personal settings without admin access',async()=>{

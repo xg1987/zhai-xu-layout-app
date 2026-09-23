@@ -1,7 +1,7 @@
 import { currentUser } from '../server/auth-core.mjs';
 export async function onRequest(context){
  const url=new URL(context.request.url),path=url.pathname.replace(/\/+$/,'')||'/';
- if(['/', '/index.html','/phone','/phone.html','/settings','/settings.html','/admin','/admin.html'].includes(path)|| (path.startsWith('/admin/')&&path!=='/admin/login')){
+ if(['/', '/index.html','/phone','/phone.html','/live','/live.html','/settings','/settings.html','/admin','/admin.html'].includes(path)|| (path.startsWith('/admin/')&&path!=='/admin/login')){
   if(!context.env.DB)return new Response('账号服务暂不可用',{status:503});
   let user;try{user=await currentUser(context.request,context.env.DB);}catch{return new Response('账号服务暂不可用',{status:503});}
   const admin=path.startsWith('/admin');

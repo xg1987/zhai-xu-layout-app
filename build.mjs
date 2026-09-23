@@ -4,12 +4,12 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const files = ['plan-workflow.js','plan-workflow.css','index.html', 'phone.html', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers', '_routes.json', '_redirects', 'login.html', 'login.js', 'admin.html', 'settings.html', 'account.css', 'auth-client.js', 'session.js', 'assets/auth-residential-loop-v2.mp4', 'assets/auth-residential-video-poster-v2.jpg'];
+const files = ['plan-workflow.js','plan-workflow.css','index.html', 'phone.html', 'live.html', 'live.css', 'live.js', 'workspace.css', 'workspace.js', 'luopan.js', 'assets/zodiac.png', '_headers', '_routes.json', '_redirects', 'login.html', 'login.js', 'admin.html', 'settings.html', 'account.css', 'auth-client.js', 'session.js', 'assets/auth-residential-loop-v2.mp4', 'assets/auth-residential-video-poster-v2.jpg'];
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-for (const script of ['workspace.js', 'luopan.js','login.js','session.js','auth-client.js','server/auth-core.mjs']) {
+for (const script of ['workspace.js', 'luopan.js','live.js','login.js','session.js','auth-client.js','server/auth-core.mjs']) {
   execFileSync(process.execPath, ['--check', join(root, script)]);
 }
-for (const htmlFile of ['index.html', 'phone.html']) {
+for (const htmlFile of ['index.html', 'phone.html', 'live.html']) {
   const html = await readFile(join(root, htmlFile), 'utf8');
   if (/https?:\/\/(localhost|127\.0\.0\.1)/.test(html)) throw new Error('Local-only URL in ' + htmlFile);
 }
