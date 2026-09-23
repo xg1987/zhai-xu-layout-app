@@ -82,8 +82,22 @@ test('workspace and admin HTML require a valid session and are not cached',async
  const {db,sql,admin}=await setup();
  const context=(path,cookie='')=>({request:new Request('https://app.example'+path,{headers:{Cookie:cookie}}),env:{DB:db,MODEL_ENCRYPTION_KEY:'ab'.repeat(32)},next:async()=>new Response('page')});
  assert.equal((await middleware(context('/'))).status,302);
- assert.match((await middleware(context('/admin/'))).headers.get('Location'),/login\?admin=1/);
+ assert.equal((await middleware(context('/settings'))).headers.get('Location'),'https://app.example/login');
+ assert.equal((await middleware(context('/admin/'))).headers.get('Location'),'https://app.example/login');
+ const settings=await middleware(context('/settings',admin.cookie));assert.equal(settings.status,200);assert.equal(settings.headers.get('Cache-Control'),'no-store');
  const logged=await middleware(context('/admin',admin.cookie));assert.equal(logged.status,200);assert.equal(logged.headers.get('Cache-Control'),'no-store');assert.equal(await logged.text(),'page');sql.close();
+});
+test('ordinary users can open personal settings without admin access',async()=>{
+ const {db,sql,request,admin}=await setup();
+ const created=await request('/api/admin/accounts','POST',{login:'settings-user',name:'普通用户',password,confirmPassword:password,role:'user'},admin.cookie);
+ assert.equal(created.status,201);
+ const login=await request('/api/login','POST',{login:'settings-user',password});assert.equal(login.status,200);
+ const settings=await request('/api/account/settings','GET',undefined,login.cookie);
+ assert.equal(settings.status,200);assert.equal(settings.data.user.name,'普通用户');assert.equal(settings.data.user.role,'user');
+ assert.equal((await request('/api/admin/settings','GET',undefined,login.cookie)).status,403);
+ const context={request:new Request('https://app.example/settings',{headers:{Cookie:login.cookie}}),env:{DB:db},next:async()=>new Response('settings page')};
+ assert.equal((await middleware(context)).status,200);
+ sql.close();
 });
 
  test('original admin contracts, filtering, profile, review and session revocation',async()=>{

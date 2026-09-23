@@ -3,7 +3,7 @@ const Session = createContext(null)
 export const useSession = () => useContext(Session)
 export function LogoutControl({ showIdentity = true }) {
  const user = useSession(), [error, setError] = useState('')
- return <span className="session-controls">{showIdentity && <span>{user?.name}</span>}<button onClick={async () => { try { const res = await fetch('/api/logout', { method: 'POST' }); if (!res.ok) throw new Error(); window.location.assign(user?.role === 'admin' ? '/admin/login' : '/login') } catch { setError('退出失败，请重试') } }}>退出登录</button>{error && <span role="alert">{error}</span>}</span>
+ return <span className="session-controls">{showIdentity && <span>{user?.name}</span>}<button onClick={async () => { try { const res = await fetch('/api/logout', { method: 'POST' }); if (!res.ok) throw new Error(); window.location.assign('/login') } catch { setError('退出失败，请重试') } }}>退出登录</button>{error && <span role="alert">{error}</span>}</span>
 }
 export function SessionGate({ admin, children }) {
  const [user, setUser] = useState(null), [error, setError] = useState(''), [revision, setRevision] = useState(0)

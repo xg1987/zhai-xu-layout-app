@@ -1,1 +1,1 @@
-/admin/login /login?admin=1 302
+/admin/login /login 302

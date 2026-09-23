@@ -11,5 +11,6 @@ import SystemSettings from './components/admin/SystemSettings.jsx';
 import './base.css';
 import './components/admin/spatial.css';
 const pages={overview:AdminOverview,invitations:AdminInvitations,events:AdminEvents,models:ModelSettings,usage:UsageCosts,settings:SystemSettings};
-const Page=pages[location.pathname.replace(/\/$/,'').split('/')[2]]||AdminAccounts;
-createRoot(document.getElementById('root')).render(<StrictMode><SessionGate admin><Page/></SessionGate></StrictMode>);
+const sharedSettings=['/settings','/settings.html'].includes(location.pathname.replace(/\/$/,''));
+const Page=sharedSettings?SystemSettings:pages[location.pathname.replace(/\/$/,'').split('/')[2]]||AdminAccounts;
+createRoot(document.getElementById('root')).render(<StrictMode><SessionGate admin={!sharedSettings}><Page/></SessionGate></StrictMode>);

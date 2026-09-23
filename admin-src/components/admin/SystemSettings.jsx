@@ -7,7 +7,7 @@ import './settings.css'
 async function request(url, options) {
  const response = await fetch(url, options)
  const data = await response.json().catch(() => { throw new Error('设置服务暂不可用，请稍后重试') })
- if (response.status === 401) { window.location.replace('/admin/login'); throw new Error('请重新登录') }
+ if (response.status === 401) { window.location.replace('/login'); throw new Error('请重新登录') }
  if (!response.ok) throw new Error(data.error || '保存失败，请重试')
  return data
 }
@@ -24,7 +24,7 @@ function ProfileForm({ user, onSaved, onCancel }) {
   finally { setBusy(false) }
  }
  return <form className="system-form" onSubmit={save}>
-  <div className="system-identity"><span className="system-avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><strong>{user.phone}</strong><small>{user.role === 'admin' ? '管理员' : '普通用户'}</small></div></div>
+  <div className="system-identity"><span className="system-avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><strong>{user.phone}</strong></div></div>
   <label htmlFor="settings-name">显示名称</label>
   <input id="settings-name" name="name" value={name} onChange={e => { setName(e.target.value); setFeedback(null) }} autoComplete="nickname" required maxLength={24} disabled={busy}/>
   <div className="system-form-actions"><button className="admin-primary" disabled={busy || !name.trim() || name.trim() === user.name}>{busy ? '保存中…' : '确认保存'}</button><button type="button" className="system-cancel" disabled={busy} onClick={onCancel}>取消</button>{feedback && <p className={`system-feedback ${feedback.ok ? 'success' : 'error'}`} role={feedback.ok ? 'status' : 'alert'}>{feedback.text}</p>}</div>
@@ -49,7 +49,7 @@ function PasswordForm({ onCancel }) {
   try {
    await request('/api/account/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: current, newPassword: password, confirmPassword: confirm }) })
    setCurrent(''); setPassword(''); setConfirm('')
-   window.location.replace('/admin/login?passwordChanged=1')
+   window.location.replace('/login?passwordChanged=1')
   } catch (e) { setError(e.message); setCurrent(''); setPassword(''); setConfirm('') }
   finally { setBusy(false) }
  }
@@ -72,17 +72,17 @@ export default function SystemSettings() {
  useEffect(() => {
   let live = true
   setError('')
-  request('/api/admin/settings').then(result => { if (live) setData(result) }).catch(e => { if (live) setError(e.message) })
+  request('/api/account/settings').then(result => { if (live) setData(result) }).catch(e => { if (live) setError(e.message) })
   return () => { live = false }
  }, [revision])
  const closeProfile = () => { setEditingProfile(false); profileButton.current?.focus() }
  const closePassword = () => { setEditingPassword(false); passwordButton.current?.focus() }
- return <div className="admin-app system-app"><AdminHeader active="settings"/><main className="admin-main system-main">
+ return <div className="admin-app system-app">{location.pathname.startsWith('/admin')?<AdminHeader active="settings"/>:<header className="system-user-header"><a href="/">← 返回工作台</a><strong>家居风水</strong></header>}<main className="admin-main system-main">
   <div className="admin-title"><div><h2>系统设置</h2></div></div>
   {error && <p className="system-feedback error" role="alert">{error}<button onClick={() => setRevision(v => v + 1)}>重新加载</button></p>}
   {!data && !error && <p role="status" className="system-loading">正在读取设置…</p>}
   {data && <><div className="system-sections">
-   <section className="system-section system-profile-card" aria-labelledby="settings-profile-title"><div className="system-section-heading"><h3 id="settings-profile-title">账户资料</h3></div><div className="system-setting-row system-profile-summary"><div className="system-identity"><span className="system-avatar" aria-hidden="true">{data.user.name.slice(0, 1)}</span><div><strong>{data.user.name}</strong><small>{data.user.phone} · 管理员</small></div></div><button ref={profileButton} className="admin-secondary" type="button" aria-haspopup="dialog" onClick={() => setEditingProfile(true)}>修改信息</button></div></section>
+   <section className="system-section system-profile-card" aria-labelledby="settings-profile-title"><div className="system-section-heading"><h3 id="settings-profile-title">账户资料</h3></div><div className="system-setting-row system-profile-summary"><div className="system-identity"><span className="system-avatar" aria-hidden="true">{data.user.name.slice(0, 1)}</span><div><strong>{data.user.name}</strong><small>{data.user.phone}</small></div></div><button ref={profileButton} className="admin-secondary" type="button" aria-haspopup="dialog" onClick={() => setEditingProfile(true)}>修改信息</button></div></section>
    <section className="system-section system-security-card" aria-labelledby="settings-security-title"><div className="system-section-heading"><h3 id="settings-security-title">账号安全</h3></div><div className="system-security"><div className="system-setting-row"><div><strong>登录密码</strong></div><button ref={passwordButton} className="admin-secondary" type="button" aria-haspopup="dialog" onClick={() => setEditingPassword(true)}>修改密码</button></div></div></section>
    <section className="system-section system-about-card" aria-labelledby="settings-about-title"><div className="system-section-heading"><h3 id="settings-about-title">关于软件</h3></div><dl className="system-about"><div><dt>软件名称</dt><dd>{data.software.name}</dd></div><div><dt>当前版本</dt><dd><span className="system-version">v{data.software.version}</span></dd></div><div><dt>界面语言</dt><dd>{data.software.language}</dd></div></dl></section>
   </div></>}
