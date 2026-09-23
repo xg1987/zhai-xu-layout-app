@@ -8,9 +8,10 @@ const schema=(await readFile(new URL('../migrations/0001_accounts.sql',import.me
 const auditSchema=await readFile(new URL('../migrations/0003_audit_result.sql',import.meta.url),'utf8');
 const enabledSchema=await readFile(new URL('../migrations/0004_model_enabled.sql',import.meta.url),'utf8');
 const planSchema=await readFile(new URL('../migrations/0005_plan_analysis.sql',import.meta.url),'utf8');
+const planTitleSchema=await readFile(new URL('../migrations/0009_plan_titles.sql',import.meta.url),'utf8');
 const password='Test-only!472905';
 async function setup(){
- const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema+enabledSchema+planSchema);
+ const sql=new DatabaseSync(':memory:');sql.exec(schema+auditSchema+enabledSchema+planSchema+planTitleSchema);
  const db={async batch(statements){sql.exec('BEGIN');try{const out=[];for(const statement of statements)out.push(await statement.run());sql.exec('COMMIT');return out;}catch(error){sql.exec('ROLLBACK');throw error;}}};
  // D1 batches return SELECT rows as well as mutation metadata.
  db.prepare=query=>{const bound=(values=[])=>({async first(){return sql.prepare(query).get(...values)||null;},async all(){return {results:sql.prepare(query).all(...values)};},async run(){const stmt=sql.prepare(query);if(/^SELECT/i.test(query))return {results:stmt.all(...values),meta:{changes:0}};return {results:[],meta:{changes:Number(stmt.run(...values).changes)}};},bind(...v){return bound(v);}});return bound();};
@@ -185,9 +186,12 @@ test('real analysis flow: Qwen first, fallback, metering, saved confirmation, ow
   assert.equal((await call('/api/plans/'+id+'/confirm','POST',{outline:[[0,0],[900,900],[0,900],[900,0]],northAngleDeg:0})).status,400);
   const completed=await call('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0});assert.equal(completed.status,200);assert.equal(completed.data.plan.status,'complete');assert.equal(completed.data.plan.result.sectors.length,8);assert.ok(completed.data.plan.image.startsWith('data:image/'));
   assert.equal((await call('/api/plans/'+id)).data.plan.result.version,1);assert.equal((await call('/api/plans')).data.plans.length,1);assert.equal((await call('/api/plans')).data.plans[0].image,undefined);
+  assert.equal((await call('/api/plans/'+id,'PATCH',{title:'南山新家'})).data.plan.title,'南山新家');
+  assert.equal((await call('/api/plans')).data.plans[0].title,'南山新家');
+  assert.equal((await call('/api/plans/'+id,'PATCH',{title:'  '})).status,400);
   const usage=(await call('/api/admin/vision/usage')).data;assert.equal(usage.summary.calls,2);assert.equal(usage.summary.successful,1);assert.equal(usage.records.filter(r=>r.operation==='recognize').length,2);assert.ok(usage.records.some(r=>r.attempt===2));
   await call('/api/admin/users','POST',{login:'plan-other',name:'另一用户',password,role:'user'});const other=await request('/api/login','POST',{login:'plan-other',password});assert.equal(other.status,200);
-  assert.equal((await request('/api/plans/'+id,'GET',undefined,other.cookie)).status,404);assert.equal((await request('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0},other.cookie)).status,404);assert.equal((await request('/api/plans','GET',undefined,other.cookie)).data.plans.length,0);
+  assert.equal((await request('/api/plans/'+id,'GET',undefined,other.cookie)).status,404);assert.equal((await request('/api/plans/'+id,'PATCH',{title:'别人的家'},other.cookie)).status,404);assert.equal((await request('/api/plans/'+id+'/confirm','POST',{outline,northAngleDeg:0},other.cookie)).status,404);assert.equal((await request('/api/plans','GET',undefined,other.cookie)).data.plans.length,0);
   assert.equal((await request('/api/plans/'+id,'POST',{image,width:800,height:800},other.cookie)).status,409);assert.equal(calls.length,2);
  }finally{globalThis.fetch=originalFetch;sql.close();}
 });

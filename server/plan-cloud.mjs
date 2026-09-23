@@ -2,13 +2,14 @@ import {validateImage,callVision,PROVIDERS} from './vision-provider.mjs';
 import {open,exchange} from './vision-cloud.mjs';
 import {normalizeUsage,priceSnapshot,calculateCost} from './usage-math.mjs';
 import {analyzePlan} from './plan-geometry.mjs';
-const serialize=r=>({id:r.id,status:r.status,width:r.width,height:r.height,created:r.created_at,updated:r.updated_at,error:r.error,recognition:r.recognition_json?JSON.parse(r.recognition_json):null,result:r.result_json?JSON.parse(r.result_json):null,...(r.image?{image:r.image}:{})});
+const serialize=r=>({id:r.id,title:r.title||null,status:r.status,width:r.width,height:r.height,created:r.created_at,updated:r.updated_at,error:r.error,recognition:r.recognition_json?JSON.parse(r.recognition_json):null,result:r.result_json?JSON.parse(r.result_json):null,...(r.image?{image:r.image}:{})});
 async function readBody(request,fail){if(!request.headers.get('Content-Type')?.startsWith('application/json'))fail('请使用 JSON 请求',415);if(Number(request.headers.get('Content-Length'))>900000)fail('图片过大，请压缩后再试',413);const text=await request.text();if(text.length>900000)fail('图片过大，请压缩后再试',413);try{return JSON.parse(text);}catch{fail('请求格式不正确');}}
 export async function planRoute(c){
  const {path,method,db,user,request,env,json,fail,bodyOf,limit}=c;if(!path.startsWith('/api/plans'))return null;
- if(path==='/api/plans'&&method==='GET'){const rows=await db.prepare('SELECT id,status,width,height,created_at,updated_at,error,recognition_json,result_json FROM plans WHERE user_id=? ORDER BY created_at DESC LIMIT 100').bind(user.id).all();return json({plans:rows.results.map(serialize)});}
+ if(path==='/api/plans'&&method==='GET'){const rows=await db.prepare('SELECT id,title,status,width,height,created_at,updated_at,error,recognition_json,result_json FROM plans WHERE user_id=? ORDER BY created_at DESC LIMIT 100').bind(user.id).all();return json({plans:rows.results.map(serialize)});}
  const match=path.match(/^\/api\/plans\/([a-f0-9-]{36})(\/confirm)?$/);if(!match)fail('接口不存在',404);const id=match[1];let row=await db.prepare('SELECT * FROM plans WHERE id=? AND user_id=?').bind(id,user.id).first();
  if(method==='GET'&&!match[2]){if(!row)fail('记录不存在',404);return json({plan:serialize(row)});}
+ if(method==='PATCH'&&!match[2]){if(!row)fail('记录不存在',404);const b=await bodyOf(request);const title=typeof b?.title==='string'?b.title.trim():'';if(!title||title.length>32||/[\x00-\x1f\x7f]/.test(title))fail('名称应为 1–32 个字');const updated=new Date().toISOString();await db.prepare('UPDATE plans SET title=?,updated_at=? WHERE id=? AND user_id=?').bind(title,updated,id,user.id).run();return json({plan:serialize({...row,title,updated_at:updated})});}
  if(method==='POST'&&match[2]){if(!row)fail('记录不存在',404);if(!['recognized','complete'].includes(row.status))fail('请先完成识别',409);const b=await bodyOf(request);let result;try{result=analyzePlan({...b,width:row.width,height:row.height});}catch(e){fail(e.message);}await db.prepare("UPDATE plans SET status='complete',result_json=?,updated_at=? WHERE id=? AND user_id=?").bind(JSON.stringify(result),new Date().toISOString(),id,user.id).run();return json({plan:serialize({...row,status:'complete',result_json:JSON.stringify(result)})});}
  if(method!=='POST'||match[2])fail('不支持此操作',405);
  if(row&&['recognized','complete'].includes(row.status))return json({plan:serialize(row)});

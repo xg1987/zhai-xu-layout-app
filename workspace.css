@@ -140,3 +140,25 @@
   @keyframes tool-sheet-enter{from{transform:translateY(100%);opacity:.7}to{transform:translateY(0);opacity:1}}
   @keyframes tool-backdrop-enter{from{opacity:0}to{opacity:1}}
 }
+
+.canvas-tool-slot{display:none}
+.upload-guide{margin:0;padding:8px 13px;border:1px solid #e6e9df;border-radius:12px;background:#ffffffeb;box-shadow:0 3px 14px #2630240c;color:#50634f;text-align:center;font-size:12px;line-height:1.7;white-space:normal;min-width:260px}
+.history-hint{margin:-17px 0 18px;color:#6b7868;font-size:12px}
+.record-open{display:flex;flex:1;align-items:center;justify-content:space-between;gap:14px;min-width:0;text-align:left;padding:0}
+.record-open>span{min-width:0;overflow:hidden}
+.record-open strong,.record-open small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.record-rename{flex-shrink:0;padding:8px 10px;border:1px solid #e4dcd3;border-radius:10px;color:#a73b2e;background:#fffaf8;font-size:12px}
+.record-rename:hover{background:#faeee9}
+@media(max-width:750px){
+  .mobile-dock{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .canvas-tool-slot{display:block;position:absolute;top:74px;right:14px;z-index:4}
+  .workspace{position:relative}
+  .canvas-tool-slot .rail-tools,.canvas-tool-slot .rail-tools .toolbar{display:flex}
+  .canvas-tool-slot .rail-tools .toolbar{gap:7px;padding:5px;border:1px solid #e3e8dd;border-radius:16px;background:#ffffffed;box-shadow:0 5px 18px #26302410}
+  .canvas-tool-slot .rail-tools #layersButton,.canvas-tool-slot .rail-tools #sizeButton{min-height:38px;height:38px;width:auto;padding:6px 10px;display:flex;flex-direction:row;gap:6px;border:0;border-radius:11px;color:#50634f;font-size:12px;background:transparent}
+  .canvas-tool-slot .rail-tools #layersButton:hover,.canvas-tool-slot .rail-tools #sizeButton:hover{background:#f1f5ee}
+  .canvas-tool-slot .rail-tools #layersButton>svg:first-child,.canvas-tool-slot .rail-tools #sizeButton>svg{width:18px;height:18px}
+  .canvas-tool-slot .rail-tools .tool-label{display:inline}
+  .canvas-tool-slot .rail-tools .chevron{display:none}
+  .upload-guide{max-width:min(280px,78vw);min-width:0;font-size:11px}
+}

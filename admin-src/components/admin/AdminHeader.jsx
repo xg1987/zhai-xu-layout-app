@@ -38,7 +38,7 @@ export default function AdminHeader({ active = 'accounts' }) {
 }
 
 function AdminBrand() {
- return <div className="brand"><svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="16" stroke="currentColor" strokeWidth="1.2"/><path d="m24 1 5 18 18 5-18 5-5 18-5-18L1 24l18-5Z" fill="currentColor" opacity=".9"/><path d="m24 6 0 18 17 0-13 4-4 13V24H7l13-4Z" fill="white" opacity=".9"/></svg><h1>家居布局</h1></div>
+ return <div className="brand"><svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="16" stroke="currentColor" strokeWidth="1.2"/><path d="m24 1 5 18 18 5-18 5-5 18-5-18L1 24l18-5Z" fill="currentColor" opacity=".9"/><path d="m24 6 0 18 17 0-13 4-4 13V24H7l13-4Z" fill="white" opacity=".9"/></svg><h1>家居风水</h1></div>
 }
 
 function AdminAccountMenu({ user, active }) {

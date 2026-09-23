@@ -107,6 +107,25 @@
 .admin-app.system-app .system-about>div:last-child{padding-bottom:0}
 @media(max-width:760px){.admin-app.system-app .system-section{grid-template-columns:minmax(0,1fr);gap:20px;padding:22px}.admin-app.system-app .system-section-heading{padding:0}.admin-app.system-app .system-main{padding-inline:18px}}
 
+/* Personal settings use the same warm palette as the workspace. */
+.admin-app.system-app{--text:#292d29;--muted:#747b72;--line:#e7e9e3;--blue:#ad382b;background:radial-gradient(ellipse at top,#f8faf5,#fff 68%);color:#292d29}
+.admin-app.system-app .system-user-header{border-color:#e7e9e3;background:#ffffffeb}
+.admin-app.system-app .system-user-header a{color:#ad382b}
+.admin-app.system-app .admin-title h2{color:#292d29}
+.admin-app.system-app .system-section{border-color:#e4e8dd;background:linear-gradient(145deg,#fff,#fafcf8);box-shadow:0 10px 28px #38483109,inset 0 1px 0 #fff}
+.admin-app.system-app .system-section-heading h3,.admin-app.system-app .system-setting-row strong,.admin-app.system-app .system-identity strong{color:#354336}
+.admin-app.system-app .system-avatar{background:linear-gradient(#fff,#eef1e9);border-color:#e3e7dd;color:#4c6c54}
+.admin-app.system-app .system-form input{border-color:#dbe3d6;background:#fff;color:#292d29}
+.admin-app.system-app .system-form input:focus-visible,.admin-app.system-app button:focus-visible,.admin-app.system-app a:focus-visible{outline-color:#ad382b}
+.admin-app.system-app .admin-primary{background:linear-gradient(165deg,#c14f40,#ab3528);border-color:#9f3327;color:#fff;box-shadow:0 5px 14px #a536231a}
+.admin-app.system-app .admin-primary:hover:not(:disabled){background:#9f3327}
+.admin-app.system-app .admin-secondary{border-color:#dfe5d7;background:#f8faf5;color:#4b5941;box-shadow:none}
+.admin-app.system-app .system-about dt{color:#748071}
+.admin-app.system-app .system-about dd{color:#354336}
+.admin-app.system-app .system-version{background:#f9eeeb;border-color:#ead8d2;color:#ad382b}
+.admin-app.system-app .system-password-dialog .system-form label{color:#50634f}
+.admin-app.system-app .system-password-dialog .system-cancel{border-color:#dfe5d7;color:#50634f}
+
 /* Password editing is a focused modal, never an expanded settings row. */
 .admin-app .system-password-dialog{position:fixed;inset:0;margin:auto;width:440px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);overflow:auto;padding:28px;border:1px solid #fff;border-radius:24px;background:linear-gradient(135deg,#fff,#f3f7ff);color:#243858;box-shadow:0 28px 90px #182d5438;box-sizing:border-box}
 .system-password-dialog::backdrop{background:#1c31533d;backdrop-filter:blur(6px)}
