@@ -1,0 +1,692 @@
+{
+  "schemaVersion": "1.0.0",
+  "title": "人物与事项居住象义知识库",
+  "updatedAt": "2026-09-22",
+  "method": "天纪人物—居住方位取象",
+  "interpretationType": "traditional_symbolism",
+  "runtimeConnected": false,
+  "sources": [
+    {
+      "id": "tianji-08-5",
+      "title": "天纪文字版08-5",
+      "author": "倪海厦讲述；神机阁墨谷先生刊载",
+      "url": "https://www.shenjige.cn/details/0DhkwMhCM.html",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-09-1",
+      "title": "天纪文字版09-1",
+      "author": "倪海厦讲述；神机阁墨谷先生刊载",
+      "url": "https://www.shenjige.cn/details/w8iYJrm6n.html",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-09-3",
+      "title": "天纪文字版09-3",
+      "author": "倪海厦讲述；神机阁文字整理",
+      "url": "https://www.shenjige.cn/details/O4GmiZ1-A.html",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-66",
+      "title": "倪海厦天纪66：艮为山、风山渐、雷泽归妹卦详解",
+      "author": "倪海厦讲述；太极之巅易学网转载",
+      "url": "https://www.taijizhidian.com/zzsb/69662.html",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-gou",
+      "title": "天风姤：风水阳宅应用",
+      "author": "小天书屋整理；标注来源为倪海厦《天纪》",
+      "url": "https://www.wangcai.club/zh/books/yijing/03-gua/44-gou",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-heng",
+      "title": "雷风恒：风水阳宅应用",
+      "author": "小天书屋整理；标注来源为倪海厦《天纪》",
+      "url": "https://www.wangcai.club/zh/books/yijing/03-gua/32-heng",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-qian",
+      "title": "乾为天：天纪易经学习笔记",
+      "author": "倪海厦讲述；LazyHub知识栏目整理",
+      "url": "https://wx.lazyhub.cn/index.php?card=1&mode=yijing",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    },
+    {
+      "id": "tianji-xian",
+      "title": "泽山咸：天纪易经学习笔记",
+      "author": "倪海厦讲述；LazyHub知识栏目整理",
+      "url": "https://wx.lazyhub.cn/index.php?card=31&mode=yijing",
+      "source_type": "practitioner_article",
+      "recorded_at": "2026-09-22",
+      "note": ""
+    }
+  ],
+  "topics": {
+    "romance": "婚恋桃花",
+    "marriage": "夫妻相处",
+    "exams": "考试学业",
+    "career": "事业发展"
+  },
+  "rules": [
+    {
+      "id": "romance-woman-SE",
+      "topic": "romance",
+      "method_id": "tianji_person_room_v1",
+      "title": "单身女性：东南婚缘取用",
+      "subject_label": "当前单身、希望建立伴侣关系的成年女性",
+      "direction_code": "SE",
+      "person_trigram": null,
+      "hexagram_name": null,
+      "content": "东南取婚缘启动、重新建立伴侣关系之象，包含离异或丧偶后希望再婚的情境。",
+      "evidence_type": "case_discussion",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "relationship_status": [
+          "never_married",
+          "divorced",
+          "widowed"
+        ],
+        "current_partner": false,
+        "goal": [
+          "seek_partner",
+          "repartner"
+        ],
+        "requires": [
+          "confirmed_relationship_status",
+          "selected_timing_method",
+          "individual_timing_review"
+        ],
+        "role_codes": [],
+        "excludes": [
+          "seeking_extramarital_relationship"
+        ],
+        "scope": "source_discussion_with_case"
+      },
+      "actions": {
+        "kind": "candidate_room_direction",
+        "direction_code": "SE",
+        "sharing": null
+      },
+      "timing": {
+        "kind": "individual_timing",
+        "lead_months": null,
+        "start_date": null,
+        "deadline": null,
+        "case_ages_are_general_rule": false
+      },
+      "sources": [
+        {
+          "source_id": "tianji-09-1",
+          "locator": "女性红鸾取用段及由西南改住东南的个案"
+        }
+      ]
+    },
+    {
+      "id": "romance-mother-SW",
+      "topic": "romance",
+      "method_id": "tianji_person_room_v1",
+      "title": "单身母亲：西南与婚恋目标",
+      "subject_label": "以母亲身份取象、独居且希望再婚的成年女性",
+      "direction_code": "SW",
+      "person_trigram": "坤",
+      "hexagram_name": "坤为地",
+      "content": "西南独居取独处、婚缘推进偏缓之象；事业安排与求伴侣的取用分开处理。",
+      "evidence_type": "case_discussion",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "母"
+        ],
+        "relationship_status": [
+          "divorced",
+          "widowed",
+          "never_married"
+        ],
+        "current_partner": false,
+        "sharing": "alone",
+        "goal": [
+          "repartner"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_occupancy"
+        ],
+        "scope": "source_discussion_with_case"
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-09-1",
+          "locator": "母亲名位、西南独住及后续婚缘安排段"
+        }
+      ]
+    },
+    {
+      "id": "romance-youngest-daughter-NE",
+      "topic": "romance",
+      "method_id": "tianji_person_room_v1",
+      "title": "少女角色：东北媒介婚缘",
+      "subject_label": "已成年、未婚且角色确认为少女的家庭成员",
+      "direction_code": "NE",
+      "person_trigram": "兑",
+      "hexagram_name": "泽山咸",
+      "content": "婚缘取媒介介绍之象，同时包含关系先成后变的解读；与自由交往型桃花分开归类。",
+      "evidence_type": "secondary_summary",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "少女"
+        ],
+        "relationship_status": [
+          "never_married"
+        ],
+        "goal": [
+          "seek_partner"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_relationship_status"
+        ],
+        "mixed_interpretation": true
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-xian",
+          "locator": "PDF第185页／页内184：阳宅象解"
+        }
+      ]
+    },
+    {
+      "id": "romance-eldest-daughter-NE",
+      "topic": "romance",
+      "method_id": "tianji_person_room_v1",
+      "title": "长女：东北婚恋取用",
+      "subject_label": "已成年、未婚且角色确认为长女的家庭成员",
+      "direction_code": "NE",
+      "person_trigram": "巽",
+      "hexagram_name": "风山渐",
+      "content": "婚恋取推进迟缓、关系难以落实之象；同一组合在公职事业主题下另有不同解读。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "长女"
+        ],
+        "relationship_status": [
+          "never_married"
+        ],
+        "goal": [
+          "seek_partner",
+          "marry"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_relationship_status"
+        ],
+        "related_rule_ids": [
+          "career-eldest-daughter-NE"
+        ]
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-66",
+          "locator": "风山渐（阳宅）第三至第五项"
+        }
+      ]
+    },
+    {
+      "id": "marriage-couple-NW",
+      "topic": "marriage",
+      "method_id": "tianji_person_room_v1",
+      "title": "夫妻同住：西北主卧",
+      "subject_label": "已婚夫妻共同居住；以妻子角色为本条主体",
+      "direction_code": "NW",
+      "person_trigram": "坤",
+      "hexagram_name": "地天泰",
+      "content": "妻居夫位，取夫妻和合、共同生活之象；丈夫在同一房间另取乾为天。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "母"
+        ],
+        "relationship_status": [
+          "married"
+        ],
+        "sharing": "with_spouse",
+        "goal": [
+          "marital_harmony"
+        ],
+        "requires": [
+          "confirmed_spouse_relationship",
+          "confirmed_sharing_room"
+        ],
+        "co_resident_trigram": "乾",
+        "co_resident_hexagram": "乾为天"
+      },
+      "actions": {
+        "kind": "candidate_shared_bedroom",
+        "direction_code": "NW",
+        "sharing": "with_spouse"
+      },
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-08-5",
+          "locator": "阳宅上面：妻居西北、与夫同住段"
+        }
+      ]
+    },
+    {
+      "id": "marriage-husband-SE",
+      "topic": "marriage",
+      "method_id": "tianji_person_room_v1",
+      "title": "丈夫：东南异性缘与夫妻关系",
+      "subject_label": "已婚、以丈夫角色取象的男性",
+      "direction_code": "SE",
+      "person_trigram": "乾",
+      "hexagram_name": "天风姤",
+      "content": "取外缘增多、夫妻关系受扰之象，归入婚姻冲突主题，不列为求伴侣的优选房间。",
+      "evidence_type": "secondary_summary",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "父"
+        ],
+        "relationship_status": [
+          "married"
+        ],
+        "goal": [
+          "marital_harmony",
+          "relationship_conflict_review"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_relationship_status"
+        ],
+        "romance_kind": "marital_conflict",
+        "placement_recommendation": false
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-gou",
+          "locator": "第七节：父母住东南、夫妻失和段"
+        }
+      ]
+    },
+    {
+      "id": "exams-husband-S",
+      "topic": "exams",
+      "method_id": "tianji_person_room_v1",
+      "title": "丈夫备考：正南",
+      "subject_label": "已婚、以丈夫或父亲角色取象的男性",
+      "direction_code": "S",
+      "person_trigram": "乾",
+      "hexagram_name": "天火同人",
+      "content": "正南取科甲、资格考试之象。该讲法将备考本人暂住与夫妻共同迁居分开。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "父"
+        ],
+        "relationship_status": [
+          "married"
+        ],
+        "goal": [
+          "exam",
+          "professional_qualification"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_exam_date",
+          "temporary_occupancy_agreement"
+        ],
+        "sharing": "exam_candidate_only",
+        "desk_orientation_method": "separate_personal_study_method"
+      },
+      "actions": {
+        "kind": "temporary_room_direction",
+        "direction_code": "S",
+        "sharing": "exam_candidate_only"
+      },
+      "timing": {
+        "kind": "approximate_lead_before_event",
+        "event": "exam_date",
+        "lead_months": 3,
+        "approximate": true,
+        "stay_duration_months": null,
+        "guaranteed_effect_date": null
+      },
+      "sources": [
+        {
+          "source_id": "tianji-09-3",
+          "locator": "阳宅部分：父居二女位、司法官考试、提前一季入住段"
+        }
+      ]
+    },
+    {
+      "id": "exams-eldest-son-SE",
+      "topic": "exams",
+      "method_id": "tianji_person_room_v1",
+      "title": "长子备考：东南",
+      "subject_label": "角色确认为长男的备考成员",
+      "direction_code": "SE",
+      "person_trigram": "震",
+      "hexagram_name": "雷风恒",
+      "content": "东南取学习、考试与资格考核之象。与丈夫备考的天火同人分开检索。",
+      "evidence_type": "secondary_summary",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "role_codes": [
+          "长男"
+        ],
+        "goal": [
+          "exam",
+          "professional_qualification"
+        ],
+        "requires": [
+          "confirmed_role"
+        ],
+        "reassess_role_when": [
+          "marriage",
+          "parenthood"
+        ],
+        "not_inherited_from_rule": "exams-husband-S"
+      },
+      "actions": {
+        "kind": "candidate_room_direction",
+        "direction_code": "SE",
+        "sharing": null
+      },
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-heng",
+          "locator": "第七节：长子居长女位、科甲与执照考试段"
+        }
+      ]
+    },
+    {
+      "id": "exams-youngest-son-NE",
+      "topic": "exams",
+      "method_id": "tianji_person_room_v1",
+      "title": "少男学习：东北",
+      "subject_label": "角色确认为少男的家庭成员",
+      "direction_code": "NE",
+      "person_trigram": "艮",
+      "hexagram_name": "艮为山",
+      "content": "少男居少男位，取学业、科甲之象。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "role_codes": [
+          "少男"
+        ],
+        "goal": [
+          "study",
+          "exam"
+        ],
+        "requires": [
+          "confirmed_role"
+        ],
+        "role_is_not_age_band": true
+      },
+      "actions": {
+        "kind": "candidate_room_direction",
+        "direction_code": "NE",
+        "sharing": null
+      },
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-66",
+          "locator": "艮为山（阳宅）：三子居三子位、科甲段"
+        }
+      ]
+    },
+    {
+      "id": "career-husband-NW",
+      "topic": "career",
+      "method_id": "tianji_person_room_v1",
+      "title": "丈夫或父亲：西北事业取用",
+      "subject_label": "已婚丈夫，或与子女同住且角色确认为父亲的男性",
+      "direction_code": "NW",
+      "person_trigram": "乾",
+      "hexagram_name": "乾为天",
+      "content": "西北取事业担当、决断与家庭责任之象；公务任职和经营管理分别记录职业背景。",
+      "evidence_type": "secondary_summary",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "父"
+        ],
+        "goal": [
+          "career",
+          "business_management"
+        ],
+        "any_of": [
+          {
+            "relationship_status": "married"
+          },
+          {
+            "confirmed_parent_role": true,
+            "lives_with_children": true
+          }
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_occupation"
+        ],
+        "married_working_away_allowed": true
+      },
+      "actions": {
+        "kind": "candidate_room_direction",
+        "direction_code": "NW",
+        "sharing": null
+      },
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-qian",
+          "locator": "PDF第22—23页：阳宅象解及乾为天的前提条件"
+        }
+      ]
+    },
+    {
+      "id": "career-husband-S",
+      "topic": "career",
+      "method_id": "tianji_person_room_v1",
+      "title": "丈夫公职：正南晋升取用",
+      "subject_label": "已婚且从事公职的男性",
+      "direction_code": "S",
+      "person_trigram": "乾",
+      "hexagram_name": "天火同人",
+      "content": "正南在公职情境中取晋升之象；私人企业不直接套用同一晋升解释。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "父"
+        ],
+        "relationship_status": [
+          "married"
+        ],
+        "occupation": [
+          "public_service"
+        ],
+        "goal": [
+          "promotion"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_occupation"
+        ],
+        "excludes_occupation": [
+          "private_company"
+        ],
+        "sharing": "not_generalized_to_couple",
+        "related_rule_ids": [
+          "exams-husband-S"
+        ]
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-09-3",
+          "locator": "天火同人：文武公职与私人企业区别段"
+        }
+      ]
+    },
+    {
+      "id": "career-eldest-daughter-NE",
+      "topic": "career",
+      "method_id": "tianji_person_room_v1",
+      "title": "长女公职：东北职业取用",
+      "subject_label": "角色确认为长女、从事公职或教学工作的成年成员",
+      "direction_code": "NE",
+      "person_trigram": "巽",
+      "hexagram_name": "风山渐",
+      "content": "东北在公务、教职情境中取职业发展之象；学业和婚恋主题须另行判断。",
+      "evidence_type": "lecture_transcript",
+      "interpretation_type": "traditional_symbolism",
+      "review_status": "pending_review",
+      "enabled": 0,
+      "version": "1.0",
+      "recorded_at": "2026-09-22",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "conditions": {
+        "adult_only": true,
+        "role_codes": [
+          "长女"
+        ],
+        "occupation": [
+          "public_service",
+          "teacher"
+        ],
+        "goal": [
+          "career"
+        ],
+        "requires": [
+          "confirmed_role",
+          "confirmed_occupation"
+        ],
+        "mixed_interpretation": true,
+        "related_rule_ids": [
+          "romance-eldest-daughter-NE"
+        ]
+      },
+      "actions": null,
+      "timing": null,
+      "sources": [
+        {
+          "source_id": "tianji-66",
+          "locator": "风山渐（阳宅）：公职、教员段"
+        }
+      ]
+    }
+  ],
+  "verificationReceipt": "2026-09-22-person-goals-verification.json"
+}

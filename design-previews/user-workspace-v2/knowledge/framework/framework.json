@@ -1,0 +1,1021 @@
+{
+  "schemaVersion": "1.1.0",
+  "name": "家居分析框架",
+  "createdAt": "2026-09-22",
+  "stage": "local_framework",
+  "runtimeConnected": false,
+  "defaultEnabledModuleIds": [],
+  "coordinateSystem": {
+    "origin": "top_left",
+    "xDirection": "right",
+    "yDirection": "down",
+    "range": [
+      0,
+      1000
+    ],
+    "preserveImageAspectRatio": true,
+    "northAngle": {
+      "origin": "image_up",
+      "rotation": "clockwise",
+      "min": 0,
+      "exclusiveMax": 360
+    },
+    "unknown": null
+  },
+  "directionCodes": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW"
+  ],
+  "householdRoleCodes": [
+    "父",
+    "母",
+    "长男",
+    "长女",
+    "中男",
+    "中女",
+    "少男",
+    "少女"
+  ],
+  "confirmationStates": [
+    "unconfirmed",
+    "confirmed",
+    "needs_review"
+  ],
+  "moduleStates": {
+    "not_selected": "未选择",
+    "awaiting_inputs": "待补资料",
+    "awaiting_rules": "待定规则",
+    "ready": "可分析",
+    "running": "分析中",
+    "completed": "已完成",
+    "needs_review": "需核对",
+    "failed": "处理失败"
+  },
+  "reportStates": [
+    "draft",
+    "running",
+    "partial",
+    "completed",
+    "needs_review",
+    "failed"
+  ],
+  "viewModes": [
+    "by_member",
+    "by_room",
+    "by_finding"
+  ],
+  "ruleInterpretationTypes": [
+    "traditional_interpretation",
+    "spatial_observation",
+    "measured_condition"
+  ],
+  "changeScopes": [
+    "move_furniture",
+    "change_room_use",
+    "renovation"
+  ],
+  "inputCatalog": {
+    "confirmed_layout": {
+      "label": "已确认户型",
+      "fields": [
+        "floors.imageRef",
+        "floors.imageWidth",
+        "floors.imageHeight",
+        "floors.northAngleDeg",
+        "floors.outline",
+        "floors.confirmationStatus"
+      ]
+    },
+    "confirmed_rooms": {
+      "label": "已确认房间",
+      "fields": [
+        "rooms.id",
+        "rooms.floorId",
+        "rooms.type",
+        "rooms.polygon",
+        "rooms.confirmationStatus"
+      ]
+    },
+    "confirmed_objects": {
+      "label": "已确认家具及门窗",
+      "fields": [
+        "objects.id",
+        "objects.roomId",
+        "objects.type",
+        "objects.geometry",
+        "objects.orientationDeg",
+        "objects.confirmationStatus"
+      ]
+    },
+    "confirmed_household": {
+      "label": "已确认家庭成员",
+      "fields": [
+        "members.id",
+        "members.label",
+        "members.roleCode",
+        "members.roleConfirmationStatus",
+        "occupancies.memberId",
+        "occupancies.roomId"
+      ]
+    },
+    "occupancy_constraints": {
+      "label": "入住条件",
+      "fields": [
+        "householdConstraints.sharingGroups",
+        "householdConstraints.careNeeds",
+        "householdConstraints.roomCapacity",
+        "householdConstraints.confirmationStatus"
+      ]
+    },
+    "analysis_method": {
+      "label": "已选判定方法",
+      "fields": [
+        "selectedMethods.moduleId",
+        "selectedMethods.methodId",
+        "selectedMethods.version",
+        "selectedMethods.parameters"
+      ]
+    },
+    "module_rules": {
+      "label": "已启用规则",
+      "fields": [
+        "rules.id",
+        "rules.moduleId",
+        "rules.version",
+        "rules.reviewStatus",
+        "rules.enabled"
+      ]
+    },
+    "change_constraints": {
+      "label": "可改范围",
+      "fields": [
+        "changeConstraints.allowedScopes",
+        "changeConstraints.immovableObjectIds",
+        "changeConstraints.dimensionEvidenceIds"
+      ]
+    },
+    "completed_recommendations": {
+      "label": "已完成的调整建议",
+      "fields": [
+        "recommendations.id",
+        "recommendations.moduleId",
+        "recommendations.action",
+        "recommendations.status"
+      ]
+    },
+    "decor_preferences": {
+      "label": "现有软装及偏好",
+      "fields": [
+        "decor.roomId",
+        "decor.colors",
+        "decor.materials",
+        "decor.preferences",
+        "decor.confirmationStatus"
+      ]
+    },
+    "onsite_evidence": {
+      "label": "现场资料",
+      "fields": [
+        "evidence.id",
+        "evidence.kind",
+        "evidence.roomId",
+        "evidence.value",
+        "evidence.unit",
+        "evidence.capturedAt",
+        "evidence.confirmationStatus"
+      ]
+    },
+    "outdoor_evidence": {
+      "label": "室外资料",
+      "fields": [
+        "evidence.id",
+        "evidence.kind",
+        "evidence.location",
+        "evidence.orientationDeg",
+        "evidence.mediaRef",
+        "evidence.confirmationStatus"
+      ]
+    },
+    "analysis_year": {
+      "label": "分析年份",
+      "fields": [
+        "annualContext.year"
+      ]
+    },
+    "confirmed_member_goals": {
+      "label": "已确认的成员目标与阶段",
+      "fields": [
+        "memberGoals.memberId",
+        "memberGoals.topic",
+        "memberGoals.goalCode",
+        "memberGoals.targetDate",
+        "memberGoals.relationshipStatus",
+        "memberGoals.occupation",
+        "memberGoals.confirmationStatus"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "id": "missing_corner",
+      "name": "八方缺角",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "八方完整程度",
+        "缺角区域",
+        "关联解读"
+      ],
+      "rulesToDefine": [
+        "缺角参考轮廓",
+        "分宫与中心取法",
+        "阳台及公共区域边界",
+        "阈值与临界值"
+      ],
+      "reportSections": [
+        "directions",
+        "findings"
+      ],
+      "knowledgeCoverage": "existing_pending"
+    },
+    {
+      "id": "palace_usage",
+      "name": "八宫空间用途",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "八方及中宫空间清单",
+        "房间跨宫关系",
+        "用途分析"
+      ],
+      "rulesToDefine": [
+        "八宫及中宫边界",
+        "跨宫覆盖判定",
+        "不同用途规则"
+      ],
+      "reportSections": [
+        "directions",
+        "rooms",
+        "findings"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "household_rooms",
+      "name": "家庭成员与卧室",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "confirmed_household",
+        "occupancy_constraints",
+        "module_rules"
+      ],
+      "outputs": [
+        "现住关系",
+        "可选分房方案",
+        "共住安排",
+        "分配冲突"
+      ],
+      "rulesToDefine": [
+        "家庭角色匹配",
+        "卧室选择方法",
+        "夫妻与多孩共住优先级",
+        "老人及特殊需求约束"
+      ],
+      "reportSections": [
+        "household",
+        "rooms",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "person_goals",
+      "name": "人物与事项居住象义",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "confirmed_household",
+        "confirmed_member_goals",
+        "occupancy_constraints",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "婚恋桃花与夫妻相处",
+        "考试学业与事业事项",
+        "人物方位组合",
+        "时间及共住条件",
+        "目标冲突"
+      ],
+      "rulesToDefine": [
+        "人物角色确认与转换",
+        "各取法适用范围",
+        "个案时机与普遍规则区分",
+        "共住与多目标冲突优先级"
+      ],
+      "reportSections": [
+        "household",
+        "topics",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "partial_pending"
+    },
+    {
+      "id": "furniture_placement",
+      "name": "床位与家具",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "confirmed_objects",
+        "change_constraints",
+        "module_rules"
+      ],
+      "outputs": [
+        "对象位置关系",
+        "床头朝向",
+        "调整清单"
+      ],
+      "rulesToDefine": [
+        "床位及床头取法",
+        "门窗家具相对关系",
+        "可移动范围",
+        "尺寸与通行校验"
+      ],
+      "reportSections": [
+        "rooms",
+        "findings",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "layout_comparison",
+      "name": "调整前后对比",
+      "phase": 1,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "completed_recommendations",
+        "change_constraints"
+      ],
+      "outputs": [
+        "现状布局",
+        "建议布局",
+        "变更清单",
+        "冲突清单"
+      ],
+      "rulesToDefine": [
+        "方案采用条件",
+        "不可移动对象校验",
+        "方案冲突处理"
+      ],
+      "reportSections": [
+        "comparisons"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "door_master_stove",
+      "name": "门、主房、厨灶",
+      "phase": 2,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "confirmed_objects",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "门主灶方位",
+        "三者关系",
+        "调整方向"
+      ],
+      "rulesToDefine": [
+        "现代住宅门与主房定义",
+        "厨灶定位方式",
+        "组合关系规则"
+      ],
+      "reportSections": [
+        "topics",
+        "findings",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "study_workspace",
+      "name": "学习与居家办公",
+      "phase": 2,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "confirmed_objects",
+        "confirmed_household",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "学习区域",
+        "居家办公区域",
+        "书桌布置方案"
+      ],
+      "rulesToDefine": [
+        "住宅文昌取法",
+        "流年文昌取法",
+        "个人文昌取法",
+        "使用者与空间匹配"
+      ],
+      "reportSections": [
+        "topics",
+        "household",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "five_elements_decor",
+      "name": "五行与软装",
+      "phase": 2,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "confirmed_rooms",
+        "decor_preferences",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "空间配色",
+        "材质与形状",
+        "软装搭配"
+      ],
+      "rulesToDefine": [
+        "方位及用途的搭配规则",
+        "材质颜色映射",
+        "现有软装与偏好约束"
+      ],
+      "reportSections": [
+        "topics",
+        "rooms",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "living_comfort",
+      "name": "居住舒适度",
+      "phase": 2,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_rooms",
+        "onsite_evidence",
+        "module_rules"
+      ],
+      "outputs": [
+        "噪声及室温记录",
+        "空气质量记录",
+        "行动便利",
+        "居家安全事项"
+      ],
+      "rulesToDefine": [
+        "每项指标所需测量条件",
+        "指标标准与适用范围",
+        "通行尺寸及使用需求"
+      ],
+      "reportSections": [
+        "topics",
+        "findings",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "outdoor_environment",
+      "name": "室外环境",
+      "phase": 3,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "outdoor_evidence",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "道路及建筑关系",
+        "遮挡情况",
+        "环境标注"
+      ],
+      "rulesToDefine": [
+        "现场朝向确认",
+        "室外对象判定",
+        "观察距离与适用范围"
+      ],
+      "reportSections": [
+        "topics",
+        "findings",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    },
+    {
+      "id": "annual_changes",
+      "name": "年度变化",
+      "phase": 3,
+      "enabled": false,
+      "implementationStatus": "structure_only",
+      "requiredInputGroups": [
+        "confirmed_layout",
+        "analysis_year",
+        "analysis_method",
+        "module_rules"
+      ],
+      "outputs": [
+        "年度方位",
+        "年度关注事项",
+        "对应布置"
+      ],
+      "rulesToDefine": [
+        "年度计算方法",
+        "住宅建成或入住年份适用条件",
+        "坐向精度要求",
+        "年度建议规则"
+      ],
+      "reportSections": [
+        "topics",
+        "recommendations"
+      ],
+      "knowledgeCoverage": "missing"
+    }
+  ],
+  "plannedRecords": {
+    "floors": {
+      "purpose": "各楼层图片、坐标和空间基准",
+      "fields": [
+        "id",
+        "planId",
+        "label",
+        "imageRef",
+        "imageWidth",
+        "imageHeight",
+        "northAngleDeg",
+        "outline",
+        "scale",
+        "confirmationStatus",
+        "revision"
+      ]
+    },
+    "rooms": {
+      "purpose": "房间用途与边界",
+      "fields": [
+        "id",
+        "floorId",
+        "label",
+        "type",
+        "polygon",
+        "confirmationStatus",
+        "revision"
+      ]
+    },
+    "objects": {
+      "purpose": "床、门窗及家具位置",
+      "fields": [
+        "id",
+        "roomId",
+        "type",
+        "geometry",
+        "orientationDeg",
+        "movable",
+        "confirmationStatus",
+        "evidenceIds",
+        "revision"
+      ]
+    },
+    "members": {
+      "purpose": "家庭成员及经确认的角色",
+      "fields": [
+        "id",
+        "planId",
+        "label",
+        "roleCode",
+        "roleConfirmationStatus",
+        "residency",
+        "needs",
+        "methodSpecificProfile"
+      ]
+    },
+    "occupancies": {
+      "purpose": "成员与现住房间的多对多关系",
+      "fields": [
+        "id",
+        "memberId",
+        "roomId",
+        "sharingGroupId",
+        "confirmationStatus"
+      ]
+    },
+    "householdConstraints": {
+      "purpose": "共住、照护和容量条件",
+      "fields": [
+        "planId",
+        "sharingGroups",
+        "careNeeds",
+        "roomCapacity",
+        "confirmationStatus"
+      ]
+    },
+    "changeConstraints": {
+      "purpose": "方案可改动范围",
+      "fields": [
+        "planId",
+        "allowedScopes",
+        "immovableObjectIds",
+        "dimensionEvidenceIds"
+      ]
+    },
+    "decor": {
+      "purpose": "软装现状与偏好",
+      "fields": [
+        "id",
+        "roomId",
+        "colors",
+        "materials",
+        "preferences",
+        "confirmationStatus"
+      ]
+    },
+    "evidence": {
+      "purpose": "识别、用户确认和现场测量依据",
+      "fields": [
+        "id",
+        "planId",
+        "floorId",
+        "roomId",
+        "kind",
+        "mediaRef",
+        "location",
+        "orientationDeg",
+        "value",
+        "unit",
+        "capturedAt",
+        "confirmationStatus"
+      ]
+    },
+    "annualContext": {
+      "purpose": "年度分析输入",
+      "fields": [
+        "planId",
+        "year",
+        "buildingYear",
+        "occupancyYear",
+        "confirmationStatus"
+      ]
+    },
+    "selectedMethods": {
+      "purpose": "每个模块的选定取法",
+      "fields": [
+        "moduleId",
+        "methodId",
+        "version",
+        "parameters"
+      ]
+    },
+    "rules": {
+      "purpose": "模块规则扩展结构",
+      "fields": [
+        "id",
+        "moduleId",
+        "title",
+        "interpretationType",
+        "methodId",
+        "methodVersion",
+        "requiredInputs",
+        "appliesTo",
+        "conditions",
+        "calculation",
+        "result",
+        "sourceIds",
+        "version",
+        "reviewStatus",
+        "enabled",
+        "reviewedBy",
+        "reviewedAt"
+      ]
+    },
+    "findings": {
+      "purpose": "结果与图上位置、住户及规则关联",
+      "fields": [
+        "id",
+        "moduleId",
+        "directionCodes",
+        "roomIds",
+        "objectIds",
+        "memberIds",
+        "title",
+        "content",
+        "interpretationType",
+        "severity",
+        "evidenceIds",
+        "ruleSnapshotIds",
+        "annotationIds",
+        "status"
+      ]
+    },
+    "annotations": {
+      "purpose": "图上高亮及标注",
+      "fields": [
+        "id",
+        "floorId",
+        "findingId",
+        "geometry",
+        "label"
+      ]
+    },
+    "recommendations": {
+      "purpose": "可执行的调整建议",
+      "fields": [
+        "id",
+        "moduleId",
+        "findingIds",
+        "roomIds",
+        "objectIds",
+        "memberIds",
+        "action",
+        "scope",
+        "priority",
+        "constraints",
+        "ruleSnapshotIds",
+        "status"
+      ]
+    },
+    "layouts": {
+      "purpose": "现状与方案的独立版本",
+      "fields": [
+        "id",
+        "planId",
+        "baseRevision",
+        "kind",
+        "rooms",
+        "objects",
+        "occupancies",
+        "recommendationIds",
+        "conflicts",
+        "status"
+      ]
+    },
+    "ruleSnapshots": {
+      "purpose": "报告所用规则及出处快照",
+      "fields": [
+        "id",
+        "ruleId",
+        "ruleVersion",
+        "moduleId",
+        "methodId",
+        "methodVersion",
+        "content",
+        "sources",
+        "appliedAt"
+      ]
+    },
+    "analysisRuns": {
+      "purpose": "分析批次、输入版本与模块状态",
+      "fields": [
+        "id",
+        "planId",
+        "ownerId",
+        "frameworkVersion",
+        "inputRevision",
+        "inputSnapshotRef",
+        "selectedModuleIds",
+        "selectedMethods",
+        "moduleResults",
+        "status",
+        "createdAt",
+        "completedAt"
+      ]
+    },
+    "memberGoals": {
+      "purpose": "成员事项、婚恋阶段、职业及时间条件",
+      "fields": [
+        "id",
+        "planId",
+        "memberId",
+        "topic",
+        "goalCode",
+        "priority",
+        "targetDate",
+        "relationshipStatus",
+        "currentPartner",
+        "occupation",
+        "temporaryResidenceAllowed",
+        "confirmationStatus",
+        "revision"
+      ]
+    }
+  },
+  "existingKnowledgeBindings": {
+    "directionCorrespondences": {
+      "table": "fengshui_direction_correspondences",
+      "key": "direction_code",
+      "usage": "reference_mapping"
+    },
+    "missingCornerRules": {
+      "table": "fengshui_knowledge_rules",
+      "categories": [
+        "missing_corner_criterion",
+        "missing_corner_interpretation"
+      ],
+      "requiredState": {
+        "review_status": "approved",
+        "enabled": 1
+      },
+      "moduleId": "missing_corner"
+    },
+    "sources": {
+      "table": "fengshui_knowledge_sources",
+      "linkTable": "fengshui_rule_sources"
+    },
+    "selectedMissingCornerMethod": null,
+    "personGoalRules": {
+      "table": "fengshui_scenario_rules",
+      "linkTable": "fengshui_scenario_rule_sources",
+      "moduleId": "person_goals",
+      "methodId": "tianji_person_room_v1",
+      "requiredState": {
+        "review_status": "approved",
+        "enabled": 1
+      },
+      "conditionMatchingRequired": true,
+      "caseTimingRequiresIndividualReview": true,
+      "schemaAdapterImplemented": false
+    }
+  },
+  "moduleSequence": [
+    "missing_corner",
+    "palace_usage",
+    "household_rooms",
+    "person_goals",
+    "furniture_placement",
+    "door_master_stove",
+    "study_workspace",
+    "five_elements_decor",
+    "living_comfort",
+    "outdoor_environment",
+    "annual_changes",
+    "layout_comparison"
+  ],
+  "reportSections": [
+    {
+      "id": "overview",
+      "title": "住宅总览",
+      "moduleIds": []
+    },
+    {
+      "id": "directions",
+      "title": "八方情况",
+      "moduleIds": [
+        "missing_corner",
+        "palace_usage"
+      ]
+    },
+    {
+      "id": "household",
+      "title": "家庭成员",
+      "moduleIds": [
+        "household_rooms",
+        "person_goals"
+      ]
+    },
+    {
+      "id": "rooms",
+      "title": "房间与家具",
+      "moduleIds": [
+        "palace_usage",
+        "household_rooms",
+        "furniture_placement"
+      ]
+    },
+    {
+      "id": "topics",
+      "title": "专题分析",
+      "moduleIds": [
+        "door_master_stove",
+        "study_workspace",
+        "five_elements_decor",
+        "living_comfort",
+        "outdoor_environment",
+        "annual_changes",
+        "person_goals"
+      ]
+    },
+    {
+      "id": "findings",
+      "title": "定位问题",
+      "moduleIds": [
+        "missing_corner",
+        "palace_usage",
+        "furniture_placement",
+        "door_master_stove",
+        "living_comfort",
+        "outdoor_environment"
+      ]
+    },
+    {
+      "id": "recommendations",
+      "title": "调整方案",
+      "moduleIds": []
+    },
+    {
+      "id": "comparisons",
+      "title": "前后对比",
+      "moduleIds": [
+        "layout_comparison"
+      ]
+    }
+  ],
+  "workflow": [
+    "recognize_image",
+    "confirm_layout",
+    "confirm_household",
+    "select_modules",
+    "complete_required_inputs",
+    "resolve_rules",
+    "analyze_modules",
+    "create_findings",
+    "propose_changes",
+    "compare_layouts"
+  ],
+  "executionContract": {
+    "templateRulesExecutable": false,
+    "ruleRequiredFields": [
+      "id",
+      "moduleId",
+      "methodId",
+      "methodVersion",
+      "conditions",
+      "result",
+      "sourceIds",
+      "version",
+      "reviewedBy",
+      "reviewedAt"
+    ],
+    "ruleRequiredState": {
+      "reviewStatus": "approved",
+      "enabled": true
+    },
+    "methodSelectionRequired": true,
+    "missingDataProducesConclusion": false,
+    "noResultMeansNormal": false,
+    "legacySectorPercentIsMissingRatio": false,
+    "requireConfirmedFamilyRoleForMemberAssociation": true,
+    "familyRoleDeterminesBedroomAutomatically": false,
+    "snapshotInputsAndAppliedRules": true,
+    "invalidateDependentResultsWhenInputsChange": true,
+    "partialReportsAllowed": true,
+    "completionRequiresAllSelectedModules": true,
+    "layoutConflictState": "needs_review",
+    "originalLayoutOverwritten": false,
+    "recordIsolation": "same_plan_and_owner",
+    "personGoalRequiresConfirmedRoleAndGoal": true,
+    "personGoalUsesConditionsBeforeDirection": true,
+    "caseTimingIsGeneralRule": false,
+    "bedroomDirectionIsHeadDirection": false,
+    "conflictingPersonGoalsRequireReview": true
+  },
+  "updatedAt": "2026-09-22"
+}

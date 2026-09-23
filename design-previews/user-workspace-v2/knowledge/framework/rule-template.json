@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": null,
+  "moduleId": null,
+  "title": null,
+  "interpretationType": null,
+  "methodId": null,
+  "methodVersion": null,
+  "requiredInputs": [],
+  "appliesTo": {
+    "directionCodes": [],
+    "roomTypes": [],
+    "objectTypes": [],
+    "householdRoleCodes": []
+  },
+  "conditions": null,
+  "calculation": null,
+  "result": {
+    "title": null,
+    "content": null,
+    "severity": null,
+    "suggestions": []
+  },
+  "sourceIds": [],
+  "version": null,
+  "reviewStatus": "draft",
+  "enabled": false,
+  "reviewedBy": null,
+  "reviewedAt": null
+}

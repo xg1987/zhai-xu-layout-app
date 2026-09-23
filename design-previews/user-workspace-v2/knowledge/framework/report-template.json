@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "1.1.0",
+  "frameworkVersion": "1.1.0",
+  "isTemplate": true,
+  "id": null,
+  "planId": null,
+  "ownerId": null,
+  "status": "draft",
+  "createdAt": null,
+  "completedAt": null,
+  "inputRevision": null,
+  "inputSnapshotRef": null,
+  "selectedModuleIds": [],
+  "selectedMethods": [],
+  "summary": {
+    "completedModuleIds": [],
+    "pendingModuleIds": [],
+    "findingsCount": null
+  },
+  "moduleResults": [
+    {
+      "moduleId": "missing_corner",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "palace_usage",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "household_rooms",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "person_goals",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "furniture_placement",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "layout_comparison",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "door_master_stove",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "study_workspace",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "five_elements_decor",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "living_comfort",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "outdoor_environment",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    },
+    {
+      "moduleId": "annual_changes",
+      "status": "not_selected",
+      "missingInputGroups": [],
+      "missingRuleIds": [],
+      "unresolvedRequirements": [],
+      "findingIds": [],
+      "recommendationIds": [],
+      "error": null
+    }
+  ],
+  "directionResults": [
+    {
+      "directionCode": "N",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "NE",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "E",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "SE",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "S",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "SW",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "W",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    },
+    {
+      "directionCode": "NW",
+      "status": "not_selected",
+      "missingCorner": null,
+      "roomIds": [],
+      "memberIds": [],
+      "findingIds": []
+    }
+  ],
+  "householdResults": [],
+  "roomResults": [],
+  "topicResults": [],
+  "findings": [],
+  "annotations": [],
+  "recommendations": [],
+  "layoutComparisons": [],
+  "ruleSnapshots": [],
+  "memberGoalResults": []
+}

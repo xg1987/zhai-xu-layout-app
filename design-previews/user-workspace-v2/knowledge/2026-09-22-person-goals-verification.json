@@ -1,0 +1,39 @@
+{
+  "verifiedAt": "2026-09-22T09:06:13.236249+00:00",
+  "database": "zhai-xu-workspace-auth",
+  "databaseId": "9bdeb598-8d98-4761-85cb-22dec53104c8",
+  "migration": "0008_person_goal_knowledge.sql",
+  "migrationSha256": "216029aad9c69577ba9e94c8cc16bb814be3777d8d22ea7f6fd9599063ae0696",
+  "counts": {
+    "fengshui_knowledge_sources": 14,
+    "fengshui_direction_correspondences": 8,
+    "fengshui_knowledge_rules": 19,
+    "fengshui_rule_sources": 19,
+    "fengshui_scenario_rules": 12,
+    "fengshui_scenario_rule_sources": 12
+  },
+  "newSources": 8,
+  "newScenarioRules": 12,
+  "topics": {
+    "romance": 4,
+    "marriage": 2,
+    "exams": 3,
+    "career": 3
+  },
+  "allRemoteRowsMatch": true,
+  "oldKnowledgeRowsUnchanged": true,
+  "foreignKeyErrors": 0,
+  "enabledScenarioRules": 0,
+  "runtimeConnected": false,
+  "localValidation": [
+    "baseline_matches_production",
+    "json_constraints",
+    "foreign_keys",
+    "review_gate",
+    "no_blank_reviewer",
+    "hexagram_null_consistency",
+    "source_links",
+    "related_rule_references",
+    "framework_module_links"
+  ]
+}

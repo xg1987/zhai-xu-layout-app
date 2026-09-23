@@ -1,0 +1,38 @@
+{
+  "verifiedAt": "2026-09-22T03:10:53.650Z",
+  "account": "marsxiong19@gmail.com",
+  "database": "zhai-xu-workspace-auth",
+  "databaseId": "9bdeb598-8d98-4761-85cb-22dec53104c8",
+  "migration": "0006_fengshui_knowledge.sql",
+  "migrationSha256": "e1c6e21d943f2ee400e46ee210eef0750df985a20a7d2d0fe70d54a5c8766bc8",
+  "verifiedRows": {
+    "fengshui_knowledge_sources": 6,
+    "fengshui_direction_correspondences": 8,
+    "fengshui_knowledge_rules": 19,
+    "fengshui_rule_sources": 19
+  },
+  "remoteReadback": "All seeded fields and source relations match the migration exactly",
+  "foreignKeyErrors": 0,
+  "enabledInterpretations": 0,
+  "enabledCriteria": 0,
+  "reviewStatus": "pending_review",
+  "reportIntegration": "not_connected_by_this_change",
+  "existingRecordCounts": [
+    {
+      "entity": "users",
+      "count": 2
+    },
+    {
+      "entity": "plans",
+      "count": 1
+    },
+    {
+      "entity": "vision_settings",
+      "count": 2
+    },
+    {
+      "entity": "vision_usage",
+      "count": 5
+    }
+  ]
+}

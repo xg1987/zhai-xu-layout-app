@@ -1,0 +1,20 @@
+{
+  "verifiedAt": "2026-09-22T03:18:12.913Z",
+  "database": "zhai-xu-workspace-auth",
+  "migration": "0007_clean_knowledge_text.sql",
+  "migrationSha256": "9277ee392b68d65f6bc4262630ece5973cb431eddeb75e427fa6a8e68602d52a",
+  "verifiedRows": {
+    "fengshui_knowledge_sources": 6,
+    "fengshui_direction_correspondences": 8,
+    "fengshui_knowledge_rules": 19,
+    "fengshui_rule_sources": 19
+  },
+  "allRemoteRowsMatch": true,
+  "nonEmptyNotes": 0,
+  "enabledRules": 0,
+  "foreignKeyErrors": 0,
+  "exports": [
+    "家居方位知识库.md",
+    "家居方位知识库.json"
+  ]
+}

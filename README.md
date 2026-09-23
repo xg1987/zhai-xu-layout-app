@@ -2,6 +2,10 @@
 
 当前版本：`v0.4.0`
 
+## 独立家居风水工作台
+
+此前发布的家居风水工作台源码在 [design-previews/user-workspace-v2](design-previews/user-workspace-v2/)；线上预览为 [zhai-xu-workspace-preview.pages.dev](https://zhai-xu-workspace-preview.pages.dev/)。该目录中的 [知识库](design-previews/user-workspace-v2/knowledge/)保存八方对应、缺角候选规则，以及人物与事项居住象义。
+
 同一套产品的两端响应式原型，两端都面向客户，方案分析与咨询由大模型 AI 完成（没有人工老师端）：
 
 - App 端（小于 `1100px`）：底部导航含首页、项目、商城、咨询、我的。
