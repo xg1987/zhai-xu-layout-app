@@ -53,6 +53,7 @@
 
 /* Keep the tool rail and compass together as one centered working area. */
 @media(min-width:751px){
+  #liveNav{display:none}
   .header{height:64px}
   .header .modes{padding:4px}
   .header .modes button{padding:7px 25px}
