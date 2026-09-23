@@ -53,6 +53,8 @@
 
 /* Keep the tool rail and compass together as one centered working area. */
 @media(min-width:751px){
+  #liveNav{display:none}
+  .header .modes{display:none}
   .header{height:64px}
   .header .modes{padding:4px}
   .header .modes button{padding:7px 25px}
@@ -142,6 +144,7 @@
 }
 
 .canvas-tool-slot{display:none}
+.desktop-plan{display:none}
 .history-hint{margin:-17px 0 18px;color:#6b7868;font-size:12px}
 .record-open{display:flex;flex:1;align-items:center;justify-content:space-between;gap:14px;min-width:0;text-align:left;padding:0}
 .record-open>span{min-width:0;overflow:hidden}
@@ -150,8 +153,11 @@
 .record-rename:hover{background:#faeee9}
 @media(max-width:750px){
   .mobile-dock{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .canvas-tool-slot{display:block;position:absolute;top:74px;right:14px;z-index:4}
-  .workspace{position:relative}
+  .workspace{position:relative;justify-content:center;gap:9px;padding-bottom:0}
+  .canvas-wrap{width:min(100cqw,calc(100cqh - 116px),580px)}
+  .canvas-tool-slot{display:block;position:relative;z-index:4;margin:0 auto}
+  .canvas-controls{position:static;min-height:0;left:auto;right:auto;top:auto;bottom:auto;margin:0}
+  .canvas-controls:has(#fileAction[hidden]){display:none}
   .canvas-tool-slot .rail-tools,.canvas-tool-slot .rail-tools .toolbar{display:flex}
   .canvas-tool-slot .rail-tools .toolbar{gap:7px;padding:5px;border:1px solid #e3e8dd;border-radius:16px;background:#ffffffed;box-shadow:0 5px 18px #26302410}
   .canvas-tool-slot .rail-tools #layersButton,.canvas-tool-slot .rail-tools #sizeButton{min-height:38px;height:38px;width:auto;padding:6px 10px;display:flex;flex-direction:row;gap:6px;border:0;border-radius:11px;color:#50634f;font-size:12px;background:transparent}
@@ -159,4 +165,19 @@
   .canvas-tool-slot .rail-tools #layersButton>svg:first-child,.canvas-tool-slot .rail-tools #sizeButton>svg{width:18px;height:18px}
   .canvas-tool-slot .rail-tools .tool-label{display:inline}
   .canvas-tool-slot .rail-tools .chevron{display:none}
+}
+@media(min-width:751px){
+  .workspace>.canvas-wrap,.workspace>.canvas-head,.workspace>.canvas-controls,.workspace>.canvas-tool-slot,.rail-tools{display:none}
+  .workspace{padding:0;background:#fff}
+  .desktop-plan{display:flex;align-items:center;justify-content:center;width:min(100%,760px);height:min(72dvh,640px);min-height:420px;padding:36px;border:1px solid #e6ebe2;border-radius:28px;background:#fff;box-shadow:0 14px 42px #2630240c}
+  .desktop-plan-empty{display:flex;align-items:center;flex-direction:column;gap:18px}
+  .desktop-plan-empty h1{margin:0 0 8px;font-size:25px;font-weight:600}
+  .desktop-upload-icon{display:grid;place-items:center;width:78px;height:78px;border-radius:22px;background:#f0f5ed;color:#49694e}
+  .desktop-upload-icon svg{width:35px;height:35px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .desktop-plan-loaded{width:100%;height:100%;min-height:0;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:18px}
+  .desktop-plan-loaded img{display:block;max-width:100%;max-height:calc(100% - 80px);object-fit:contain;border-radius:14px}
+  .desktop-plan-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+  .desktop-plan-actions button{min-height:44px}
+  .layout:has(>.workspace:not([hidden])):has(>.inspector[hidden]){width:min(100%,920px)}
+  .rail{margin-bottom:0}
 }

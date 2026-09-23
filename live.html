@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>实景罗盘 · 家居风水</title>
-  <link rel="stylesheet" href="/live.css?v=0.4.0">
+  <link rel="stylesheet" href="/live.css?v=0.4.1">
 </head>
 <body>
   <header class="live-header">
@@ -13,6 +13,12 @@
     <span class="header-space" aria-hidden="true"></span>
   </header>
   <main class="live-app">
+    <section class="desktop-handoff" aria-label="手机端使用提示">
+      <div class="handoff-icon" aria-hidden="true">⌖</div>
+      <h1>请在手机上使用实景罗盘</h1>
+      <p>实景罗盘需要调用手机相机与方向感应。请用手机打开当前网址。</p>
+      <a href="/">返回工作台</a>
+    </section>
     <div class="scene-tabs" role="group" aria-label="实景场景">
       <button id="indoorScene" class="selected" aria-pressed="true">室内</button>
       <button id="outdoorScene" aria-pressed="false">室外</button>
@@ -35,6 +41,6 @@
     </section>
   </main>
   <script src="/luopan.js?rev=b1059dad65"></script>
-  <script src="/live.js?v=0.4.0"></script>
+  <script src="/live.js?v=0.4.1"></script>
 </body>
 </html>
