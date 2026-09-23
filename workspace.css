@@ -142,7 +142,6 @@
 }
 
 .canvas-tool-slot{display:none}
-.upload-guide{margin:0;padding:8px 13px;border:1px solid #e6e9df;border-radius:12px;background:#ffffffeb;box-shadow:0 3px 14px #2630240c;color:#50634f;text-align:center;font-size:12px;line-height:1.7;white-space:normal;min-width:260px}
 .history-hint{margin:-17px 0 18px;color:#6b7868;font-size:12px}
 .record-open{display:flex;flex:1;align-items:center;justify-content:space-between;gap:14px;min-width:0;text-align:left;padding:0}
 .record-open>span{min-width:0;overflow:hidden}
@@ -160,5 +159,4 @@
   .canvas-tool-slot .rail-tools #layersButton>svg:first-child,.canvas-tool-slot .rail-tools #sizeButton>svg{width:18px;height:18px}
   .canvas-tool-slot .rail-tools .tool-label{display:inline}
   .canvas-tool-slot .rail-tools .chevron{display:none}
-  .upload-guide{max-width:min(280px,78vw);min-width:0;font-size:11px}
 }

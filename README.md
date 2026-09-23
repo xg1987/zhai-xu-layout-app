@@ -2,7 +2,7 @@
 
 本地目录已整理：原 `design-previews/user-workspace-v2/` 工作台已移至仓库根目录；另一套宅序 App / Web 原型已移出。前端、管理后台、服务端、数据库迁移与知识库均在本目录，所有构建和测试命令在根目录执行。
 
-当前独立站点版本：0.3.2。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
+当前独立站点版本：0.3.3。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
 - 工作台：https://zhai-xu-workspace-preview.pages.dev/
 - 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
