@@ -1,68 +1,71 @@
-# 宅序 · 家居布局 App / Web 原型
+# 家居风水在线工作台
 
-当前版本：`v0.4.0`
+本地目录已整理：原 `design-previews/user-workspace-v2/` 工作台已移至仓库根目录；另一套宅序 App / Web 原型已移出。前端、管理后台、服务端、数据库迁移与知识库均在本目录，所有构建和测试命令在根目录执行。
 
-## 独立家居风水工作台
+当前独立站点版本：0.3.0。部署于 marsxiong19@gmail.com 的 Cloudflare 账户，项目名 zhai-xu-workspace-preview；正式 zhai-xu-layout-app 项目不受影响。
 
-此前发布的家居风水工作台源码在 [design-previews/user-workspace-v2](design-previews/user-workspace-v2/)；线上预览为 [zhai-xu-workspace-preview.pages.dev](https://zhai-xu-workspace-preview.pages.dev/)。该目录中的 [知识库](design-previews/user-workspace-v2/knowledge/)保存八方对应、缺角候选规则，以及人物与事项居住象义。
+- 工作台：https://zhai-xu-workspace-preview.pages.dev/
+- 管理后台：https://zhai-xu-workspace-preview.pages.dev/admin
+- 用户登录：/login；管理员登录：/login?admin=1；邀请码注册：/register。
+- 手机交互预览：/phone；公开版本：/version.json。
 
-同一套产品的两端响应式原型，两端都面向客户，方案分析与咨询由大模型 AI 完成（没有人工老师端）：
+## 已接通
 
-- App 端（小于 `1100px`）：底部导航含首页、项目、商城、咨询、我的。
-- Web 端（大于等于 `1100px`）：底部导航含首页、项目、商城、咨询、我的（与 App 端一致），项目页为画布 + 点位详情工作台。
-- 首页支持上传户型图，由大模型识别格局、找出问题点位并生成布置方案（点位直接落在上传的图上）。
+- Pages Functions 与独立 D1 数据库 zhai-xu-workspace-auth 支持真实登录、退出、账号管理、注册审核、邀请码及管理操作记录。
+- 邀请注册必须持有有效、未过期、未用完的邀请码；注册后等待管理员审核。普通用户不能访问管理接口。
+- 密码采用随机盐 PBKDF2-SHA256；数据库仅保存密码摘要。会话使用随机令牌和 HttpOnly / Secure / SameSite Cookie，数据库仅保存令牌摘要。
+- 登录限速、同源写入校验、停用账号撤销会话。注册与邀请码使用次数通过 D1 批处理事务更新。
+- 初始化管理员由部署人员直接写入数据库；账号密码不在源码、构建资源或迁移文件中。
+- 手机工作台使用底部悬浮组件；图层和大小采用底部面板。保留风水罗盘的三层转动、五行配色及上传后的中央确认按钮。
+- 登录沿用已确认的东方住宅视频和透明卡片，支持减少动态效果。
 
-## 本地运行
+## 当前边界
 
-```bash
-npm install
-npm run dev   # 同时启动 API（127.0.0.1:3001）和前端（0.0.0.0:5173）
-```
+室内工作台已接通图片识别、北向与轮廓人工确认、八方几何分布和账号隔离的云端历史。首选开启的 Qwen，失败时尝试开启的 Gemini；每次实际识别单独记录用量。上传前将图片压缩到 1800 像素以内及约 600 KB，存入独立 D1（每个账号列表显示最近 100 条）。模型未识别北向时必须由用户填写，轮廓可拖点或重新描边；结果使用面积重心与 180×180 网格估算八方占比，不输出没有规则依据的吉凶、健康或命运结论。室外仍未开放，图像原始大文件不保存，未提供历史删除和导出。
 
-生产构建与启动：
+## 构建和发布
 
-```bash
+```sh
+npm test
 npm run build
-npm run start  # NODE_ENV=production，由 API 服务托管 dist 静态资源
+wrangler d1 migrations apply DB --remote
+wrangler pages deploy dist --project-name zhai-xu-workspace-preview --branch main
 ```
 
-Cloudflare Pages 部署：
+构建前运行 `npm ci`，React 管理后台由 esbuild 打包。服务端代码通过 Functions 打包，公开 dist 仅包含白名单静态资源。`.wrangler/` 和 `dist/` 均不提交。
 
-```bash
-npm run build
-wrangler d1 migrations apply zhai-xu-auth-db --remote
-wrangler pages deploy dist --project-name zhai-xu-layout-app
-```
+## 验证
 
-线上环境使用 `functions/api/[[path]].js` 提供登录接口，并通过 `wrangler.toml` 绑定 D1 数据库。
+九组服务端测试覆盖会话保护、错误密码、跨站请求、邀请限额与事务回滚、注册审核、权限、管理员保护、限速、页面守卫及退出。
+已使用本地 Cloudflare Workers/D1 运行完整邀请注册→审核→用户登录→越权拒绝→退出流程。
+内置浏览器检查登录、注册、管理后台桌面及 390px 手机布局；工作台此前检查 320×568、390×844、430×932 和 1280×800。未声称真机验证。
 
-## 发布约定
+设计参考：项目原有 60fps.design、Navbar Gallery、Component Gallery 等参考集。
 
-每次正式更新默认作为同一个完整发布：更新软件版本号、构建验证、提交并推送 GitHub，再部署到 Cloudflare Pages 并核对线上版本。只有在明确要求时才跳过某一步。
+## 原版后台适配
 
-## 账号体系
+- `admin-src/components/admin/` 复用原版 React 组件及样式；原有用户工作台保持独立。
+- 数据库迁移 0002 仅增加审核备注与模型、用量表，保留现有用户和密码。
+- `MODEL_ENCRYPTION_KEY` 必须作为 Pages secret 设置为随机 32 字节十六进制字符串；不得放入源码或公开变量。模型密钥经 AES-GCM 加密后写入 D1。
+- 费用计算沿用原项目计价规则，属于估算，实际扣费以服务商账单为准。
+- 验证包含原版管理接口、资料更新、重置密码、审核、角色与状态保护、模型密钥加密、受控模型响应的用量入账与错误脱敏；没有用真实密钥产生测试费用。
 
-- 手机号 + 密码注册/登录，密码使用 bcrypt 加密存储于 SQLite（`server/data.db`，不入库控）。
-- 会话使用 httpOnly Cookie（14 天有效期），退出登录即失效。
-- 接口：`POST /api/register`、`POST /api/login`、`POST /api/logout`、`GET /api/me`。
-- 生产部署务必置于 HTTPS 之后，并为 Cookie 增加 `Secure` 标记。
+### 0.2.2 请求兼容修复
 
-## AI 户型分析
+模型与汇率请求统一使用 Workers 支持的 manual 重定向模式，拒绝 3xx，防止密钥被转发；区分超时、连接失败、运行环境异常和重定向。十组测试覆盖上述分支。真实 Workers 本地运行验证 Google 无密钥请求可返回 HTTP 响应，汇率接口可访问。
 
-- 接口：`POST /api/analyze-floorplan`（需登录），入参 `{ image: <base64>, mediaType }`，支持 JPG/PNG/WebP，10MB 以内。
-- 服务端调用 Claude（`claude-opus-4-8`，视觉 + 结构化输出）识别户型并返回 `{ summary, points[] }`，点位含方位、建议、施工时机与图上百分比坐标。
-- 本地运行需配置 `ANTHROPIC_API_KEY` 环境变量；Cloudflare Pages 需在项目设置中添加同名 Secret。未配置时接口返回 503 并提示。
+### 0.2.3 Qwen 模型更新
 
-主要验收尺寸为 App `390 × 844`、Web `1280 × 720`；Web 同时按 `1440 × 900` 概念规格设计。
+Qwen 切换为 Qwen3.8-Max，使用北京默认业务空间专属接口；同步 Max 公开原价。保留已保存的加密密钥和历史调用价格，历史记录按实际模型显示。
 
-## 已实现交互
+### 0.2.4 模型优先级
 
-- 首页上传户型图 → AI 分析生成新方案，保存进「项目」列表（localStorage 持久化）。
-- 「项目」页为方案列表（演示方案 + AI 生成方案），点击进入画布工作台，可返回列表切换。
-- 图上点位与方案详情联动。
-- 户型图缩放、平移与复位。
-- 平面图 / 施工清单切换。
-- App 底部首页、项目、商城、咨询、我的真实页面切换。
-- Web 端底部导航同样提供首页、项目、商城、咨询、我的，项目页为审核工作台。
-- 与 AI 布局助手的咨询消息发送。
-- 重新校准、导出报告和点位确认流程。
+后台配置将 Qwen3.8-Max 列为主模型，Gemini 3.8 Flash 列为备用模型，卡片顺序和说明随角色同步。已保存密钥及连接测试记录保留。独立工作台的真实图片识别流程尚未接入，本次变更不代表自动识图与故障切换已经完成。
+
+### 0.2.5 模型启用与价格
+
+删除模型用途描述，展示与用量计费共用的输入输出单价。增加持久化启用开关，关闭后服务端禁止连接测试且保留密钥；更新密钥不会重新开启已关闭的模型。部署需应用 0004_model_enabled.sql。
+
+### 0.3.0 室内识别闭环
+
+新增 0005_plan_analysis.sql；匿名和跨账号访问被拒绝，重复请求不重复调用，处理中请求两分钟内禁止重试，关闭模型不参与识别。模型返回不是户型时要求换图，确认轮廓拒绝自交或无效北向。
