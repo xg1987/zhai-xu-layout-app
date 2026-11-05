@@ -1,8 +1,8 @@
-name = "zhai-xu-layout-app"
+name = "zhai-xu-room-scan"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-07-21"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "zhai-xu-auth-db"
-database_id = "dbadfd63-2725-43fd-8064-644567a0164d"
+database_name = "zhai-xu-room-scan-auth"
+database_id = "78307f3b-27dd-4357-8590-ad8273c7cbc1"

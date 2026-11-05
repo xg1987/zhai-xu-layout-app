@@ -1,8 +1,10 @@
-# 宅序 · v0.1.2
+# 宅序 · v0.1.3
 
 本版新增单房间照片扫描、可编辑物品清单、相对布局草图与按账号隔离的房间记录，并将账户、邀请审核、模型设置与用量后台适配到 Cloudflare Pages / D1。保留东方住宅视频登录页和已确认的纯白空间罗盘。
 
-发布沿用 `codex/prototype-v0.1.0` 分支；仓库 `main` 是另一套独立工作台，本次不覆盖。Cloudflare 项目为 `zhai-xu-layout-app`，公开版本文件为 `/version.json`，内容包含构建版本和 Git 提交。
+发布沿用 `codex/prototype-v0.1.0` 分支；仓库 `main` 是另一套独立工作台，本次不覆盖。扫描版独立发布到 Cloudflare Pages 项目 `zhai-xu-room-scan`，使用独立 D1 数据库；保留现有 `zhai-xu-workspace-preview` 站点及其数据，不在旧站点上覆盖更新。`v0.1.2` Git 标签保留为此前源码存档。
+
+本版发布账号为 `marsxiong19@gmail.com`，目标站点为 `https://zhai-xu-room-scan.pages.dev`。公开版本路径为 `/version.json`，内容包含构建版本和 Git 提交；是否已上线以该独立站点的实际部署核对结果为准。
 
 ## 房间扫描
 
@@ -25,7 +27,7 @@ Cloudflare 房间数据保存在 D1，按登录账号隔离，采用版本号防
 
 用户登录 `/login`，管理员登录 `/admin/login`。公开注册需要有效邀请码，管理员审核通过后才允许登录。后台包括账号启停与角色、密码重置、邀请管理、操作记录、模型配置、费用记录及系统设置。
 
-云端迁移只补缺失字段与新表，保留既有用户、密码、角色及会话。兼容旧 PBKDF2 和 bcrypt 密码；云端新密码使用原生 Web Crypto PBKDF2。脚本不会创建默认管理员，也不会提升旧账号权限。管理员开通必须使用已有授权流程。
+本扫描版使用独立云端账号库，不自动复制旧站点或本机的账号、密码、角色、会话及模型密钥。迁移脚本只补目标数据库中缺失的字段与新表，保留其中已有数据。兼容旧 PBKDF2 和 bcrypt 密码；云端新密码使用原生 Web Crypto PBKDF2。脚本不会创建默认管理员，也不会提升旧账号权限。管理员开通必须使用已有授权流程。
 
 停用、角色变更、重置密码与本人改密均撤销相关会话。写入接口检查请求来源；登录和密码错误次数在 D1 持久限流。邀请码只保存摘要，新邀请码完整值仅在创建时返回。
 
@@ -57,8 +59,8 @@ node scripts/prepare-cloudflare.mjs --local
 
 ## Cloudflare 发布
 
-按项目 `AGENTS.md`，发布前必须用 `wrangler whoami` 确认账号为 `xionggang1243@gmail.com`。生产数据库绑定见 `wrangler.toml`。先运行 `node scripts/prepare-cloudflare.mjs --remote`；脚本自动检查账号，只添加缺失结构，不导入或替换本机数据。
+本次用户明确指定部署账号为 `marsxiong19@gmail.com`，覆盖旧 `AGENTS.md` 中的账号要求。发布前必须用 `wrangler whoami` 核对该账号。发布目标仅为独立 Pages 项目 `zhai-xu-room-scan`；独立 D1 的 `DB` 绑定见本版 `wrangler.toml`，不得绑定或改写 `zhai-xu-workspace-preview` 的数据库。先运行 `node scripts/prepare-cloudflare.mjs --remote`；脚本自动检查账号，只添加目标库缺失结构，不导入或替换本机数据。
 
 首次配置云端模型功能时，将随机 32 字节 Base64 值通过标准输入写入 Pages secret `VISION_MASTER_KEY`；已有密钥不得随意替换，否则原加密模型配置无法解密。不要把任何密钥写进代码、命令参数或公开变量。
 
-构建并显式暂存本次发布文件，提交与推送分支及版本标签。再次构建使 `/version.json` 的提交对应最终发布提交，再用 `wrangler pages deploy dist --project-name zhai-xu-layout-app --branch <项目生产分支>` 部署。核对 GitHub 远程 SHA、Cloudflare 生产部署、公开版本和构建资源；内置浏览器验收与手机真机验收需分别报告。
+构建并显式暂存本次发布文件，提交与推送分支及 `v0.1.3` 版本标签。再次构建使 `/version.json` 的提交对应最终发布提交，再用 `wrangler pages deploy dist --project-name zhai-xu-room-scan --branch <项目生产分支>` 部署。核对 GitHub 远程 SHA、该独立项目的生产部署、`https://zhai-xu-room-scan.pages.dev/version.json` 和构建资源，同时确认原 `zhai-xu-workspace-preview` 站点保持原状；内置浏览器验收与手机真机验收需分别报告。

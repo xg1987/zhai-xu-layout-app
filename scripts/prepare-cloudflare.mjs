@@ -8,7 +8,7 @@ if (process.argv.some(argument => argument.startsWith('--') && !['--remote', '--
 const run = args => execFileSync('npx', ['--no-install', 'wrangler', ...args], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 })
 if (remote) {
   const identity = run(['whoami'])
-  if (!/associated with the email xionggang1243@gmail\.com\b/i.test(identity)) throw new Error('Cloudflare account must be xionggang1243@gmail.com; no database changes were made')
+  if (!/associated with the email marsxiong19@gmail\.com\b/i.test(identity)) throw new Error('Cloudflare account must be marsxiong19@gmail.com; no database changes were made')
 }
 
 function execute(sql) {
