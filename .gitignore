@@ -10,3 +10,6 @@ server/local-auth.sqlite*
 server/.vision-master-key
 .env
 .env.local
+.dev.vars
+.dev.vars.*
+.wrangler/

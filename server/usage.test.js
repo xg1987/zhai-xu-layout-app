@@ -33,6 +33,28 @@ test('阶梯边界、跨年单价和低于一分钱的费用保留', () => {
  assert.equal(calculateCost({input:1,cached:0,output:0},price,null).cnyNano,2000)
 })
 
+test('房间识别用途可独立记录，沿用模型计价并保留已有户型与测试记录', async () => {
+ const db = new Database(':memory:')
+ const store = createUsageStore(db, { fetchImpl: async () => Response.json(fx), now: fixedNow })
+ try {
+  for (const operation of ['recognize', 'test']) {
+   const id = await store.begin({ ...record, requestId: `old-${operation}`, operation })
+   store.meter(id, gemini); store.finish(id, 'success')
+  }
+  const originalRows = db.prepare('SELECT * FROM vision_usage ORDER BY id').all()
+  const id = await store.begin({ ...record, requestId: 'new-room', operation: 'room' })
+  store.meter(id, gemini); store.finish(id, 'success')
+  const data = store.list()
+  assert.equal(data.summary.calls, 3)
+  assert.equal(data.summary.successful, 3)
+  assert.equal(data.summary.pending, 0)
+  assert.deepEqual(new Set(data.records.map(row => row.operation)), new Set(['recognize', 'test', 'room']))
+  assert.ok(data.records.every(row => row.cnyAmount === 0.02415))
+  assert.equal(data.summary.cnyAmount, 0.07245)
+  assert.deepEqual(db.prepare("SELECT * FROM vision_usage WHERE operation IN ('recognize','test') ORDER BY id").all(), originalRows)
+ } finally { db.close() }
+})
+
 test('持久用量、独立汇率快照、缺失汇率恢复，不把未知费用算成零', async () => {
  const db=new Database(':memory:');let offline=true, rate=7
  const fetchImpl=async()=>{if(offline)throw new Error('offline');return Response.json({...fx,rate})}

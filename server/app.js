@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { createRoomRecordsRouter } from './room-records.js'
 import bcrypt from 'bcryptjs'
 import express from 'express'
 import { createVisionStore, createVisionRouter } from './vision.js'
@@ -56,6 +57,7 @@ export function createApplication({ db, masterPath, version, secureCookie = fals
   next()
  })
  app.use('/api', createVisionRouter({ store: visionStore, currentUser, usageStore }))
+ app.use('/api', createRoomRecordsRouter({db,currentUser,now}))
  app.use(express.json({ limit: '16kb' }))
  app.use('/api', createAccountSettingsRouter({ db, currentUser, clearSessionCookie, version }))
  app.use('/api', createAdminRouter({ db, currentUser, audit, visionStore, usageStore, now }))

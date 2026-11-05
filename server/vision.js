@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import express from 'express'
+import { ROOM_PROMPT, RoomRecognitionError, parseRoomRecognition } from './room-recognition.js'
 
 // Endpoints are fixed: a submitted key cannot be forwarded to an arbitrary URL.
 export const PROVIDERS = Object.freeze({
@@ -69,9 +70,18 @@ export function validateImage(image) {
   const match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(image)
   if (!match) throw new VisionError('仅支持 PNG、JPG 或 WebP 图片')
   const bytes = Buffer.from(match[2], 'base64')
+  if (bytes.toString('base64') !== match[2]) throw new VisionError('图片编码不正确，请重新选择图片')
   const valid = match[1] === 'png' ? bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) : match[1] === 'jpeg' ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255 : bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP'
   if (!valid || bytes.length > 5 * 1024 * 1024) throw new VisionError('图片格式不正确或超过 5 MB')
   return { mimeType: `image/${match[1]}`, data: match[2] }
+}
+
+export function validateRoomImages(images) {
+  if (!Array.isArray(images) || images.length < 1 || images.length > 4) throw new VisionError('请选择 1–4 张房间照片')
+  const validated = images.map(validateImage)
+  const totalBytes = validated.reduce((sum, image) => sum + Buffer.byteLength(image.data, 'base64'), 0)
+  if (totalBytes > 12 * 1024 * 1024) throw new VisionError('房间照片总大小不能超过 12 MB，请缩小后重试')
+  return validated
 }
 
 export function parseRecognition(text) {
@@ -87,18 +97,21 @@ export function parseRecognition(text) {
   return { isFloorPlan: result.isFloorPlan, northAngleDeg: result.isFloorPlan ? angle : null, outline: result.isFloorPlan ? result.outline : [], rooms: result.rooms, notes: result.notes }
 }
 
-export async function callVision(id, key, { image, test = false, onUsage = () => {} } = {}, fetchImpl = fetch) {
+export async function callVision(id, key, { image, images, task = 'floorplan', test = false, onUsage = () => {} } = {}, fetchImpl = fetch) {
   const provider = PROVIDERS[id]
-  const prompt = test ? '连接测试。只返回 JSON 对象 {"ok":true}。' : PROMPT
+  if (!provider || !['floorplan', 'room'].includes(task)) throw new VisionError('不支持的图片识别任务')
+  const inputImages = task === 'room' ? images : image ? [image] : []
+  if (!test && task === 'room' && (!Array.isArray(inputImages) || inputImages.length < 1 || inputImages.length > 4)) throw new VisionError('请选择 1–4 张房间照片')
+  const prompt = test ? '连接测试。只返回 JSON 对象 {"ok":true}。' : task === 'room' ? `${ROOM_PROMPT}\n本次上传共${inputImages.length}张照片，sourceImageIndex只允许0至${inputImages.length - 1}。` : PROMPT
   let url, headers, body
   if (id === 'gemini') {
     url = `https://generativelanguage.googleapis.com/v1beta/models/${provider.model}:generateContent`
     headers = { 'Content-Type': 'application/json', 'x-goog-api-key': key }
-    body = { contents: [{ role: 'user', parts: [{ text: prompt }, ...(image ? [{ inlineData: image }] : [])] }], generationConfig: { responseMimeType: 'application/json', maxOutputTokens: test ? 1024 : 8192, thinkingConfig: { thinkingLevel: 'low' } } }
+    body = { contents: [{ role: 'user', parts: [{ text: prompt }, ...(inputImages || []).map(inlineData => ({ inlineData }))] }], generationConfig: { responseMimeType: 'application/json', maxOutputTokens: test ? 1024 : 8192, thinkingConfig: { thinkingLevel: 'low' } } }
   } else {
     url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
     headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }
-    body = { model: provider.model, enable_thinking: false, response_format: { type: 'json_object' }, max_tokens: test ? 100 : 4096, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...(image ? [{ type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] : [])] }] }
+    body = { model: provider.model, enable_thinking: false, response_format: { type: 'json_object' }, max_tokens: test ? 100 : task === 'room' ? 8192 : 4096, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...(inputImages || []).map(item => ({ type: 'image_url', image_url: { url: `data:${item.mimeType};base64,${item.data}` } }))] }] }
   }
   try {
     const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(test ? 20000 : 45000), redirect: 'error' })
@@ -116,9 +129,10 @@ export async function callVision(id, key, { image, test = false, onUsage = () =>
     const text = id === 'gemini' ? data.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') : data.choices?.[0]?.message?.content
     if (typeof text !== 'string' || !text.trim()) throw new VisionError('模型未返回识别内容，请重试', 502, true)
     if (test) { let value; try { value = JSON.parse(text) } catch {} if (value?.ok !== true) throw new VisionError('模型响应异常，请重试连接测试', 502); return { ok: true } }
-    return parseRecognition(text)
+    return task === 'room' ? parseRoomRecognition(text, inputImages.length) : parseRecognition(text)
   } catch (error) {
     if (error instanceof VisionError) throw error
+    if (error instanceof RoomRecognitionError) throw new VisionError(error.message, error.status, error.retryable)
     throw new VisionError(`${provider.name}：连接失败或超时，请检查网络后重试`, 502, true)
   }
 }
@@ -132,6 +146,7 @@ export function createVisionRouter({ store, currentUser, usageStore, invoke = ca
     req.visionUser = user; next()
   }
   const json = express.json({ limit: '8mb' })
+  const roomJson = express.json({ limit: '17mb' })
   function provider(req, res, next) { if (!Object.hasOwn(PROVIDERS, req.params.id)) return res.status(404).json({ error: '模型不存在' }); next() }
   router.get('/admin/vision', auth(true), (req, res) => res.json({ providers: store.list() }))
   router.get('/admin/vision/usage', auth(true), async (req, res) => {
@@ -152,7 +167,7 @@ export function createVisionRouter({ store, currentUser, usageStore, invoke = ca
     try { await run() } finally { active.delete(id) }
   }
   async function metered(req, id, key, options, requestId = crypto.randomUUID(), attempt = 1) {
-    const record = await usageStore?.begin({ requestId, attempt, user: req.visionUser, provider: id, model: PROVIDERS[id].model, operation: options.test ? 'test' : 'recognize' })
+    const record = await usageStore?.begin({ requestId, attempt, user: req.visionUser, provider: id, model: PROVIDERS[id].model, operation: options.test ? 'test' : options.task === 'room' ? 'room' : 'recognize' })
     try {
       const result = await invoke(id, key, { ...options, onUsage: data => { if (record) usageStore.meter(record, data) } })
       if (record) usageStore.finish(record, 'success')
@@ -167,8 +182,7 @@ export function createVisionRouter({ store, currentUser, usageStore, invoke = ca
     res.json({ ok: true, providers: store.list(), message: '连接成功，模型可调用' })
   }))
   router.get('/vision/status', auth(), (req, res) => res.json({ ready: store.list().some(p => p.configured) }))
-  router.post('/vision/recognize', auth(), json, async (req, res) => exclusive(req, res, async () => {
-    const image = validateImage(req.body?.image)
+  async function recognize(req, res, options) {
     const configured = store.list().filter(p => p.configured)
     if (!configured.length) throw new VisionError('管理员尚未配置图片识别模型', 503)
     let last, fallbackReason = null, attempt = 0
@@ -176,11 +190,17 @@ export function createVisionRouter({ store, currentUser, usageStore, invoke = ca
     for (const provider of configured) {
       const saved = store.read(provider.id)
       try {
-        const result = await metered(req, provider.id, saved.key, { image }, requestId, ++attempt)
+        const result = await metered(req, provider.id, saved.key, options, requestId, ++attempt)
         return res.json({ provider: provider.name, model: provider.model, usedFallback: !!fallbackReason, result })
       } catch (error) { last = error; if (!error.retryable) throw error; fallbackReason = error.message }
     }
     throw last
+  }
+  router.post('/vision/recognize', auth(), json, async (req, res) => exclusive(req, res, async () => {
+    await recognize(req, res, { image: validateImage(req.body?.image) })
+  }))
+  router.post('/vision/room', auth(), roomJson, async (req, res) => exclusive(req, res, async () => {
+    await recognize(req, res, { task: 'room', images: validateRoomImages(req.body?.images) })
   }))
   router.use((error, req, res, next) => {
     if (res.headersSent) return next(error)

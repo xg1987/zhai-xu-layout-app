@@ -1,0 +1,10 @@
+/version.json
+  Cache-Control: no-store
+/
+  Cache-Control: no-cache
+/login
+  Cache-Control: no-cache
+/admin/*
+  Cache-Control: no-cache
+/scan
+  Cache-Control: no-cache
