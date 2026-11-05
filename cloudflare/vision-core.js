@@ -103,7 +103,9 @@ export async function callProvider(id, key, { image, images, task = 'floorplan',
     body = { model: provider.model, enable_thinking: false, response_format: { type: 'json_object' }, max_tokens: test ? 100 : task === 'room' ? 8192 : 4096, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...inputImages.map(item => ({ type: 'image_url', image_url: { url: `data:${item.mimeType};base64,${item.data}` } }))] }] }
   }
   try {
-    const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(test ? 20000 : 45000), redirect: 'error' })
+    const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(test ? 20000 : 45000), redirect: 'manual' })
+    // Workers does not support redirect:error. Never follow redirects with API keys.
+    if (response.status >= 300 && response.status < 400) throw new VisionError(`${provider.name}：服务返回重定向，已阻止转发密钥`, 502, true)
     const data = await providerJson(response)
     onUsage(data)
     if (!response.ok) {

@@ -8,7 +8,8 @@ export function createD1UsageStore(db, { fetchImpl = fetch, now = Date.now } = {
     const cached = await db.prepare('SELECT * FROM vision_fx WHERE requested_date=?').bind(date).first()
     if (cached && now() - Date.parse(cached.fetched_at) < 6 * 3600000) return parse(cached.rate_json)
     try {
-      const response = await fetchImpl(`https://api.frankfurter.dev/v2/rate/USD/CNY?providers=ecb&date=${date}`, { signal: AbortSignal.timeout(4000), redirect: 'error' })
+      const response = await fetchImpl(`https://api.frankfurter.dev/v2/rate/USD/CNY?providers=ecb&date=${date}`, { signal: AbortSignal.timeout(4000), redirect: 'manual' })
+      if (response.status >= 300 && response.status < 400) throw new Error('FX redirect blocked')
       if (!response.ok) throw new Error('FX unavailable')
       const value = await response.json()
       const age = Date.parse(date) - Date.parse(value.date)

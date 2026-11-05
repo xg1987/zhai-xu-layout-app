@@ -95,7 +95,7 @@ test('多图主备切换、严格房间解析、每笔用量/费用及失败用�
       calls.push(url)
       assert.equal(url.includes(secret), false)
       assert.equal(options.body.includes(secret), false)
-      assert.equal(options.redirect, 'error')
+      assert.equal(options.redirect, 'manual')
       if (url.includes('googleapis')) {
         assert.match(url, /gemini-3\.8-flash:generateContent$/)
         assert.equal(options.headers['x-goog-api-key'], secret)
@@ -215,4 +215,58 @@ test('Web适配器拒绝不规范图片/模型坐标与恶意响应，不泄漏�
     const invalid = JSON.stringify({ ...room, objects: [{ ...room.objects[0], sourceImageIndex: 1 }] })
     await assert.rejects(callProvider(id, secret, { task: 'room', images: [validateImage(image)] }, async () => Response.json(id === 'gemini' ? { candidates: [{ content: { parts: [{ text: invalid }] } }] } : { choices: [{ message: { content: invalid } }] })), error => error.status === 502 && error.retryable)
   }
+})
+
+test('Workers使用manual重定向策略，模型3xx脱敏后改用备用模型，不跟随携密钥的Location', async () => {
+  const { db, request } = setup()
+  const redirectedUrl = `https://untrusted.test/collect?key=${secret}`
+  try {
+    for (const id of ['gemini', 'qwen']) await request(`/admin/vision/${id}`, { method: 'POST', body: { apiKey: secret } })
+    const modelCalls = []
+    const fetchImpl = async (url, options) => {
+      assert.equal(options.redirect, 'manual')
+      assert.equal(url.includes('untrusted.test'), false)
+      if (url.startsWith('https://api.frankfurter.dev/')) return Response.json(fx)
+      modelCalls.push(url)
+      if (url.includes('googleapis')) return new Response(`sensitive: ${secret}`, { status: 307, headers: { Location: redirectedUrl } })
+      return Response.json({ ...qwenUsage, choices: [{ message: { content: JSON.stringify(room) } }] })
+    }
+    const response = await request('/vision/room', { actor: user, method: 'POST', body: { images: [image] }, fetchImpl })
+    assert.equal(response.status, 200)
+    const data = await response.json()
+    assert.equal(data.usedFallback, true)
+    assert.equal(data.model, 'qwen3.7-plus')
+    assert.equal(modelCalls.length, 2)
+    assert.deepEqual(db.prepare('SELECT provider,status FROM vision_usage ORDER BY rowid').all(), [{ provider: 'gemini', status: 'failed' }, { provider: 'qwen', status: 'success' }])
+    assert.equal(JSON.stringify(db.prepare('SELECT * FROM vision_usage').all()).includes(secret), false)
+    for (const id of ['gemini', 'qwen']) await assert.rejects(callProvider(id, secret, { image: validateImage(image) }, async (url, options) => {
+      assert.equal(options.redirect, 'manual')
+      return new Response(`sensitive: ${secret}`, { status: 302, headers: { Location: redirectedUrl } })
+    }), error => error.status === 502 && error.retryable && !error.message.includes(secret) && !error.message.includes(redirectedUrl))
+  } finally { db.close() }
+})
+
+test('汇率3xx不跟随、不伪造换算值，保留原币费用与fx_missing状态', async () => {
+  const { db, env } = setup()
+  const calls = []
+  const store = createD1UsageStore(env.DB, { now, fetchImpl: async (url, options) => {
+    assert.equal(options.redirect, 'manual')
+    assert.ok(url.startsWith('https://api.frankfurter.dev/'))
+    assert.equal(options.headers, undefined)
+    calls.push(url)
+    return new Response('untrusted-rate-body', { status: 301, headers: { Location: 'https://untrusted.test/rate' } })
+  } })
+  try {
+    const record = await store.begin({ requestId: 'redirected-fx', attempt: 1, user, provider: 'gemini', model: 'gemini-3.8-flash', operation: 'recognize' })
+    await store.finish(record, 'gemini', geminiUsage, 'success')
+    await store.reconcile()
+    const data = await store.list()
+    assert.equal(calls.length, 2)
+    assert.equal(data.records[0].fx, null)
+    assert.equal(data.records[0].cnyAmount, null)
+    assert.equal(data.records[0].nativeAmount, 0.00345)
+    assert.equal(data.records[0].costState, 'fx_missing')
+    assert.equal(data.summary.pending, 1)
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM vision_fx').get().n, 0)
+  } finally { db.close() }
 })
