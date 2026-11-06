@@ -8,7 +8,7 @@ export function throwIfAborted(signal) {
 
 export async function roomRequest(path, { body, ...options } = {}) {
   const response = await fetch(`/api${path}`, { ...options, headers: { ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...options.headers }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) })
-  const result = await response.json().catch(() => { throw new Error('本机服务暂不可用，请稍后重试') })
+  const result = await response.json().catch(() => { throw new Error('服务暂不可用，请稍后重试') })
   if (response.status === 401) {
     window.location.replace('/login')
     throw new Error('登录已失效，请重新登录')
